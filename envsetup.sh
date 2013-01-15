@@ -66,9 +66,9 @@ function check_product()
         return
     fi
 
-    if (echo -n $1 | grep -q -e "^cm_") ; then
-       CM_BUILD=$(echo -n $1 | sed -e 's/^cm_//g')
-       NAM_VARIANT=$(echo -n $1 | sed -e 's/^cm_//g')
+    if (echo -n $1 | grep -q -e "^mk_") ; then
+       CM_BUILD=$(echo -n $1 | sed -e 's/^mk_//g')
+       NAM_VARIANT=$(echo -n $1 | sed -e 's/^mk_//g')
     elif (echo -n $1 | grep -q -e "htc_") ; then
        CM_BUILD=
        NAM_VARIANT=$(echo -n $1)
@@ -446,9 +446,9 @@ function add_lunch_combo()
 }
 
 # add the default one here
-add_lunch_combo full-eng
-add_lunch_combo full_x86-eng
-add_lunch_combo vbox_x86-eng
+# add_lunch_combo full-eng
+# add_lunch_combo full_x86-eng
+# add_lunch_combo vbox_x86-eng
 
 function print_lunch_menu()
 {
@@ -485,7 +485,7 @@ function brunch()
     breakfast $*
     if [ $? -eq 0 ]; then
         export CM_FAST_BUILD=1
-        mka bacon
+        time mka bacon
     else
         echo "No such item in brunch menu. Try 'breakfast'"
         return 1
@@ -499,7 +499,7 @@ function breakfast()
     CM_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
-    for f in `/bin/ls vendor/cm/vendorsetup.sh 2> /dev/null`
+    for f in `/bin/ls vendor/mk/vendorsetup.sh 2> /dev/null`
         do
             echo "including $f"
             . $f
@@ -516,7 +516,7 @@ function breakfast()
             lunch $target
         else
             # This is probably just the CM model name
-            lunch cm_$target-userdebug
+            lunch mk_$target-userdebug
         fi
     fi
     return $?
@@ -651,9 +651,10 @@ function tapas()
 function eat()
 {
     if [ "$OUT" ] ; then
-        MODVERSION=`sed -n -e'/ro\.cm\.version/s/.*=//p' $OUT/system/build.prop`
+        MODVERSION=`sed -n -e'/ro\.mk\.version/s/.*=//p' $OUT/system/build.prop`
         ZIPFILE=cm-$MODVERSION.zip
         ZIPPATH=$OUT/$ZIPFILE
+        MD5SUMFILE=$ZIPPATH.md5sum
         if [ ! -f $ZIPPATH ] ; then
             echo "Nothing to eat"
             return 1
@@ -675,10 +676,11 @@ function eat()
         if adb push $ZIPPATH /storage/sdcard0/ ; then
             # Optional path for sdcard0 in recovery
             [ -z "$1" ] && DIR=sdcard || DIR=$1
+            MD5FILE=/$DIR/$ZIPFILE.md5
             cat << EOF > /tmp/command
 --update_package=/$DIR/$ZIPFILE
 EOF
-            if adb push /tmp/command /cache/recovery/ ; then
+            if adb push /tmp/command /cache/recovery/ && adb push $MD5SUMFILE $MD5FILE; then
                 echo "Rebooting into recovery for installation"
                 adb reboot recovery
             fi
@@ -693,7 +695,11 @@ EOF
 
 function omnom
 {
-    brunch $*
+    if [ $# -gt 0 -o -z "$TARGET_PRODUCT" ]; then
+        brunch $*
+    else
+        mka bacon
+    fi
     eat
 }
 
