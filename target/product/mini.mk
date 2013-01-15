@@ -24,7 +24,7 @@ PRODUCT_AAPT_CONFIG := normal ldpi mdpi hdpi xhdpi xxhdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
 # en_US only
-PRODUCT_LOCALES := en_US
+PRODUCT_LOCALES := zh_CN
 
 # dummy definitions to use += in later parts
 PRODUCT_PROPERTY_OVERRIDES :=

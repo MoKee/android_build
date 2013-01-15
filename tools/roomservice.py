@@ -139,12 +139,12 @@ def add_to_manifest(repositories, fallback_branch = None):
         repo_name = repository['repository']
         repo_target = repository['target_path']
         if exists_in_tree(lm, repo_name):
-            print 'CyanogenMod/%s already exists' % (repo_name)
+            print 'MoKee/%s already exists' % (repo_name)
             continue
 
-        print 'Adding dependency: CyanogenMod/%s -> %s' % (repo_name, repo_target)
+        print 'Adding dependency: MoKee/%s -> %s' % (repo_name, repo_target)
         project = ElementTree.Element("project", attrib = { "path": repo_target,
-            "remote": "github", "name": "CyanogenMod/%s" % repo_name })
+            "remote": "mokee", "name": "MoKee/%s" % repo_name })
 
         if 'branch' in repository:
             project.set('revision',repository['branch'])
@@ -166,7 +166,7 @@ def add_to_manifest(repositories, fallback_branch = None):
 
 def fetch_dependencies(repo_path, fallback_branch = None):
     print 'Looking for dependencies'
-    dependencies_path = repo_path + '/cm.dependencies'
+    dependencies_path = repo_path + '/mk.dependencies'
     syncable_repos = []
 
     if os.path.exists(dependencies_path):
@@ -175,7 +175,7 @@ def fetch_dependencies(repo_path, fallback_branch = None):
         fetch_list = []
 
         for dependency in dependencies:
-            if not is_in_manifest("CyanogenMod/%s" % dependency['repository']):
+            if not is_in_manifest("MoKee/%s" % dependency['repository']):
                 fetch_list.append(dependency)
                 syncable_repos.append(dependency['target_path'])
 

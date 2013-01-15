@@ -30,11 +30,9 @@ PRODUCT_PACKAGES := \
     Email2 \
     Exchange2 \
     Gallery2 \
-    LatinIME \
     Launcher2 \
     Music \
     Provision \
-    QuickSearchBox \
     Settings \
     Sync \
     Updater \
