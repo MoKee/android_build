@@ -23,13 +23,6 @@ PRODUCT_PACKAGES := \
     libfwdlockengine \
     WAPPushManager
 
-# PRODUCT_PACKAGES += \
-#     libvideoeditor_jni \
-#     libvideoeditor_core \
-#     libvideoeditor_osal \
-#     libvideoeditor_videofilters \
-#     libvideoeditorplayer
-
 PRODUCT_PACKAGES += \
     Galaxy4 \
     HoloSpiralWallpaper \
