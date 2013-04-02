@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Import from paranoid
+# Edit By Xilence2210
+
+# get current path
+reldir=`dirname $0`
+cd $reldir
+DIR=`pwd`
+
+# Colorize and add text parameters
+red=$(tput setaf 1)             #  red
+grn=$(tput setaf 2)             #  green
+cya=$(tput setaf 6)             #  cyan
+txtbld=$(tput bold)             # Bold
+bldred=${txtbld}$(tput setaf 1) #  red
+bldgrn=${txtbld}$(tput setaf 2) #  green
+bldblu=${txtbld}$(tput setaf 4) #  blue
+bldcya=${txtbld}$(tput setaf 6) #  cyan
+txtrst=$(tput sgr0)             # Reset
+
+THREADS="16"
+DEVICE="$1"
+SYNC="$2"
+EXTRAS="$3"
+
+if [ "mokee$DEVICE" == "mokee" ]
+then
+   echo -e "please enter your device name!"
+   echo -e "e.g. ./mk maguro"
+   exit 0
+fi
+
+# if you set another OUT_DIR,set this before use.
+
+# OUT_DIR=/mokee/out/target/product/$DEVICE
+if [ ! -d "$OUT_DIR" ]
+then
+   echo -e "please specify correct OUT_DIR in this script on line 29 !"
+   exit 0
+fi
+
+# we don't allow scrollback buffer
+echo -e '\0033\0143'
+clear
+
+echo -e "${cya}Building ${bldcya}Mokee Open Source Project ${txtrst}";
+
+# setup environment
+echo -e "${bldblu}Setting up environment ${txtrst}"
+export USE_CCACHE=1
+export CCACHE_DIR=~/.ccache
+# set ccache to 10G,set it at your own risk
+prebuilts/misc/linux-x86/ccache/ccache -M 15G
+. build/envsetup.sh
+
+# lunch device
+echo -e ""
+echo -e "${bldblu}Lunching device ${txtrst}"
+lunch mk_$DEVICE-userdebug
+
+fix_count=0
+# excute with vars
+echo -e ""
+for var in $* ; do
+if [ "$var" == "sync" ]
+then
+   echo -e "${bldblu}Fetching latest sources ${txtrst}"
+   repo sync
+   echo -e ""
+elif [ "$var" == "clean" ]
+then
+   echo -e "${bldblu}Clearing previous build info ${txtrst}"
+   mka installclean
+elif [ "$var" == "fix" ]
+then
+   echo -e "skip for remove build.prop"
+   fix_count=1
+fi
+done
+if [ "$fix_count" == "0" ]
+then
+   echo -e "removing build.prop"
+   rm -f $OUT_DIR/system/build.prop
+fi
+
+echo -e ""
+echo -e "${bldblu}Starting compilation ${txtrst}"
+
+# get time of startup
+res1=$(date +%s.%N)
+
+# start compilation
+mka bacon
+echo -e ""
+
+# finished? get elapsed time
+res2=$(date +%s.%N)
+echo "${bldgrn}Total time elapsed: ${txtrst}${grn}$(echo "($res2 - $res1) / 60"|bc ) minutes ($(echo "$res2 - $res1"|bc ) seconds) ${txtrst}"
+
+# make a alarm
+echo $'\a'
