@@ -36,7 +36,7 @@ fi
 # OUT_DIR=/mokee/out/target/product/$DEVICE
 if [ ! -d "$OUT_DIR" ]
 then
-   echo -e "please specify correct OUT_DIR in this script on line 29 !"
+   echo -e "please specify correct OUT_DIR in this script on line 36 !"
    exit 0
 fi
 
@@ -50,7 +50,7 @@ echo -e "${cya}Building ${bldcya}Mokee Open Source Project ${txtrst}";
 echo -e "${bldblu}Setting up environment ${txtrst}"
 export USE_CCACHE=1
 export CCACHE_DIR=~/.ccache
-# set ccache to 10G,set it at your own risk
+# set ccache due to your disk space,set it at your own risk
 prebuilts/misc/linux-x86/ccache/ccache -M 15G
 . build/envsetup.sh
 
