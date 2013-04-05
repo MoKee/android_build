@@ -1337,6 +1337,28 @@ endif
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CM_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(CM_TARGET_PACKAGE) > $(CM_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(CM_TARGET_PACKAGE)"${CL_RST}
+	
+	$(hide) # Create Release, Experimental and Nightly folder Start
+
+ifdef MK_BUILD_PATH
+	$(hide) mkdir -p $(MK_BUILD_PATH)
+  ifeq "RELEASE" "$(MK_BUILDTYPE)"
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Release
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Release/$(CM_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Release/$(CM_BUILD)
+  endif
+  ifeq "EXPERIMENTAL" "$(MK_BUILDTYPE)"
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental/$(CM_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Experimental/$(CM_BUILD)
+  endif
+  ifeq "NIGHTLY" "$(MK_BUILDTYPE)"
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly/$(CM_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Nightly/$(CM_BUILD)
+  endif
+endif
+	$(hide) # Create Release, Experimental and Nightly folder End
 
 # -----------------------------------------------------------------
 # The update package
