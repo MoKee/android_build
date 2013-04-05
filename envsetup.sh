@@ -1867,6 +1867,11 @@ do
 done
 unset f
 
+# Changelog Tool
+function clog() {
+    ./clog
+}
+
 addcompletions
 
 export ANDROID_BUILD_TOP=$(gettop)
