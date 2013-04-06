@@ -27,7 +27,6 @@ EXTRAS="$3"
 if [ "mokee$DEVICE" == "mokee" ]
 then
    clear
-   . build/envsetup.sh
    echo " "
    echo "==================================================="
    echo " "
@@ -42,7 +41,6 @@ then
    echo "      sync  :run 'repo sync' before build"
    echo " "
    echo " e.g './mk maguro sync clean'"
-   echo " you can also run './mk' to excute '. build/envsetup.sh' quickly"
    echo " "
    exit 0
 fi
@@ -52,7 +50,7 @@ fi
 # OUT_DIR=/mokee/out/target/product/$DEVICE
 if [ ! -d "$OUT_DIR" ]
 then
-   echo -e "please specify correct OUT_DIR in this script on line 52 !"
+   echo -e "please specify correct OUT_DIR in this script on line 50 !"
    exit 0
 fi
 
