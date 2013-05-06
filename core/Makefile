@@ -871,7 +871,7 @@ SYSTEMIMAGE_SOURCE_DIR := $(TARGET_OUT)
 ifneq ($(INSTALLED_RECOVERYIMAGE_TARGET),)
 intermediates := $(call intermediates-dir-for,PACKAGING,recovery_patch)
 ifndef BOARD_CUSTOM_BOOTIMG_MK
-ifeq ($(CM_BUILD),)
+ifeq ($(MK_BUILD),)
 RECOVERY_FROM_BOOT_PATCH := $(intermediates)/recovery_from_boot.p
 else
 RECOVERY_FROM_BOOT_PATCH :=
@@ -1305,7 +1305,7 @@ else
     OTA_FROM_TARGET_SCRIPT := $(TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT)
 endif
 
-ifneq ($(CM_BUILD),)
+ifneq ($(MK_BUILD),)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := true
 else
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
@@ -1326,7 +1326,7 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	   --override_device=$(override_device) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-CM_TARGET_PACKAGE := $(PRODUCT_OUT)/$(CM_VERSION).zip
+CM_TARGET_PACKAGE := $(PRODUCT_OUT)/$(MK_VERSION).zip
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
@@ -1344,18 +1344,18 @@ ifdef MK_BUILD_PATH
 	$(hide) mkdir -p $(MK_BUILD_PATH)
   ifeq "RELEASE" "$(MK_BUILDTYPE)"
 	$(hide) mkdir -p $(MK_BUILD_PATH)/Release
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Release/$(CM_BUILD)
-	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Release/$(CM_BUILD)
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Release/$(MK_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Release/$(MK_BUILD)
   endif
   ifeq "EXPERIMENTAL" "$(MK_BUILDTYPE)"
 	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental/$(CM_BUILD)
-	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Experimental/$(CM_BUILD)
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental/$(MK_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Experimental/$(MK_BUILD)
   endif
   ifeq "NIGHTLY" "$(MK_BUILDTYPE)"
 	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly/$(CM_BUILD)
-	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Nightly/$(CM_BUILD)
+	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly/$(MK_BUILD)
+	$(hide) cp $(CM_TARGET_PACKAGE) $(MK_BUILD_PATH)/Nightly/$(MK_BUILD)
   endif
 endif
 	$(hide) # Create Release, Experimental and Nightly folder End
