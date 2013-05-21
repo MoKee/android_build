@@ -51,7 +51,7 @@ except:
     device = product
 
 if not depsonly:
-    print("Device %s not found. Attempting to retrieve device repository from MoKee OpenSource github (http://github.com/MoKee) or CyanogenMod Github (http://github.com/CyanogenMod)." % device)
+    print("Device %s not found. Attempting to retrieve device repository from MoKee OpenSource github (http://github.com/MoKee)." % device)
 
 repositories = []
 

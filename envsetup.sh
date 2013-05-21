@@ -575,7 +575,7 @@ function lunch()
     check_product $product
     if [ $? -ne 0 ]
     then
-        # if we can't find a product, try to grab it off the CM github
+        # if we can't find a product, try to grab it off the MoKee github
         T=$(gettop)
         pushd $T > /dev/null
         build/tools/roomservice.py $product
@@ -1688,7 +1688,7 @@ function mkrebase() {
     local dir="$(gettop)/$repo"
 
     if [ -z $repo ] || [ -z $refs ]; then
-        echo "CyanogenMod Gerrit Rebase Usage: "
+        echo "MoKee OpenSource Gerrit Rebase Usage: "
         echo "      mkrebase <path to project> <patch IDs on Gerrit>"
         echo "      The patch IDs appear on the Gerrit commands that are offered."
         echo "      They consist on a series of numbers and slashes, after the text"
