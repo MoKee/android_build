@@ -163,8 +163,7 @@ def add_to_manifest(repositories, fallback_branch = None):
             continue
 
         print('Adding dependency: %s -> %s' % (repo_name, repo_target))
-        project = ElementTree.Element("project", attrib = { "path": repo_target,
-            "remote": "mokee", "name": "%s" % repo_name })
+        project = ElementTree.Element("project", attrib = { "path": repo_target, "name": "%s" % repo_name, "remote": "mokee" })
 
         if 'branch' in repository:
             project.set('revision',repository['branch'])
@@ -173,6 +172,9 @@ def add_to_manifest(repositories, fallback_branch = None):
             project.set('revision', fallback_branch)
         else:
             print("Using default branch for %s" % repo_name)
+
+        if 'remote' in repository:
+            project.set('remote',repository['remote'])
 
         lm.append(project)
 
