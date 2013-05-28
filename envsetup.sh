@@ -20,7 +20,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - aospremote: Add git remote for matching AOSP repository.
 - mka:      Builds using SCHED_BATCH on all processors.
 - mkap:     Builds the module(s) using mka and pushes them to the device.
-- cmka:     Cleans and builds using mka.
+- mkka:     Cleans and builds using mka.
 - reposync: Parallel repo sync using ionice and SCHED_BATCH.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
@@ -470,7 +470,7 @@ function print_lunch_menu()
        echo "  (ohai, koush!)"
     fi
     echo
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "Breakfast menu... pick a combo:"
     else
        echo "Lunch menu... pick a combo:"
@@ -484,7 +484,7 @@ function print_lunch_menu()
         i=$(($i+1))
     done
 
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "... and don't forget the bacon!"
     fi
 
@@ -506,7 +506,7 @@ function brunch()
 function breakfast()
 {
     target=$1
-    CM_DEVICES_ONLY="true"
+    MK_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
     for f in `/bin/ls vendor/mk/vendorsetup.sh 2> /dev/null`
@@ -525,7 +525,7 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the CM model name
+            # This is probably just the MK model name
             lunch mk_$target-userdebug
         fi
     fi
@@ -688,7 +688,7 @@ function eat()
             done
             echo "Device Found.."
         fi
-    if (adb shell cat /system/build.prop | grep -q "ro.cm.device=$MK_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.mk.device=$MK_BUILD");
     then
         # if adbd isn't root we can't write to /cache/recovery/
         adb root
@@ -1366,7 +1366,7 @@ function installboot()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 > /dev/null
     adb wait-for-online remount
-    if (adb shell cat /system/build.prop | grep -q "ro.cm.device=$MK_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.mk.device=$MK_BUILD");
     then
         adb push $OUT/boot.img /cache/
         for i in $OUT/system/lib/modules/*;
@@ -1409,7 +1409,7 @@ function installrecovery()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 >> /dev/null
     adb wait-for-online remount
-    if (adb shell cat /system/build.prop | grep -q "ro.cm.device=$MK_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.mk.device=$MK_BUILD");
     then
         adb push $OUT/recovery.img /cache/
         adb shell dd if=/cache/recovery.img of=$PARTITION
@@ -1733,7 +1733,7 @@ function mka() {
     esac
 }
 
-function cmka() {
+function mkka() {
     if [ ! -z "$1" ]; then
         for i in "$@"; do
             case $i in
@@ -1789,7 +1789,7 @@ function dopush()
         echo "Device Found."
     fi
 
-    if (adb shell cat /system/build.prop | grep -q "ro.cm.device=$MK_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.mk.device=$MK_BUILD");
     then
     adb root &> /dev/null
     sleep 0.3
@@ -1837,7 +1837,7 @@ function dopush()
 alias mmp='dopush mm'
 alias mmmp='dopush mmm'
 alias mkap='dopush mka'
-alias cmkap='dopush cmka'
+alias mkkap='dopush mkka'
 
 
 # Force JAVA_HOME to point to java 1.6 if it isn't already set
