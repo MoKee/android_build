@@ -24,6 +24,8 @@ DEVICE="$1"
 SYNC="$2"
 EXTRAS="$3"
 
+VLINE=67
+
 if [ "mokee$DEVICE" == "mokee" ]
 then
    clear
@@ -32,6 +34,21 @@ then
    echo " "
    echo " Mokee Build Script"
    echo " -------------------"
+   echo " "
+   echo " 请在使用前设置输出路径"
+   echo " 使用'gedit mk'或者'vim mk'编辑脚本的"
+   echo " 第 $VLINE 行，去掉#号并设置路径即可！"
+   echo " "
+   echo " 用法: './mk [Device] {Variable}'"
+   echo "   Device - 设备名"
+   echo "   Variable - 参数"
+   echo "   参数如下："
+   echo "      fix   :如果上次编译遇到错误，则使用此参数快速编译"
+   echo "      clean :在开始编译前执行命令 'make installclean' "
+   echo "      sync  :在开始编译前执行同步命令 'repo sync' "
+   echo " "
+   echo " 例如 './mk maguro sync clean'"
+   echo " 则表示 '编译maguro，在开始前同步并清理'"
    echo " "
    echo " Usage: './mk [Device] {Variable}'"
    echo "   Device - your device name"
@@ -48,11 +65,15 @@ fi
 # if you set another OUT_DIR,set this before use.
 
 # OUT_DIR=/mokee/out/target/product/$DEVICE
-if [ ! -d "$OUT_DIR" ]
+if [ "mk$OUT_DIR" == "mk" ]
 then
-   echo -e "please specify correct OUT_DIR in this script on line 50 !"
+   echo -e "请设置编译输出路径在该脚本的$VLINE行！"
+   echo -e "please specify correct OUT_DIR in THIS SCRIPT at line $VLINE !"
    exit 0
-fi
+elif [ ! -d "$OUT_DIR" ]
+then
+   mkdir $OUT_DIR
+fi 
 
 # we don't allow scrollback buffer
 echo -e '\0033\0143'
