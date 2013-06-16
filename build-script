@@ -25,6 +25,7 @@ SYNC="$2"
 EXTRAS="$3"
 
 VLINE=67
+ADDON=packages/apps/HALO
 
 if [ "mokee$DEVICE" == "mokee" ]
 then
@@ -101,6 +102,15 @@ for var in $* ; do
 if [ "$var" == "sync" ]
 then
    echo -e "${bldblu}Fetching latest sources ${txtrst}"
+   if [ -d "$ADDON" ]
+   then
+      echo -e "fetching add-on repo"
+      echo -e "change this at script line 28"
+      cd $ADDON
+      git pull
+      cd $DIR
+      echo -e "=============================================="
+   fi
    repo sync
    echo -e ""
 elif [ "$var" == "clean" ]
