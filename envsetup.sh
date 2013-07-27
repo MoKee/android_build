@@ -16,8 +16,8 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - jgrep:   Greps on all local Java files.
 - resgrep: Greps on all local res/*.xml files.
 - godir:   Go to the directory containing a file.
-- mkremote: Add git remote for MoKee OpenSource Gerrit Review.
-- mkgerrit: A Git wrapper that fetches/pushes patch from/to MoKee OpenSource Gerrit Review.
+- mkremote: Add git remote for MK Gerrit Review.
+- mkgerrit: A Git wrapper that fetches/pushes patch from/to MK Gerrit Review.
 - mkrebase: Rebase a Gerrit change and push it again.
 - aospremote: Add git remote for matching AOSP repository.
 - mka:      Builds using SCHED_BATCH on all processors.
@@ -582,7 +582,7 @@ function lunch()
     check_product $product
     if [ $? -ne 0 ]
     then
-        # if we can't find a product, try to grab it off the MoKee github
+        # if we can't find a product, try to grab it off the MK github
         T=$(gettop)
         pushd $T > /dev/null
         build/tools/roomservice.py $product
@@ -1467,8 +1467,14 @@ function installboot()
     PARTITION_TYPE=`grep "^\/boot" $OUT/recovery/root/etc/recovery.fstab | awk {'print $2'}`
     if [ -z "$PARTITION" ];
     then
-        echo "Unable to determine boot partition."
-        return 1
+        # Try for RECOVERY_FSTAB_VERSION = 2
+        PARTITION=`grep "[[:space:]]\/boot[[:space:]]" $OUT/recovery/root/etc/recovery.fstab | awk {'print $1'}`
+        PARTITION_TYPE=`grep "[[:space:]]\/boot[[:space:]]" $OUT/recovery/root/etc/recovery.fstab | awk {'print $3'}`
+        if [ -z "$PARTITION" ];
+        then
+            echo "Unable to determine boot partition."
+            return 1
+        fi
     fi
     adb start-server
     adb root
