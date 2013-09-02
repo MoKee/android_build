@@ -2047,6 +2047,11 @@ function clog() {
     ./clog
 }
 
+# OTA Script
+function ota() {
+    ./build/tools/mk_ota_script/gen_ota
+}
+
 addcompletions
 
 export ANDROID_BUILD_TOP=$(gettop)
