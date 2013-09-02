@@ -1,0 +1,133 @@
+#!/bin/bash
+#
+# Copyright (C) 2013 The MoKee OpenSource Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+INPUT_PATH=$1
+OUTPUT_PATH=$2
+LOG_PATH=$3
+
+get_timestamp(){
+echo $1 | cut -d'-' -f3 | cut -d'-' -f1
+}
+
+get_latest(){
+LATEST_DEVICE=`echo $LATEST_ZIP | cut -d'-' -f2`
+LATEST_TIMESTAMP=`get_timestamp $LATEST_ZIP`
+LATEST_VERSION=`echo $LATEST_ZIP | cut -d'-' -f1`
+LATEST_TYPE=`echo ${LATEST_ZIP##*-} | cut -d'.' -f1`
+if [ "$LATEST_TYPE" == "RELEASE" ];then
+	LATEST_YR=${LATEST_TIMESTAMP:0:2}
+	LATEST_MTH=${LATEST_TIMESTAMP:2:2}
+	LATEST_DATE=${LATEST_TIMESTAMP:4:2}
+else
+	LATEST_YR=${LATEST_TIMESTAMP:0:4}
+	LATEST_MTH=${LATEST_TIMESTAMP:4:2}
+	LATEST_DATE=${LATEST_TIMESTAMP:6:2}
+	LATEST_HR=${LATEST_TIMESTAMP:8:2}
+	LATEST_MIN=${LATEST_TIMESTAMP:10:2}
+fi
+}
+
+compare_file(){
+CUR_ZIP=$1
+CUR_TIMESTAMP=`get_timestamp $1`
+CUR_TYPE=`echo ${CUR_ZIP##*-} | cut -d'.' -f1`
+
+if [ -z "$LATEST_ZIP" ];then
+	LATEST_ZIP=$CUR_ZIP
+	return 0
+fi
+
+get_latest
+
+if [ "$CUR_TYPE" == "RELEASE" ];then
+	CUR_YR=${CUR_TIMESTAMP:0:2}
+	CUR_MTH=${CUR_TIMESTAMP:2:2}
+	CUR_DATE=${CUR_TIMESTAMP:4:2}
+	if [ $CUR_YR -gt $LATEST_YR ];then
+		LATEST_ZIP=$CUR_ZIP
+	elif [ $CUR_YR -eq $LATEST_YR ];then
+		if [ $CUR_MTH -gt $LATEST_MTH ];then
+			LATEST_ZIP=$CUR_ZIP
+		elif [ $CUR_MTH -eq $LATEST_MTH ];then
+			if [ $CUR_DATE -gt $LATEST_DATE ];then
+				LATEST_ZIP=$CUR_ZIP
+			fi
+		fi
+	fi
+else
+	CUR_YR=${CUR_TIMESTAMP:0:4}
+	CUR_MTH=${CUR_TIMESTAMP:4:2}
+	CUR_DATE=${CUR_TIMESTAMP:6:2}
+	CUR_HR=${CUR_TIMESTAMP:8:2}
+	CUR_MIN=${CUR_TIMESTAMP:10:2}
+	if [ $CUR_YR -gt $LATEST_YR ];then
+		LATEST_ZIP=$CUR_ZIP
+	elif [ $CUR_YR -eq $LATEST_YR ];then
+		if [ $CUR_MTH -gt $LATEST_MTH ];then
+			LATEST_ZIP=$CUR_ZIP
+		elif [ $CUR_MTH -eq $LATEST_MTH ];then
+			if [ $CUR_DATE -gt $LATEST_DATE ];then
+				LATEST_ZIP=$CUR_ZIP
+			elif [ $CUR_DATE -eq $LATEST_DATE ];then
+				if [ $CUR_HR -gt $LATEST_HR ];then
+					LATEST_ZIP=$CUR_ZIP
+				elif [ $CUR_HR -eq $LATEST_HR ];then
+					if [ $CUR_MIN -gt $LATEST_MIN ];then
+						LATEST_ZIP=$CUR_ZIP
+					fi
+				fi
+			fi
+		fi
+	fi
+fi
+}
+
+FILENAMES=`ls $INPUT_PATH`
+for i in $FILENAMES;do
+	if [ ! -d $INPUT_PATH/$i ] && [[ "$i" == *".zip" ]];then
+		compare_file $i
+	fi
+done
+
+get_latest
+LOG_DATE=`date '+%y%m%d%H%M'`
+mkdir -p $LOG_PATH
+if [ ! -z "$LATEST_ZIP" ];then
+	echo "Latest zip is $LATEST_ZIP"
+	echo "Latest zip is $LATEST_ZIP" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	echo "Generating OTA packages..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	echo "====================================" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+else
+	echo "Error! Check file names or input parameters!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	exit 1
+fi
+
+mkdir -p $OUTPUT_PATH
+for i in $FILENAMES;do
+	CUR_TIMESTAMP=`get_timestamp $i`
+	if [ "$i" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$i ] && [[ "$i" == *".zip" ]];then
+		echo "Generating OTA package for $i..."
+		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		echo "Completed OTA package for $i at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	fi
+done
+echo "====================================" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+echo "Completed at `date`"
+echo "Completed at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
