@@ -1417,21 +1417,9 @@ endif
 
 ifdef MK_BUILD_PATH
 	$(hide) mkdir -p $(MK_BUILD_PATH)
-  ifeq "RELEASE" "$(MK_BUILDTYPE)"
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Release
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Release/$(MK_BUILD)
-	$(hide) cp $(MK_TARGET_PACKAGE) $(MK_BUILD_PATH)/Release/$(MK_BUILD)
-  endif
-  ifeq "EXPERIMENTAL" "$(MK_BUILDTYPE)"
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Experimental/$(MK_BUILD)
-	$(hide) cp $(MK_TARGET_PACKAGE) $(MK_BUILD_PATH)/Experimental/$(MK_BUILD)
-  endif
-  ifeq "NIGHTLY" "$(MK_BUILDTYPE)"
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly
-	$(hide) mkdir -p $(MK_BUILD_PATH)/Nightly/$(MK_BUILD)
-	$(hide) cp $(MK_TARGET_PACKAGE) $(MK_BUILD_PATH)/Nightly/$(MK_BUILD)
-  endif
+	$(hide) mkdir -p $(MK_BUILD_PATH)/$(MK_BUILDTYPE)
+	$(hide) mkdir -p $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)
+	$(hide) cp $(MK_TARGET_PACKAGE) $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)
 endif
 	$(hide) # Create Release, Experimental and Nightly folder End
 
