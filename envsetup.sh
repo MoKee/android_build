@@ -2044,7 +2044,12 @@ unset f
 
 # Changelog Tool
 function clog() {
-    ./clog
+    ./build/clog
+}
+
+# OTA Script
+function ota() {
+    ./build/tools/mk_ota_script/gen_ota
 }
 
 addcompletions
