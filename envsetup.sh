@@ -2052,6 +2052,11 @@ function ota() {
     ./build/tools/mk_ota_script/gen_ota
 }
 
+# Batch OTA Script
+function ota_all() {
+    ./build/tools/mk_ota_script/gen_ota_all $1
+}
+
 addcompletions
 
 export ANDROID_BUILD_TOP=$(gettop)

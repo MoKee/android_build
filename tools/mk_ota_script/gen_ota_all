@@ -15,24 +15,21 @@
 # limitations under the License.
 #
 
-INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
+TYPE=$1
+INPUT=$MK_OTA_INPUT/$TYPE
 if [ -z "$OUT_DIR" ];then
-	OUTPUT=out/target/OTA/$MK_BUILDTYPE/$MK_BUILD
-	LOGDIR=out/target/OTA/$MK_BUILDTYPE/logs
+	OUTPUT=out/target/OTA/$TYPE
 else
-	OUTPUT=$OUT_DIR/target/OTA/$MK_BUILDTYPE/$MK_BUILD
-	LOGDIR=$OUT_DIR/target/OTA/$MK_BUILDTYPE/logs
+	OUTPUT=$OUT_DIR/target/OTA/$TYPE
 fi
+LOGDIR=$OUTPUT/logs
 
-if [ -z "$OUT_DIR" ];then
-	cp out/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
-else
-	cp $OUT_DIR/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
-fi
+TARGET=`ls $INPUT`
+for i in $INPUT;do
+	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR
 
-build/tools/mk_ota_script/ota $INPUT $OUTPUT $LOGDIR
-
-if [ ! -z "$MK_OTA_EXTRA" ];then
-	mkdir -p $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD
-	cp $OUTPUT/* $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD 2> /dev/null
-fi
+	if [ ! -z "$MK_OTA_EXTRA" ];then
+		mkdir -p $MK_OTA_EXTRA/$1/$i
+		cp $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null 
+	fi
+done

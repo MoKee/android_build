@@ -123,7 +123,7 @@ for i in $FILENAMES;do
 		echo "Generating OTA package for $i..."
 		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 		echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 		echo "Completed OTA package for $i at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 	fi
