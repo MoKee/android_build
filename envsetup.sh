@@ -79,6 +79,18 @@ function check_product()
     fi
     export MK_BUILD
 
+    if [ ! -z "$MK_RELEASE" ] ; then
+        export MK_BUILDTYPE=RELEASE
+    fi
+
+    if [ ! -z "$MK_NIGHTLY" ] ; then
+        export MK_BUILDTYPE=NIGHTLY
+    fi
+
+    if [ ! -z "$MK_EXPERIMENTAL" ] ; then
+        export MK_BUILDTYPE=EXPERIMENTAL
+    fi
+
     CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
