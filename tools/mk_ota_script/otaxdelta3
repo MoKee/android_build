@@ -76,12 +76,14 @@ cd ..
 mkdirp out/META-INF/com/google/android 2> /dev/null
 mv z2/META-INF/com/google/android/update-binary out/META-INF/com/google/android/
 mv z2/META-INF/com/google/android/updater-script oldscript
-mv z2/boot.img out/boot.img
 rm -rf z1/META-INF
 rm -rf z2/META-INF
 rm z1/system/bin/backuptool.sh
 rm z2/system/bin/backuptool.sh
-rm z1/boot.img
+if [ -f z2/boot.img ];then
+	mv z2/boot.img out/boot.img
+	rm z1/boot.img
+fi
 
 # Process preinstall
 if [ -f z2/system/bin/loadpreinstalls.sh ]; then
