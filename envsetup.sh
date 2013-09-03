@@ -2044,7 +2044,7 @@ unset f
 
 # Changelog Tool
 function clog() {
-    ./build/clog
+    ./build/clog $1
 }
 
 # OTA Script
