@@ -16,10 +16,22 @@
 #
 
 INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
-OUTPUT=out/target/OTA/$MK_BUILD
-LOGDIR=$OUTPUT/logs
+if [ -z "$OUT_DIR" ];then
+	OUTPUT=out/target/OTA/$MK_BUILDTYPE/$MK_BUILD
+	LOGDIR=out/target/OTA/$MK_BUILDTYPE/logs/$MK_BUILD
+else
+	OUTPUT=$OUT_DIR/target/OTA/$MK_BUILDTYPE/$MK_BUILD
+	LOGDIR=$OUT_DIR/target/OTA/$MK_BUILDTYPE/logs/$MK_BUILD
+fi
 
-cp out/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
+if [ -z "$OUT_DIR" ];then
+	cp out/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
+else
+	cp $OUT_DIR/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
+fi
+
+echo ""
+echo "OTA: $MK_BUILD"
 build/tools/mk_ota_script/ota $INPUT $OUTPUT $LOGDIR
 
 if [ ! -z "$MK_OTA_EXTRA" ];then
