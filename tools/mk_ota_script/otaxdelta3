@@ -15,7 +15,11 @@
 # limitations under the License.
 #
 
-TMP=out/target/OTA/tmp
+if [ -z "$OUT_DIR" ];then
+	TMP=out/target/OTA/tmp
+else
+	TMP=$OUT_DIR/target/OTA/tmp
+fi
 
 if [ -z "$XDELTA3" ];then
 	XDELTA3=xdelta3
