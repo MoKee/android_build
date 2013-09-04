@@ -317,7 +317,7 @@ BINARY1=$(realpath build/tools/mk_ota_script/prebuilt/xdelta3)
 BINARY2=$(realpath build/tools/mk_ota_script/prebuilt/patcher)
 if [ $IS_MTD == 1 ];then
 	BINARY3=$(realpath build/tools/mk_ota_script/prebuilt/mtd_updater.sh)
-if
+fi
 cd $TMP/out
 cp $BINARY1 ./
 cp $BINARY2 ./
