@@ -170,7 +170,7 @@ for file in $(find z2 -type f -print); do
 done
 
 # Special processing for mtd parts
-if [ `ls z2 | grep "mtd"` ];then
+if ls z2/*mtd* &> /dev/null;then
 	IS_MTD=1
 	mv z2/bml_over_mtd.sh out
 	mv z2/bml_over_mtd out
