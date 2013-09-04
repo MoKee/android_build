@@ -25,6 +25,8 @@ if [ -z "$XDELTA3" ];then
 	XDELTA3=xdelta3
 fi
 
+IS_MTD=0
+
 realpath(){
 cd `dirname $1`
 echo $PWD/`basename $1`
@@ -167,20 +169,23 @@ for file in $(find z2 -type f -print); do
     fi
 done
 
-# Skipping mtd parts
-for mtd in $(find z2 -maxdepth 1 -type f); do
-    oldmtd=$(echo $mtd | sed 's/z2/z1/1')
-    newsha1m=$(sha1sum $mtd | cut -c -40)
-    oldsha1m=$(sha1sum $oldmtd | cut -c -40)
-    mtdrx=$(echo $mtd | awk -F'/' '{print $NF}' | sed 's/\./\\\./g')
-    if [ "$newsha1m" = "$oldsha1m" ]; then
-        echo Skipping $mtd
-    else
-        mv $mtd out/
-        rm $oldfile
-        cat oldscript | grep "$mtdrx" >> mtd.txt
-    fi
-done
+# Special processing for mtd parts
+if [ -f `ls z2 | grep "mtd"` ];then
+	IS_MTD=1
+	mv z2/bml_over_mtd.sh out
+	mv z2/bml_over_mtd out
+	mv z2/flash_image out
+	for i in `ls z1`;do
+		if [ -f z1/$i ];then
+			rm z1/$i
+		fi
+	done
+	for i in `ls z2`;do
+		if [ -f z2/$i ];then
+			rm z2/$i
+		fi
+	done
+fi
 
 # Create delta
 cd z1
@@ -234,9 +239,9 @@ echo "" >> updater-script
 echo "ui_print(\"Unpacking tools...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 echo "package_extract_file(\"xdelta3\", \"/tmp/xdelta3\");" >> updater-script
-echo "set_perm(0, 0, 0755, \"/tmp/xdelta3\");" >> updater-script
+echo "set_perm(0, 0, 0777, \"/tmp/xdelta3\");" >> updater-script
 echo "package_extract_file(\"patcher\", \"/tmp/patcher\");" >> updater-script
-echo "set_perm(0, 0, 0755, \"/tmp/patcher\");" >> updater-script
+echo "set_perm(0, 0, 0777, \"/tmp/patcher\");" >> updater-script
 echo "" >> updater-script
 # Apply patch
 echo "# ---- start making changes here ----" >> updater-script
@@ -266,24 +271,29 @@ echo "show_progress(0.100000,0);" >> updater-script
 OLD_IFS=$IFS
 IFS=$'\n'
 for x in `cat oldscript | grep set_perm`;do
-	if [[ ! `echo $x | grep "backuptool"` ]];then
+	if [[ ! `echo $x | grep "backuptool"` ]] && [[ ! `echo $x | grep "/tmp"` ]] ;then
 		echo $x >> updater-script
 	fi
 done
 IFS=$OLD_IFS
 echo "" >> updater-script
-# Extras
-if [ -f "mtd.txt" ];then
-	echo "ui_print(\"Unpacking extra files...\");" >> updater-script
-	cat mtd.txt >> updater-script
-	echo "" >> updater-script
-fi
 # Flash kernel
 echo "ui_print(\"Flashing kernel...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 cat oldscript | grep "package_extract_file(\"boot.img\"" >> updater-script
 cat oldscript | grep "write_raw_image(" >> updater-script
 cat oldscript | grep "delete(\"/tmp/boot.img\")"  >> updater-script
+if [ $IS_MTD == 1 ];then
+	echo "package_extract_file(\"mtd_updater.sh\", \"/tmp/mtd_updater.sh\");" >> updater-script
+	echo "set_perm(0, 0, 0777, \"/tmp/mtd_updater.sh\");" >> updater-script
+	echo "package_extract_file(\"flash_image\", \"/tmp/flash_image\");" >> updater-script
+	echo "set_perm(0, 0, 0777, \"/tmp/flash_image\");" >> updater-script
+	echo "package_extract_file(\"bml_over_mtd\", \"/tmp/bml_over_mtd\");" >> updater-script
+	echo "set_perm(0, 0, 0777, \"/tmp/bml_over_mtd\");" >> updater-script
+	echo "package_extract_file(\"bml_over_mtd.sh\", \"/tmp/bml_over_mtd.sh\");" >> updater-script
+	echo "set_perm(0, 0, 0777, \"/tmp/bml_over_mtd.sh\");" >> updater-script
+	echo "assert(run_program(\"/tmp/mtd_updater.sh\") == 0);" >> updater-script
+fi
 echo "" >> updater-script
 # Clean up
 echo "ui_print(\"Cleaning up...\");" >> updater-script
@@ -305,9 +315,15 @@ mv updater-script out/META-INF/com/google/android/updater-script
 cd $ANDROID_BUILD_TOP
 BINARY1=$(realpath build/tools/mk_ota_script/prebuilt/xdelta3)
 BINARY2=$(realpath build/tools/mk_ota_script/prebuilt/patcher)
+if [ $IS_MTD == 1 ];then
+	BINARY3=$(realpath build/tools/mk_ota_script/prebuilt/mtd_updater.sh)
+if
 cd $TMP/out
 cp $BINARY1 ./
 cp $BINARY2 ./
+if [ ! -z "$BINARY3" ];then
+	cp $BINARY3 ./
+fi
 zip -r $OUT .
 cd ../../
 rm -rf tmp
