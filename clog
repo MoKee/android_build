@@ -8,7 +8,7 @@ if ["$MK_CHANGELOG_PATH" = ""]; then
 logdir=`pwd`
 fi
 
-#rm -rf Changelog_*
+rm -f $logdir/Changelog_$cdate.log
 
 clear
 
