@@ -31,14 +31,13 @@ echo""
 echo "Mokee Open Source Changelog from $sdate" - today >> "$logdir"/Changelog_$cdate.log
 echo "---------------------------------------------------------------" >> "$logdir"/Changelog_$cdate.log
 echo " " >> "$logdir"/Changelog_$cdate.log
-find $rdir -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read line
+find -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read line
 do
 cd $line
     # Test to see if the repo needs to have a changelog written.
     log=$(git log --pretty="%an - %s" --no-merges --since=$sdate --date-order)
     # Forgive my bad script :P
     project=${line#*/}
-    project=${project#*/}
     if [ ! -z "$log" ]; then
         # Write the changelog
         echo " >>> Changelog is updated and written for $project ..."
@@ -49,6 +48,7 @@ echo " $line" >> "$logdir"/Changelog_$cdate.log
         done
 echo "" >> "$logdir"/Changelog_$cdate.log
     fi
+cd $ANDROID_BUILD_TOP
 done
 echo""
 echo "-------------------------------------------------"
