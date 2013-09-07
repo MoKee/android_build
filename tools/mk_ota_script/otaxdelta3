@@ -313,10 +313,10 @@ sed -i 's/z2/system/g' updater-script
 mv updater-script out/META-INF/com/google/android/updater-script
 
 cd $ANDROID_BUILD_TOP
-BINARY1=$(realpath build/tools/mk_ota_script/prebuilt/xdelta3)
-BINARY2=$(realpath build/tools/mk_ota_script/prebuilt/patcher)
+BINARY1=$(realpath vendor/mk/prebuilt/ota/xdelta3)
+BINARY2=$(realpath vendor/mk/prebuilt/ota/patcher)
 if [ $IS_MTD == 1 ];then
-	BINARY3=$(realpath build/tools/mk_ota_script/prebuilt/mtd_updater.sh)
+	BINARY3=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
 fi
 cd $TMP/out
 cp $BINARY1 ./
