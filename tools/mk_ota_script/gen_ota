@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+MK_BUILDTYPE=`cd $ANDROID_BUILD_TOP; CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
+make --no-print-directory -C "$ANDROID_BUILD_TOP" -f build/core/config.mk dumpvar-MK_BUILDTYPE`
+
 INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
 if [ -z "$OUT_DIR" ];then
 	OUTPUT=out/target/OTA/$MK_BUILDTYPE/$MK_BUILD
