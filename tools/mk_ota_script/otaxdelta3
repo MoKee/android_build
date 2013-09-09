@@ -232,7 +232,9 @@ IFS=$OLD_IFS
 echo "" >> updater-script
 # Verifying system
 echo "ui_print(\"Verifying product version...\");" >> updater-script
-echo "assert(getprop(\"ro.modversion\") == \"$OLDVERSION\");" >> updater-script
+echo "package_extract_file(\"verifier\", \"/tmp/verifier\");" >> updater-script
+echo "set_perm(0, 0, 0777, \"/tmp/verifier\");" >> updater-script
+echo "assert(run_program(\"/tmp/verifier\", \"$OLDVERSION\") == 0);" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 echo "" >> updater-script
 # Extracting tools
@@ -315,14 +317,16 @@ mv updater-script out/META-INF/com/google/android/updater-script
 cd $ANDROID_BUILD_TOP
 BINARY1=$(realpath vendor/mk/prebuilt/ota/xdelta3)
 BINARY2=$(realpath vendor/mk/prebuilt/ota/patcher)
+BINARY3=$(realpath vendor/mk/prebuilt/ota/verifier)
 if [ $IS_MTD == 1 ];then
-	BINARY3=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
+	BINARY4=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
 fi
 cd $TMP/out
 cp $BINARY1 ./
 cp $BINARY2 ./
-if [ ! -z "$BINARY3" ];then
-	cp $BINARY3 ./
+cp $BINARY3 ./
+if [ ! -z "$BINARY4" ];then
+	cp $BINARY4 ./
 fi
 zip -r $OUT .
 cd ../../
