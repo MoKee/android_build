@@ -15,8 +15,17 @@
 # limitations under the License.
 #
 
-TYPE=$1
-INPUT=$MK_OTA_INPUT/$TYPE
+if [ -z "$MK_OTA_INPUT" ];then
+	echo "MK_OTA_INPUT not defined!"
+	exit 1
+elif [ -z "$1" ];then
+	echo "No argument given! [RELEASE/NIGHTLY/EXPERIMENTAL/UNOFFICIAL]"
+	exit 1
+else
+	TYPE=$1
+	INPUT=$MK_OTA_INPUT/$TYPE
+fi
+
 if [ -z "$OUT_DIR" ];then
 	OUTPUT=out/target/OTA/$TYPE
 else

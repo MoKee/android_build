@@ -18,7 +18,13 @@
 MK_BUILDTYPE=`cd $ANDROID_BUILD_TOP;CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
 make --no-print-directory -C "$ANDROID_BUILD_TOP" -f build/core/config.mk dumpvar-MK_BUILDTYPE`
 
-INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
+if [ -z "$MK_OTA_INPUT" ];then
+	echo "MK_OTA_INPUT not defined!"
+	exit 1
+else
+	INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
+fi
+
 if [ -z "$OUT_DIR" ];then
 	OUTPUT=out/target/OTA/$MK_BUILDTYPE/$MK_BUILD
 	LOGDIR=out/target/OTA/$MK_BUILDTYPE/logs/$MK_BUILD
