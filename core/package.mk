@@ -262,6 +262,7 @@ ifdef LOCAL_EXPORT_PACKAGE_RESOURCES
 # other packages can use to build their own PRODUCT-agnostic R.java (etc.)
 # files.
 resource_export_package := $(intermediates.COMMON)/package-export.apk
+$(resource_export_package): $(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
 $(R_file_stamp): $(resource_export_package)
 
 # add-assets-to-package looks at PRODUCT_AAPT_CONFIG, but this target
@@ -304,6 +305,7 @@ framework_res_package_export_deps := $(framework_res_package_export)
 else # LOCAL_SDK_RES_VERSION
 framework_res_package_export := \
     $(call intermediates-dir-for,APPS,framework-res,,COMMON)/package-export.apk
+
 # We can't depend directly on the export.apk file; it won't get its
 # PRIVATE_ vars set up correctly if we do.  Instead, depend on the
 # corresponding R.stamp file, which lists the export.apk as a dependency.
