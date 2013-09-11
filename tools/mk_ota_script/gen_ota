@@ -18,7 +18,11 @@
 MK_BUILDTYPE=`cd $ANDROID_BUILD_TOP;CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
 make --no-print-directory -C "$ANDROID_BUILD_TOP" -f build/core/config.mk dumpvar-MK_BUILDTYPE`
 
-if [ -z "$MK_OTA_INPUT" ];then
+if [ -z "`which xdelta3 2> /dev/null`" ];then
+        echo "xdelta3 is not installed!"
+        echo "Please install it first!"
+        exit 1
+elif [ -z "$MK_OTA_INPUT" ];then
 	echo "MK_OTA_INPUT not defined!"
 	exit 1
 else

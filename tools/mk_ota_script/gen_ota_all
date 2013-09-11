@@ -15,7 +15,11 @@
 # limitations under the License.
 #
 
-if [ -z "$MK_OTA_INPUT" ];then
+if [ -z "`which xdelta3 2> /dev/null`" ];then
+        echo "xdelta3 is not installed!"
+        echo "Please install it first!"
+        exit 1
+elif [ -z "$MK_OTA_INPUT" ];then
 	echo "MK_OTA_INPUT not defined!"
 	exit 1
 elif [ -z "$1" ];then
