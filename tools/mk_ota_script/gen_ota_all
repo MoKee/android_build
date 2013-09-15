@@ -37,7 +37,12 @@ else
 fi
 LOGDIR=$OUTPUT/logs
 
-TARGET=`ls $INPUT`
+if [ ! -z "$2" ];then
+	TARGET=`echo $2 | tr "," " "`
+else
+	TARGET=`ls $INPUT`
+fi
+
 for i in $TARGET;do
 	echo ""
 	echo "OTA: $i"

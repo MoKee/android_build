@@ -2056,7 +2056,7 @@ function ota() {
 
 # Batch OTA Script
 function ota_all() {
-    ./build/tools/mk_ota_script/gen_ota_all $1
+    ./build/tools/mk_ota_script/gen_ota_all $1 $2
 }
 
 # Add completions
