@@ -300,6 +300,7 @@ echo "" >> updater-script
 # Clean up
 echo "ui_print(\"Cleaning up...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
+echo "delete(\"/tmp/verifier\");" >> updater-script
 echo "delete(\"/tmp/patcher\");" >> updater-script
 echo "delete(\"/tmp/xdelta3\");" >> updater-script
 for i in `cat oldscript | grep "unmount(" | sort`;do
