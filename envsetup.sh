@@ -74,6 +74,7 @@ function check_product()
 
     if (echo -n $1 | grep -q -e "^mk_") ; then
        MK_BUILD=$(echo -n $1 | sed -e 's/^mk_//g')
+       BUILD_NUMBER=$((date +%s%N ; echo $MK_BUILD; hostname) | sha1sum | cut -c1-10)
     else
        MK_BUILD=
     fi
