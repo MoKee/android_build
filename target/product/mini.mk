@@ -161,7 +161,6 @@ PRODUCT_PACKAGES += \
     Bluetooth \
     FusedLocation \
     InputDevices \
-    LatinIME \
     Phone \
     Provision \
     hostapd \
