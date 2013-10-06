@@ -26,6 +26,7 @@ if [ -z "$XDELTA3" ];then
 fi
 
 IS_MTD=0
+SECURITYDIR=$ANDROID_BUILD_TOP/build/target/product/security
 
 realpath(){
 cd `dirname $1`
@@ -329,6 +330,7 @@ cp $BINARY3 ./
 if [ ! -z "$BINARY4" ];then
 	cp $BINARY4 ./
 fi
-zip -r $OUT .
+zip -r ../ota.zip .
+java -Xmx1024m -jar $ANDROID_BUILD_TOP/build/tools/mk_ota_script/sign_mokee_ota.jar -w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 ../ota.zip $OUT
 cd ../../
 rm -rf tmp
