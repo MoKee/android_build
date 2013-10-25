@@ -188,6 +188,8 @@ def add_to_manifest(repositories, fallback_branch = None):
             project.set('remote',repository['remote'])
             if repository['remote'] == 'cyanogen' and not 'github' in repository['repository']:
                 project.set('name','github/CyanogenMod/'+repository['repository'])
+            elif repository['remote'] == 'local' and not 'github' in repository['repository']:
+                project.set('name','github/'+repository['repository'])
             else:
                 project.set('name',repository['repository'])
 
