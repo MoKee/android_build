@@ -21,6 +21,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - mkrebase: Rebase a Gerrit change and push it again.
 - aospremote: Add git remote for matching AOSP repository.
 - cafremote: Add git remote for matching CodeAurora repository.
+- cmremote: Add git remote for matching CyanogenMod repository,
 - mka:      Builds using SCHED_BATCH on all processors.
 - mkap:     Builds the module(s) using mka and pushes them to the device.
 - mkka:     Cleans and builds using mka.
@@ -28,6 +29,9 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+- clog:     Tool to generate changelog.
+- ota:      Generate OTA packages using the MoKee OTA system.
+- ota_all:  Batch generate OTA packages using the MoKee OTA system.
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -1424,15 +1428,11 @@ function mkremote()
     then
         echo .git directory not found. Please run this from the root directory of the Android repository you wish to set up.
     fi
-    GERRIT_REMOTE=$(cat .git/config  | grep git://github.com | awk '{ print $NF }' | sed s#git://github.com/##g)
+    GERRIT_REMOTE=`cat .git/config | grep projectname | cut -d"=" -f2 | sed -e 's/^[ \t]*//'`
     if [ -z "$GERRIT_REMOTE" ]
     then
-        GERRIT_REMOTE=$(cat .git/config  | grep http://github.com | awk '{ print $NF }' | sed s#http://github.com/##g)
-        if [ -z "$GERRIT_REMOTE" ]
-        then
-          echo Unable to set up the git remote, are you in the root of the repo?
-          return 0
-        fi
+        echo Unable to set up the git remote, are you in the root of the repo?
+        return 0
     fi
     MKUSER=`git config --get review.review.mfunz.com.username`
     if [ -z "$MKUSER" ]
@@ -1478,6 +1478,19 @@ function cafremote()
     echo "Remote 'caf' created"
 }
 export -f cafremote
+
+function cmremote()
+{
+    git remote rm cm 2> /dev/null
+    if [ ! -d .git ]
+    then
+        echo .git directory not found. Please run this from the root directory of the Android repository you wish to set up.
+    fi
+    PROJECT=`cat .git/config | grep "projectname" | rev | cut -d'/' -f1 | rev`
+    git remote add cm https://github.com/CyanogenMod/${PROJECT}.git
+    echo "Remote 'cm' created"
+}
+export -f cmremote
 
 
 function installboot()
