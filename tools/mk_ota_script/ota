@@ -120,12 +120,21 @@ mkdir -p $OUTPUT_PATH
 for i in $FILENAMES;do
 	CUR_TIMESTAMP=`get_timestamp $i`
 	if [ "$i" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$i ] && [[ "$i" == *".zip" ]];then
-		echo "Generating OTA package for $i..."
 		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		echo "Completed OTA package for $i at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		echo "Checking $i..."
+		echo "Checking $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		unzip -tqq $INPUT_PATH/$i > /dev/null 2>&1
+		if [ $? -eq 0 ];then
+			echo "Generating OTA package for $i..."
+			echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			echo "Completed OTA package for $i at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		else
+			echo "$i is corrupted! Skipping!"
+			echo "$i is corrupted! Skipping!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		fi
 	fi
 done
 echo "====================================" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
