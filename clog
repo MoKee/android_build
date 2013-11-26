@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sdate=${1}
+tdate=`date +"%m/%d/%y"`
 cdate=`date +"%y%m%d"`
 rdir=`pwd`
 logdir=$MK_CHANGELOG_PATH
@@ -25,10 +26,10 @@ fi
 
 # Find the directories to log
 echo"";echo"";echo""
-echo "Mokee Open Source Changelog -------------------"
+echo "MoKee OpenSource Changelog -------------------"
 echo""
 # Log starter
-echo "Mokee Open Source Changelog from $sdate" - today >> "$logdir"/Changelog_$cdate.log
+echo "MoKee OpenSource Changelog from $sdate" - "$tdate" >> "$logdir"/Changelog_$cdate.log
 echo "---------------------------------------------------------------" >> "$logdir"/Changelog_$cdate.log
 echo " " >> "$logdir"/Changelog_$cdate.log
 find -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read line
