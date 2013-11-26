@@ -50,6 +50,6 @@ for i in $TARGET;do
 
 	if [ ! -z "$MK_OTA_EXTRA" ];then
 		mkdir -p $MK_OTA_EXTRA/$TYPE/$i
-		cp $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null 
+		cp -r $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null
 	fi
 done
