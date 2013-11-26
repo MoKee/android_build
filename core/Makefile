@@ -1429,7 +1429,7 @@ ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 	$(error TARGET_CUSTOM_RELEASETOOL is deprecated)
 endif
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(MK_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) > $(MK_TARGET_PACKAGE).md5sum
+	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) | cut -f1 -d' ' > $(MK_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(MK_TARGET_PACKAGE)"${CL_RST}
 	
 	$(hide) # Create Release, Experimental and Nightly folder Start
