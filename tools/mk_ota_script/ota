@@ -116,7 +116,7 @@ else
 	exit 1
 fi
 
-mkdir -p $OUTPUT_PATH
+mkdir -p $OUTPUT_PATH/md5
 for i in $FILENAMES;do
 	CUR_TIMESTAMP=`get_timestamp $i`
 	if [ "$i" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$i ] && [[ "$i" == *".zip" ]];then
@@ -128,6 +128,9 @@ for i in $FILENAMES;do
 			echo "Generating OTA package for $i..."
 			echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 			build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			echo "Generating md5sum of OTA package for $i..."
+			echo "Generating md5sum of OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+			md5sum $OUTPUT_PATH/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip | cut -f1 -d' ' > $OUTPUT_PATH/md5/OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip.md5sum
 			echo "Completed OTA package for $i at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 			echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 		else
