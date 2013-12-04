@@ -269,14 +269,12 @@ for dir in $(find z2 -maxdepth 1 -mindepth 1 -type d | awk -F'/' '{print $NF}');
 done
 echo "" >> updater-script
 # Permissions
-echo "ui_print(\"Setting permissions...\");" >> updater-script
+echo "ui_print(\"Setting metadata...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 OLD_IFS=$IFS
 IFS=$'\n'
-for x in `cat oldscript | grep set_perm`;do
-	if [[ ! `echo $x | grep "backuptool"` ]] && [[ ! `echo $x | grep "/tmp"` ]] ;then
-		echo $x >> updater-script
-	fi
+for x in `cat oldscript | grep set_metadata`; do
+	echo $x >> updater-script
 done
 IFS=$OLD_IFS
 echo "" >> updater-script
