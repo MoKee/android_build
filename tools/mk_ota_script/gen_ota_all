@@ -22,8 +22,8 @@ if [ -z "`which xdelta3 2> /dev/null`" ];then
 elif [ -z "$MK_OTA_INPUT" ];then
 	echo "MK_OTA_INPUT not defined!"
 	exit 1
-elif [ -z "$1" ];then
-	echo "No argument given! [RELEASE/NIGHTLY/EXPERIMENTAL/UNOFFICIAL]"
+elif [ "$1" != "RELEASE" ] && [ "$1" != "NIGHTLY" ] && [ "$1" != "EXPERIMENTAL" ] && [ "$1" != "UNOFFICIAL" ];then
+	echo "No/wrong argument given! [RELEASE/NIGHTLY/EXPERIMENTAL/UNOFFICIAL]"
 	exit 1
 else
 	TYPE=$1
