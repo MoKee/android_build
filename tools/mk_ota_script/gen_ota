@@ -47,7 +47,7 @@ fi
 echo ""
 echo "OTA: $MK_BUILD"
 build/tools/mk_ota_script/ota $INPUT $OUTPUT $LOGDIR
-
+rm -rf $OUTPUT/../tmp
 if [ ! -z "$MK_OTA_EXTRA" ];then
 	mkdir -p $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD
 	cp -r $OUTPUT/* $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD 2> /dev/null

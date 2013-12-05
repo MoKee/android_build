@@ -17,9 +17,9 @@
 #
 
 if [ -z "$OUT_DIR" ];then
-	TMP=out/target/OTA/tmp
+	TMP=out/target/OTA/tmp/$RANDOM
 else
-	TMP=$OUT_DIR/target/OTA/tmp
+	TMP=$OUT_DIR/target/OTA/tmp/$RANDOM
 fi
 
 if [ -z "$XDELTA3" ];then
@@ -331,5 +331,5 @@ if [ ! -z "$BINARY4" ];then
 fi
 zip -r ../ota.zip .
 java -Xmx1024m -jar $ANDROID_BUILD_TOP/build/tools/mk_ota_script/sign_mokee_ota.jar -w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 ../ota.zip $OUT
-cd ../../
-rm -rf tmp
+cd $ANDROID_BUILD_TOP
+rm -rf $TMP

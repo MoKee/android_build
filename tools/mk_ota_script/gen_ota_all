@@ -37,6 +37,7 @@ else
 	OUTPUT=$OUT_DIR/target/OTA/$TYPE
 fi
 LOGDIR=$OUTPUT/logs
+LIMIT=`nproc`
 
 if [ ! -z "$2" ];then
 	TARGET=`echo $2 | tr "," " "`
@@ -47,10 +48,16 @@ fi
 for i in $TARGET;do
 	echo ""
 	echo "OTA: $i"
-	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i
-
-	if [ ! -z "$MK_OTA_EXTRA" ];then
-		mkdir -p $MK_OTA_EXTRA/$TYPE/$i
-		cp -r $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null
+	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
+	if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+		wait
 	fi
 done
+wait
+rm -rf $OUTPUT/../tmp
+if [ ! -z "$MK_OTA_EXTRA" ];then
+	for i in $TARGET;do
+		mkdir -p $MK_OTA_EXTRA/$TYPE/$i
+		cp -r $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null
+	done
+fi
