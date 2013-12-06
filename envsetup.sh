@@ -85,18 +85,6 @@ function check_product()
     fi
     export MK_BUILD
 
-    if [ ! -z "$MK_RELEASE" ] ; then
-        export MK_BUILDTYPE=RELEASE
-    elif [ ! -z "$MK_NIGHTLY" ] ; then
-        export MK_BUILDTYPE=NIGHTLY
-    elif [ ! -z "$MK_EXPERIMENTAL" ] ; then
-        export MK_BUILDTYPE=EXPERIMENTAL
-    elif [ "`hostname`" == "mokee" ] ; then
-        export MK_BUILDTYPE=EXPERIMENTAL
-    else
-        export MK_BUILDTYPE=UNOFFICIAL
-    fi
-
     CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
