@@ -207,7 +207,7 @@ for f in $(find .);do
 				$XDELTA3 -D -R -e -s $f $EQUIV $OUTFILE.delta
 				filepath=`dirname $f | cut -d'.' -f2`
 				echo "package_extract_file(\"patch`dirname $f | cut -d'.' -f2`/`basename $f`.delta\", \"/tmp/`basename $f`.delta\");" >> ../applypatch.txt
-				echo "run_program(\"/tmp/patcher\", \"`dirname $f | cut -d'.' -f2`/`basename $f`\", \"/tmp/`basename $f`.delta\", \"/tmp/`basename $f`\");" >> ../applypatch.txt
+				echo "run_program(\"/tmp/patcher\", \"`dirname $f | cut -d'.' -f2`/`basename $f`\", \"/tmp/`basename $f`.delta\", \"/system/tmp/`basename $f`\");" >> ../applypatch.txt
 			fi
 		fi
 	fi
@@ -246,6 +246,7 @@ echo "package_extract_file(\"xdelta3\", \"/tmp/xdelta3\");" >> updater-script
 echo "set_perm(0, 0, 0777, \"/tmp/xdelta3\");" >> updater-script
 echo "package_extract_file(\"patcher\", \"/tmp/patcher\");" >> updater-script
 echo "set_perm(0, 0, 0777, \"/tmp/patcher\");" >> updater-script
+echo "run_program(\"mkdir\", \"/system/tmp\");" >> updater-script
 echo "" >> updater-script
 # Apply patch
 echo "# ---- start making changes here ----" >> updater-script
@@ -303,6 +304,7 @@ echo "show_progress(0.100000,0);" >> updater-script
 echo "delete(\"/tmp/verifier\");" >> updater-script
 echo "delete(\"/tmp/patcher\");" >> updater-script
 echo "delete(\"/tmp/xdelta3\");" >> updater-script
+echo "delete_recursive(\"/system/tmp\");" >> updater-script
 for i in `cat oldscript | grep "unmount(" | sort`;do
 	if [ "$i" != "$j" ];then
 		j=$i
