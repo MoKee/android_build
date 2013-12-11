@@ -1,11 +1,11 @@
 #!/bin/bash
 
 sdate=${1}
-tdate=`date +"%m/%d/%y"`
+tdate=`date +"%m/%d/%Y"`
 cdate=`date +"%y%m%d"`
 rdir=`pwd`
 logdir=$MK_CHANGELOG_PATH
-if ["$MK_CHANGELOG_PATH" = ""]; then
+if ["$MK_CHANGELOG_PATH" == ""]; then
 logdir=`pwd`
 fi
 
@@ -51,6 +51,5 @@ echo "" >> "$logdir"/Changelog_$cdate.log
     fi
 cd $ANDROID_BUILD_TOP
 done
-echo""
-echo "-------------------------------------------------"
-echo"";echo"";echo""
+echo "---------------------------------------------------------------" >> "$logdir"/Changelog_$cdate.log
+echo "You can see more changelog from http://changelog.mfunz.com" >> "$logdir"/Changelog_$cdate.log
