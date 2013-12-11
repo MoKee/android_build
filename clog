@@ -5,7 +5,7 @@ tdate=`date +"%m/%d/%Y"`
 cdate=`date +"%y%m%d"`
 rdir=`pwd`
 logdir=$MK_CHANGELOG_PATH
-if ["$MK_CHANGELOG_PATH" = ""]; then
+if ["$MK_CHANGELOG_PATH" == ""]; then
 logdir=`pwd`
 fi
 
