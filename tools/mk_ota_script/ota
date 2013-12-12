@@ -20,7 +20,7 @@ INPUT_PATH=$1
 OUTPUT_PATH=$2
 LOG_PATH=$3
 
-CHECK_OUTPUT_PATH=`dirname $OUTPUT_PATH`
+CHECK_OUTPUT_PATH=`dirname $(dirname $OUTPUT_PATH)`
 if [ ! -z $MK_OTA_EXTRA ];then
 	CHECK_OUTPUT_PATH=$MK_OTA_EXTRA
 fi
@@ -130,7 +130,7 @@ for i in $FILENAMES;do
 		OUT_ZIP=OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip
 		CUR_SHORT_VERSION=`echo $i | cut -d'-' -f1 | cut -d'.' -f1`
 		echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-		if [ -f $CHECK_OUTPUT_PATH/$LATEST_DEVICE/$OUT_ZIP ];then
+		if [ -f $CHECK_OUTPUT_PATH/$LATEST_TYPE/$LATEST_DEVICE/$OUT_ZIP ];then
 			echo "OTA package for $i already done! Skipping!"
 			echo "OTA package for $i already done! Skipping!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 			echo "------------------------------------" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
