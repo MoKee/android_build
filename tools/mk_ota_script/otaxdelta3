@@ -246,7 +246,7 @@ echo "package_extract_file(\"xdelta3\", \"/tmp/xdelta3\");" >> updater-script
 echo "set_perm(0, 0, 0777, \"/tmp/xdelta3\");" >> updater-script
 echo "package_extract_file(\"patcher\", \"/tmp/patcher\");" >> updater-script
 echo "set_perm(0, 0, 0777, \"/tmp/patcher\");" >> updater-script
-echo "run_program(\"mkdir\", \"/system/tmp\");" >> updater-script
+echo "run_program(\"/sbin/mkdir\", \"/system/tmp\");" >> updater-script
 echo "" >> updater-script
 # Apply patch
 echo "# ---- start making changes here ----" >> updater-script
