@@ -54,7 +54,7 @@ cd $line
     log=$(git log --pretty="%an - %s" --no-merges --since=$sdate --date-order)
     # Forgive my bad script :P
     project=${line#*/}
-    if [ ! -z "$log" ]; then
+    if [ ! -z "$log" ] && echo $project | grep -vq repo; then
         # Write the changelog
         echo " >>> Changelog is updated and written for $project ..."
         echo "Project: $project" >> "$logdir"/"$logfile"
