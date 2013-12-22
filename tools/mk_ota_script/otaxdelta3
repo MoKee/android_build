@@ -242,8 +242,6 @@ echo "" >> updater-script
 # Extracting tools
 echo "ui_print(\"Unpacking tools...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
-echo "package_extract_file(\"xdelta3\", \"/tmp/xdelta3\");" >> updater-script
-echo "set_perm(0, 0, 0777, \"/tmp/xdelta3\");" >> updater-script
 echo "package_extract_file(\"patcher\", \"/tmp/patcher\");" >> updater-script
 echo "set_perm(0, 0, 0777, \"/tmp/patcher\");" >> updater-script
 echo "run_program(\"/sbin/mkdir\", \"/system/tmp\");" >> updater-script
@@ -312,7 +310,6 @@ echo "ui_print(\"Cleaning up...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 echo "delete(\"/tmp/verifier\");" >> updater-script
 echo "delete(\"/tmp/patcher\");" >> updater-script
-echo "delete(\"/tmp/xdelta3\");" >> updater-script
 echo "delete_recursive(\"/system/tmp\");" >> updater-script
 for i in `cat oldscript | grep "unmount(" | sort`;do
 	if [ "$i" != "$j" ];then
@@ -327,18 +324,16 @@ sed -i 's/z2/system/g' updater-script
 mv updater-script out/META-INF/com/google/android/updater-script
 
 cd $ANDROID_BUILD_TOP
-BINARY1=$(realpath vendor/mk/prebuilt/ota/xdelta3)
-BINARY2=$(realpath vendor/mk/prebuilt/ota/patcher)
-BINARY3=$(realpath vendor/mk/prebuilt/ota/verifier)
+BINARY1=$(realpath vendor/mk/prebuilt/ota/patcher)
+BINARY2=$(realpath vendor/mk/prebuilt/ota/verifier)
 if [ $IS_MTD == 1 ];then
-	BINARY4=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
+	BINARY3=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
 fi
 cd $TMP/out
 cp $BINARY1 ./
 cp $BINARY2 ./
-cp $BINARY3 ./
-if [ ! -z "$BINARY4" ];then
-	cp $BINARY4 ./
+if [ ! -z "$BINARY3" ];then
+	cp $BINARY3 ./
 fi
 zip -r ../ota.zip .
 java -Xmx1024m -jar $ANDROID_BUILD_TOP/build/tools/mk_ota_script/sign_mokee_ota.jar -w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 ../ota.zip $OUT
