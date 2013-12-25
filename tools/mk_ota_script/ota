@@ -145,7 +145,7 @@ for i in $FILENAMES;do
 			if [ $? -eq 0 ];then
 				echo "Generating OTA package for $i..."
 				echo "Generating OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-				build/tools/mk_ota_script/otaxdelta3 $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$OUT_ZIP >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+				build/tools/mk_ota_script/otabsdiff $INPUT_PATH/$i $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$OUT_ZIP >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 				echo "Generating md5sum of OTA package for $i..."
 				echo "Generating md5sum of OTA package for $i..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 				md5sum $OUTPUT_PATH/$OUT_ZIP | cut -f1 -d' ' > $OUTPUT_PATH/md5/$OUT_ZIP.md5sum

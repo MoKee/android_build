@@ -16,8 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-if [ -z "`which xdelta3 2> /dev/null`" ];then
-        echo "xdelta3 is not installed!"
+if [ -z "`which bsdiff 2> /dev/null`" ];then
+        echo "bsdiff is not installed!"
         echo "Please install it first!"
         exit 1
 elif [ -z "$MK_OTA_INPUT" ];then
