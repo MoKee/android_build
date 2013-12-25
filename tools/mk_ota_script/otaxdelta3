@@ -96,7 +96,7 @@ if [ -f z2/system/bin/loadpreinstalls.sh ]; then
 
 	mkdirp out/$PRELOAD_HASH_DIR 2> /dev/null
 	for file in `ls out/$PRELOAD_APP_DIR`; do
-		[ -f out/$PRELOAD_APP_DIR/$file ] && md5sum out/$PRELOAD_APP_DIR/$file | cut -d" " -f1 > out/$PRELOAD_HASH_DIR/${file}.md5
+		[ -f out/$PRELOAD_APP_DIR/$file ] && md5sum out/$PRELOAD_APP_DIR/$file | cut -d' ' -f1 > out/$PRELOAD_HASH_DIR/${file}.md5
 	done
 fi
 
@@ -197,8 +197,8 @@ for f in $(find .);do
 
 	if [ -f $f ];then
 		if [ -f $EQUIV ];then
-			oldmd5=`md5sum ../z2/$f | cut -d ' ' -f1`
-			newmd5=`md5sum $f | cut -d ' ' -f1`
+			oldmd5=`md5sum $f | cut -d' ' -f1`
+			newmd5=`md5sum ../z2/$f | cut -d' ' -f1`
 			if [ "$newmd5" == "$oldmd5" ]; then
 				echo "skipping: $f"
 			else
