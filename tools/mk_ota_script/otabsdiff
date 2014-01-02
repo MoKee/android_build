@@ -28,7 +28,6 @@ fi
 
 IS_MTD=0
 SECURITYDIR=$ANDROID_BUILD_TOP/build/target/product/security
-EXCLUDE_CHECK=`cat $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check.mokee`
 
 realpath(){
 cd `dirname $1`
@@ -208,9 +207,13 @@ for f in $(find .);do
 				echo "bsdiff: $f"
 				mkdirp ../out/patch/$(dirname $f) 2> /dev/null
 				$BSDIFF $f $EQUIV ${OUTFILE}.p
-				filepath=`dirname $f | cut -d'.' -f2`
-				if ! echo $EXCLUDE_CHECK | grep -q `basename $f`;then
-					echo "apply_patch_check(\"$file\", \"$newsha1\", \"$oldsha1\") || abort(\"$file has unexpected contents.\");" >> ../checkpatch.txt
+				filename=`basename $f`
+				if ! echo $EXCLUDE_CHECK_MAIN | grep -q $filename;then
+					if ! echo $EXCLUDE_CHECK_DEVICE | grep -q $filename;then
+						if ! echo $EXCLUDE_CHECK_COMMON | grep -q $filename;then 
+							echo "apply_patch_check(\"$file\", \"$newsha1\", \"$oldsha1\") || abort(\"$file has unexpected contents.\");" >> ../checkpatch.txt
+						fi
+					fi
 				fi
 				echo "apply_patch(\"$file\", \"-\", $newsha1, $newsize, $oldsha1, package_extract_file(\"patch${file}.p\"));" >> ../applypatch.txt
 			fi
@@ -250,6 +253,7 @@ echo "" >> updater-script
 echo "ui_print(\"Checking system files...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 cat checkpatch.txt >> updater-script
+echo "" >> updater-script
 echo "ui_print(\"Patching system files...\");" >> updater-script
 echo "show_progress(0.200000,0);" >> updater-script
 cat applypatch.txt >> updater-script
