@@ -39,6 +39,8 @@ fi
 LOGDIR=$OUTPUT/logs
 LIMIT=`nproc`
 
+. $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check_main.mokee
+
 if [ ! -z "$2" ];then
 	TARGET=`echo $2 | tr "," " "`
 else
@@ -46,6 +48,16 @@ else
 fi
 
 for i in $TARGET;do
+	DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$i"`
+	if [ ! -z $DEVICE_TREE ];then
+		if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
+			. $DEVICE_TREE/exclude_check_device.mokee
+		else
+			unset EXCLUDE_CHECK_DEVICE
+			unset EXCLUDE_CHECK_COMMON
+		fi
+	fi
+
 	echo ""
 	echo "OTA: $i"
 	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
