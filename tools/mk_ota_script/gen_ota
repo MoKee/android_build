@@ -44,6 +44,18 @@ else
 	cp $OUT_DIR/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
 fi
 
+. $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check_main.mokee
+
+DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$MK_BUILD"`
+if [ ! -z $DEVICE_TREE ];then
+	if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
+		. $DEVICE_TREE/exclude_check_device.mokee
+	else
+		unset EXCLUDE_CHECK_DEVICE
+		unset EXCLUDE_CHECK_COMMON
+	fi
+fi
+
 echo ""
 echo "OTA: $MK_BUILD"
 build/tools/mk_ota_script/ota $INPUT $OUTPUT $LOGDIR
