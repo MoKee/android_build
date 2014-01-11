@@ -26,6 +26,33 @@ if [ -z "$BSDIFF" ];then
 	BSDIFF=bsdiff
 fi
 
+gen_diff(){
+if [ -f $1 ];then
+	if [ -f $EQUIV ];then
+		oldsha1=`sha1sum $1 | cut -d' ' -f1`
+		newsha1=`sha1sum ../z2/$1 | cut -d' ' -f1`
+		file=`dirname $1 | cut -d'.' -f2`/`basename $1`
+		newsize=`du $EQUIV | head -n 1 | cut -f1`
+		if [ "$newsha1" == "$oldsha1" ]; then
+			echo "skipping: $1"
+		else
+			echo "bsdiff: $1"
+			mkdirp ../out/patch/$(dirname $1) 2> /dev/null
+			$BSDIFF $1 $EQUIV ${OUTFILE}.p
+			filename=`basename $1`
+			if ! echo $EXCLUDE_CHECK_MAIN | grep -q $filename;then
+				if ! echo $EXCLUDE_CHECK_DEVICE | grep -q $filename;then
+					if ! echo $EXCLUDE_CHECK_COMMON | grep -q $filename;then 
+						echo "apply_patch_check(\"$file\", \"$newsha1\", \"$oldsha1\") || abort(\"$file has unexpected contents.\");" >> ../checkpatch.txt
+					fi
+				fi
+			fi
+			echo "apply_patch(\"$file\", \"-\", $newsha1, $newsize, $oldsha1, package_extract_file(\"patch${file}.p\"));" >> ../applypatch.txt
+		fi
+	fi
+fi
+}
+
 IS_MTD=0
 SECURITYDIR=$ANDROID_BUILD_TOP/build/target/product/security
 
@@ -195,31 +222,9 @@ for f in $(find .);do
 	EQUIV=../z2/$f
 	OUTFILE=../out/patch/$f
 
-	if [ -f $f ];then
-		if [ -f $EQUIV ];then
-			oldsha1=`sha1sum $f | cut -d' ' -f1`
-			newsha1=`sha1sum ../z2/$f | cut -d' ' -f1`
-			file=`dirname $f | cut -d'.' -f2`/`basename $f`
-			newsize=`du $EQUIV | head -n 1 | cut -f1`
-			if [ "$newsha1" == "$oldsha1" ]; then
-				echo "skipping: $f"
-			else
-				echo "bsdiff: $f"
-				mkdirp ../out/patch/$(dirname $f) 2> /dev/null
-				$BSDIFF $f $EQUIV ${OUTFILE}.p
-				filename=`basename $f`
-				if ! echo $EXCLUDE_CHECK_MAIN | grep -q $filename;then
-					if ! echo $EXCLUDE_CHECK_DEVICE | grep -q $filename;then
-						if ! echo $EXCLUDE_CHECK_COMMON | grep -q $filename;then 
-							echo "apply_patch_check(\"$file\", \"$newsha1\", \"$oldsha1\") || abort(\"$file has unexpected contents.\");" >> ../checkpatch.txt
-						fi
-					fi
-				fi
-				echo "apply_patch(\"$file\", \"-\", $newsha1, $newsize, $oldsha1, package_extract_file(\"patch${file}.p\"));" >> ../applypatch.txt
-			fi
-		fi
-	fi
+	gen_diff $f &
 done
+wait
 
 cd ..
 

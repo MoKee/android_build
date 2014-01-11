@@ -62,8 +62,8 @@ for i in $TARGET;do
 	echo "OTA: $i"
 	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
 	if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
-		wait
-	fi
+                wait
+        fi
 done
 wait
 rm -rf $OUTPUT/../tmp
