@@ -614,7 +614,8 @@ function lunch()
 
     if [ "$CCACHE_DIR" ]
     then
-        export CCACHE_DIR=$CCACHE_DIR/$product
+        TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
+        export CCACHE_DIR=$TMP_CCACHE_DIR/$product
     fi
 
     export TARGET_PRODUCT=$product
