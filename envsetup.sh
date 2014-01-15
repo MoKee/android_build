@@ -612,6 +612,11 @@ function lunch()
         return 1
     fi
 
+    if [ "$CCACHE_DIR" ]
+    then
+        export CCACHE_DIR=$CCACHE_DIR/$product
+    fi
+
     export TARGET_PRODUCT=$product
     export TARGET_BUILD_VARIANT=$variant
     export TARGET_BUILD_TYPE=release
