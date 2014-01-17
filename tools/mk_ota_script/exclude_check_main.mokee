@@ -28,4 +28,5 @@ libmsc-v7.so
 libsmartaiwrite-jni-v7.so
 libsmartaiwrite-jni-v8.so
 libsmartaiwrite-jni-v9.so
-libvadLib-v5.so"
+libvadLib-v5.so
+su"
