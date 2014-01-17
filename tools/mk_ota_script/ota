@@ -105,7 +105,7 @@ fi
 
 start_job(){
 CUR_TIMESTAMP=`get_timestamp $1`
-if [ "$1" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$i ] && [[ "$1" == *".zip" ]];then
+if [ "$1" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$1 ] && [[ "$1" == *".zip" ]];then
 	OUT_ZIP=OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip
 	CUR_SHORT_VERSION=`echo $1 | cut -d'-' -f1 | cut -d'.' -f1`
 	echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
@@ -152,7 +152,16 @@ mkdir -p $LOG_PATH
 if [ ! -z "$LATEST_ZIP" ];then
 	echo "Latest zip is $LATEST_ZIP"
 	echo "Latest zip is $LATEST_ZIP" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
-	echo "Generating OTA packages..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	echo "Checking $LATEST_ZIP..."
+	echo "Checking $LATEST_ZIP..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	unzip -tqq $INPUT_PATH/$LATEST_ZIP > /dev/null 2>&1
+	if [ $? -eq 0 ];then
+		echo "Generating OTA packages..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	else
+		echo "$LATEST_ZIP is corrupted!"
+		echo "LATEST_ZIP is corrupted!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		exit 1
+	fi
 else
 	echo "Error! Check file names or input parameters!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
 	exit 1
@@ -163,5 +172,5 @@ for i in $FILENAMES;do
 	start_job $i &
 done
 wait
-echo "Completed at `date`"
-echo "Completed at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+echo "$LATEST_DEVICE completed at `date`"
+echo "$LATEST_DEVICE completed at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
