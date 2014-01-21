@@ -247,9 +247,7 @@ IFS=$OLD_IFS
 echo "" >> updater-script
 # Verifying system
 echo "ui_print(\"Verifying product version...\");" >> updater-script
-echo "package_extract_file(\"verifier\", \"/tmp/verifier\");" >> updater-script
-echo "set_perm(0, 0, 0777, \"/tmp/verifier\");" >> updater-script
-echo "ifelse(run_program(\"/tmp/verifier\", \"$OLDVERSION\") == 0, ui_print(\"Versions match...\"), (unmount(\"/system\");abort(\"Versions mismatch...\")));" >> updater-script
+echo "ifelse(run_program(\"/system/bin/verifier\", \"$OLDVERSION\") == 0, ui_print(\"Versions match...\"), (unmount(\"/system\");abort(\"Versions mismatch...\")));" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
 echo "" >> updater-script
 # Apply patch
@@ -274,7 +272,7 @@ echo "delete_recursive(\"/system/etc/init.d\");" >> updater-script
 echo "" >> updater-script
 # New files
 echo "ui_print(\"Unpacking new files...\");" >> updater-script
-echo "show_progress(0.600000,0);" >> updater-script
+echo "show_progress(0.300000,0);" >> updater-script
 for dir in $(find z2 -maxdepth 1 -mindepth 1 -type d | awk -F'/' '{print $NF}'); do
     echo "package_extract_dir(\"$dir\", \"/$dir\");" >> updater-script
 done
@@ -333,14 +331,12 @@ sed -i 's/z2/system/g' updater-script
 mv updater-script out/META-INF/com/google/android/updater-script
 
 cd $ANDROID_BUILD_TOP
-BINARY1=$(realpath vendor/mk/prebuilt/ota/verifier)
 if [ $IS_MTD == 1 ];then
-	BINARY2=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
+	BINARY1=$(realpath vendor/mk/prebuilt/ota/mtd_updater.sh)
 fi
 cd $TMP/out
-cp $BINARY1 ./
-if [ ! -z "$BINARY2" ];then
-	cp $BINARY2 ./
+if [ ! -z "$BINARY1" ];then
+	cp $BINARY1 ./
 fi
 zip -r ../ota.zip .
 java -Xmx1024m -jar $ANDROID_BUILD_TOP/build/tools/mk_ota_script/sign_mokee_ota.jar -w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 ../ota.zip $OUT
