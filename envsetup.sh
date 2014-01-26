@@ -616,7 +616,11 @@ function lunch()
     then
         TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
         export CCACHE_DIR=$TMP_CCACHE_DIR/$product
-        prebuilts/misc/linux-x86/ccache/ccache -M 8G
+        if [ "$(uname)" = "Darwin" ] ; then
+            prebuilts/misc/darwin-x86/ccache/ccache -M 8G
+        else
+            prebuilts/misc/linux-x86/ccache/ccache -M 8G
+        fi
     fi
 
     export TARGET_PRODUCT=$product
