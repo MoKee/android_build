@@ -1,0 +1,444 @@
+#!/bin/bash
+
+
+# BuildBot script for MoKee Unofficial Developer builds
+
+# Your build source code directory path. In the example below the build source code directory path is in the "home" folder. If your source code directory is on an external HDD it should look like: //media/your PC username/the name of your storage device/path/to/your/source/code/folder
+
+read -e -p "Enter the path to your build source Directory: " -i "~/mkkk" SAUCE
+echo ""
+eval SAUCE=$SAUCE
+if [ ! -d "$SAUCE" ]; then
+		echo "BOT Could Not Find That Folder, Please Try Again..."
+		read -e -p "Enter the path to your build source Directory: " -i "~/mkkk" SAUCE
+		echo ""
+		eval SAUCE=$SAUCE
+			if [ ! -d "$SAUCE" ]; then
+				echo "MASSIVE FAIL!!!!"
+				echo "Sorry That Directory Doesnt Exist..."
+				echo "Please Check Your Directory Structure and try Running the BOT again..."
+			exit
+			fi
+fi
+if [ -d "$SAUCE" ]; then
+	eval SAUCE=$SAUCE
+	cd $SAUCE
+fi
+
+# Add devices for build
+
+echo ""
+read -r -p "what device would you like to build?" response
+eval LUNCHCMD[0]=$response
+echo ""
+echo "Ok building "${LUNCHCMD[0]}""
+echo ""
+read -r -p "Would You like to build another device?" response
+echo ""
+if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+read -r -p "What device would you like to build?" response
+echo "Ok building $response"
+LUNCHCMD[1]=$response
+echo ""
+read -r -p "Would You like to build another device?" response
+echo ""
+	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+	read -r -p "What device would you like to build?" response
+	echo "Ok building $response"
+	echo ""
+	LUNCHCMD[2]=$response
+	read -r -p "Would You like to build another device?" response
+	echo ""
+		if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+		read -r -p "What device would you like to build?" response
+		echo "Ok building $response"
+		echo ""
+		LUNCHCMD[3]=$response
+		read -r -p "Would You like to build another device?" response
+		echo ""
+			if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+			read -r -p "What device would you like to build?" response
+			echo "Ok building $response"
+			echo ""
+			LUNCHCMD[4]=$response
+			read -r -p "Would You like to build another device?" response
+			echo ""
+				if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+				read -r -p "What device would you like to build?" response
+				echo "Ok building $response"
+				echo ""
+				LUNCHCMD[5]=$response
+				read -r -p "Would You like to build another device?" response
+				echo ""
+					if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+					read -r -p "What device would you like to build?" response
+					echo "Ok building $response"
+					echo ""
+					LUNCHCMD[6]=$response
+					read -r -p "Would You like to build another device?" response
+					echo ""
+						if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+						read -r -p "What device would you like to build?" response
+						echo "Ok building $response"
+						echo ""
+						LUNCHCMD[7]=$response
+						read -r -p "Would You like to build another device?" response
+						echo ""
+							if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+							read -r -p "What device would you like to build?" response
+							echo "Ok building $response"
+							echo ""
+							LUNCHCMD[8]=$response
+							read -r -p "Would You like to build another device?" response
+							echo ""
+								if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+								read -r -p "What device would you like to build?" response
+								echo "Ok building $response"
+								echo ""
+								LUNCHCMD[9]=$response
+									echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}", "${LUNCHCMD[5]}", "${LUNCHCMD[6]}", "${LUNCHCMD[7}", "${LUNCHCMD[8]}", "${LUNCHCMD[9]}" moving on.."
+								elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+								echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}", "${LUNCHCMD[5]}", "${LUNCHCMD[6]}", "${LUNCHCMD[7}", "${LUNCHCMD[8]}" moving on.."
+								else
+								echo "Please Press y or n"
+								fi
+							elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+							echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}", "${LUNCHCMD[5]}", "${LUNCHCMD[6]}", "${LUNCHCMD[7}" moving on.."
+							else
+							echo "Please Press y or n"
+							fi
+						elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+						echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}", "${LUNCHCMD[5]}", "${LUNCHCMD[6]}" moving on.."
+						else
+						echo "Please Press y or n"
+						fi
+					elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+					echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}", "${LUNCHCMD[5]}" moving on.."
+					else
+					echo "Please Press y or n"
+					fi
+				elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+				echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}","${LUNCHCMD[4]}" moving on.."
+				else
+				echo "Please Press y or n"
+				fi
+			elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+			echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" "${LUNCHCMD[3]}" moving on.."
+			else
+			echo "Please Press y or n"
+			fi
+		elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+		echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}", "${LUNCHCMD[2]}" moving on.."
+		else
+		echo "Please Press y or n"
+		fi
+	elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+	echo "OK, building "${LUNCHCMD[0]}", "${LUNCHCMD[1]}" moving on.."
+	else
+	echo "Please Press y or n"
+	fi
+elif [[ $response =~ ^([Nn]|[nN])$ ]]; then
+echo "OK, building "${LUNCHCMD[0]}" moving on.."
+else
+echo "Please Press y or n"
+fi
+
+
+
+# Should the finished ROMS be moved out of the output folder?
+# For instance External storage, dropbox, or other cloud storage folder?
+
+echo ""
+read -r -p "Should the finished ROMS be moved to a storage folder? [y or n]" response
+case "$response" in
+y|Y) echo "ok"
+MOVE=y;;
+n|N) echo "ok, not moving"
+MOVE=n;;
+*) echo "Please Press y or n";;
+esac
+
+# Please fill in below the folder they should be moved to.
+
+	if [ $MOVE = "y" ]; then
+		read -e -p "Enter the path to your storage Directory: " -i "//media/daavvis/storage/1foronlyme/4.4.2" STORAGE
+		eval STORAGE=$STORAGE
+	fi
+
+# Sync repositories before build
+
+echo ""
+read -r -p "Should we sync repositories before build?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	SYNC=y;;
+ n|N) echo "ok, not syncing"
+	SYNC=n;;
+ *) echo "Please Press y or n";;
+esac
+	if [ $SYNC = "y" ]; then
+	
+# Number for the -j parameter
+
+read -e -p "Enter J Parameter (1 for slow internet 16 for fast): " -i "16" J
+eval J=$J
+	fi
+	
+# Do you Want to use ccache?
+
+echo ""
+read -r -p "Do you Want to use ccache?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	CCACHE=y;;
+ n|N) echo "ok, not using ccache"
+	CCACHE=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# REMOVE BUILD PROP (recomended for every build, otherwise the date of the build may not be changed, as well as other variables)
+
+echo ""
+read -r -p "Do you Want to remove the build prop before the build (recomended)?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	BP=y;;
+ n|N) echo "ok, not deleting build.prop"
+	BP=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# run mka installclean first (quick clean build)
+
+echo ""
+read -r -p "Do you Want to run mka installclean first (quick clean build)?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	QCLEAN=y;;
+ n|N) echo "ok, not running mka installclean"
+	QCLEAN=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# Run make clean first (Slow clean build. Will delete entire contents of out folder...)
+
+echo ""
+read -r -p "Do you Want to Run make clean first (Slow clean build. Will delete entire contents of out folder...)[y or n]?" response
+case "$response" in
+ y|Y) echo "ok"
+	CLEAN=y;;
+ n|N) echo "ok, not running make clean"
+	CLEAN=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# Do you want to make an ota Package?
+
+echo ""
+read -r -p "Do you want to make an ota Package?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	OTA=y;;
+ n|N) echo "ok, not making an OTA Package"
+	OTA=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# leave alone
+
+ROFOLDER=$SAUCE/out/target/product/${LUNCHCMD[$VAL]}
+OTFOLDER=$SAUCE/mokee/OTA/UNOFFICIAL/${LUNCHCMD[$VAL]}
+OTMDFOLDER=$SAUCE/mokee/OTA/UNOFFICIAL/${LUNCHCMD[$VAL]}/md5
+ROFTP="FULL"/"UNOFFICIAL"/${LUNCHCMD[$VAL]}/
+ROFTPMD5="FULL"/"UNOFFICIAL"/${LUNCHCMD[$VAL]}/md5/
+OTAFTP="OTA"/"UNOFFICIAL"/${LUNCHCMD[$VAL]}/
+OTAMD5="OTA"/"UNOFFICIAL"/${LUNCHCMD[$VAL]}/md5/
+OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/${LUNCHCMD[$VAL]}
+DATE=`eval date +%y``eval date +%m``eval date +%d`
+TIMEST=$(date +%Y_%m_%d)
+#----------------------FTP Settings--------------------#
+# Set "FTP=y" if you want to enable FTP uploading
+
+echo ""
+read -r -p "Do you want to enable FTP uploading?[y or n]" response
+case "$response" in
+ y|Y) echo "ok"
+	FTP=y;;
+ n|N) echo "ok, not uploading to mokeedev.com"
+	FTP=n;;
+ *) echo "Please Press y or n";;
+esac
+
+# FTP server settings...
+
+	if [ $FTP = "y" ]; then
+	
+# ftp username
+
+read -e -p "What is your mokeedev.com username?" FTPUSER
+eval FTPUSER=$FTPUSER
+
+# ftp password
+
+read -s -p "Enter Password: " FTPPASS
+eval FTPPASS=$FTPPASS
+	fi
+	
+# ftp hostname (should not change)
+
+FTPHOST=mokeedev.com
+
+#---------------------Build Bot Code-------------------#
+# Very much not a good idea to change this unless you know what you are doing....
+# get time of startup
+
+res1=$(date +%s.%N)
+
+echo ""
+echo "Moving to source directory..."
+cd $SAUCE
+echo ""
+echo "done!"
+echo ""
+
+
+
+		if [ $SYNC = "y" ]; then
+			echo "Running repo sync..."
+			echo ""
+			repo sync -j$J
+			echo ""
+			echo "done!"
+			echo ""
+		fi
+
+		if [ $CLEAN = "y" ]; then
+			echo "Running make clean..."
+			echo ""
+			make clean
+			echo ""
+			echo "done!"
+		fi
+
+		if [ $CCACHE = "y" ]; then
+			echo ""
+			echo "using CCACHE..."
+			export USE_CCACHE=1
+			export CCACHE_DIR=~/.ccache
+		fi
+
+
+
+for VAL in "${!LUNCHCMD[@]}"
+do
+
+echo ""
+echo "Starting build..."
+. build/envsetup.sh
+croot
+lunch mk_${LUNCHCMD[$VAL]}-userdebug
+
+
+
+		if [ $BP = "y" ]; then
+		echo ""
+		echo "Removing build.prop..."
+		echo ""
+		rm $SAUCE/out/target/product/${LUNCHCMD[$VAL]}/system/build.prop
+		echo ""
+		echo "done!"
+		fi
+
+		
+		
+		if [ $QCLEAN = "y" ]; then
+		echo ""
+		echo "Running make install clean..."
+		echo ""
+		mka installclean
+		echo ""
+		echo "done!"
+		fi
+
+# start compilation
+
+mka bacon
+echo ""
+echo "done!"
+
+ROM=`ls -t $ROFOLDER/*".zip" | head -1`
+	
+		if  [ $OTA = "y" ]; then
+			echo ""
+			echo "Copying ROM to OTA build Dir..."
+			mkdir -p $OTABDIR
+			cp $ROM $OTABDIR/
+			echo ""
+			echo "Done."
+			echo ""
+			echo "Creating OTA.zip"
+			echo ""
+				. build/envsetup.sh
+				export MK_OTA_INPUT=$SAUCE/mokee/FULL
+				export MK_OTA_EXTRA=$SAUCE/mokee/OTA
+					ota_all UNOFFICIAL ${LUNCHCMD[$VAL]}
+			echo ""
+			echo "Done."
+			echo ""
+			echo "cleaning up for next time"
+			echo ""
+				OLDROM=`ls -tr $OTABDIR/*".zip" | head -n 1`
+    				rm -rf $OLDROM
+			echo ""
+    		echo "Removed oldest Rom, Ready For Next Build..."
+			echo ""
+			echo "Done."
+		fi
+ROMMD=`ls -t $ROFOLDER/*".md5sum" | head -1`
+OTAN=`ls -t $OTFOLDER/*".zip" | head -1`
+OTAMD=`ls -t $OTMDFOLDER/*".md5sum" | head -1`
+
+#------------------------------------------------------------FTP UPLOAD START----------------
+
+if  [ $FTP = "y" ]; then
+
+	echo ""
+	echo "Uploading ROM, MD5SUM, and if you made an OTA package Them as well..."
+	echo ""	
+		curl -v -T $ROM ftp://$FTPUSER:$FTPPASS@$FTPHOST/$ROFTP
+		curl -v -T $ROMMD ftp://$FTPUSER:$FTPPASS@$FTPHOST/$ROFTPMD5
+			if [ $OTA = "y" ]; then
+				curl -v -T $OTAN ftp://$FTPUSER:$FTPPASS@$FTPHOST/$OTAFTP
+				curl -v -T $OTAMD ftp://$FTPUSER:$FTPPASS@$FTPHOST/$OTAMD5
+			fi
+	echo "Done."
+fi
+
+#------------------------------------------------------------FTP UPLOAD END----------------
+
+	if [ $MOVE = "y" ]; then
+		echo ""
+		echo "Moving Things to Storage Directorys..."
+			mkdir -p $STORAGE/${LUNCHCMD[$VAL]}/ && mkdir -p $STORAGE/${LUNCHCMD[$VAL]}/"md5" && mv $ROM $STORAGE/${LUNCHCMD[$VAL]}/ && mv $ROMMD $STORAGE/${LUNCHCMD[$VAL]}/"md5"/
+				if [ $OTA = "y" ]; then
+				mkdir -p $STORAGE/${LUNCHCMD[$VAL]}/"OTA" && mkdir -p $STORAGE/${LUNCHCMD[$VAL]}/"OTA"/"md5" && mv $OTAN $STORAGE/${LUNCHCMD[$VAL]}/"OTA"/ && mv $OTAMD $STORAGE/${LUNCHCMD[$VAL]}/"OTA"/"md5"/
+				echo "Done."
+			fi
+		echo "Cleaning up..."
+			rm -rf "out"/"target"/"OTA" && rm -rf $ROM
+		echo ""
+	fi
+		echo "Done."
+		echo ""
+
+cd $SAUCE
+	echo "ALL DONE..."
+	echo ""
+	echo ""
+	echo ""
+	
+# finished? get elapsed time
+
+res2=$(date +%s.%N)
+echo "${bldgrn}Total time elapsed: ${txtrst}${grn}$(echo "($res2 - $res1) / 60"|bc ) minutes ($(echo "$res2 - $res1"|bc ) seconds) ${txtrst}"
+done
