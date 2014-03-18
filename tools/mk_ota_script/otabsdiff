@@ -176,7 +176,7 @@ if [ -d z1/system/etc/init.d ];then
 fi
 
 # Generate file list to be removed
-for file in $(find z1 -type f -print);do
+for file in $(find z1 -mindepth 2 -type f -print);do
 	newfile=$(echo $file | sed 's/z1/z2/1')
 	rfile=$(echo $newfile | sed 's/z2\///1')
 	sfile=$(echo $file | sed 's/z1/system/1')
@@ -186,7 +186,7 @@ for file in $(find z1 -type f -print);do
 done
 
 # Process extra or important files
-for file in $(find z2 -type f -print); do
+for file in $(find z2 -mindepth 2 -type f -print); do
     oldfile=$(echo $file | sed 's/z2/z1/1')
     sfile=$(echo $file | sed 's/z2\///1')
     if [ ! -f $oldfile ] && [ -f $file ]; then
@@ -216,7 +216,7 @@ fi
 
 # Create patch
 cd z1
-for f in $(find .);do
+for f in $(find . -mindepth 2);do
 	EQUIV=../z2/$f
 	OUTFILE=../out/patch/$f
 
