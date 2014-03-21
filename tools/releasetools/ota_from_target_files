@@ -345,6 +345,42 @@ def CopySystemFiles(input_zip, output_zip=None,
   symlinks.sort()
   return symlinks
 
+def CopyDataFiles(input_zip, output_zip=None,
+                    substitute=None):
+  """Copies files underneath data/ in the input zip to the output
+  zip. Populates the Item class with their metadata, and returns a
+  list of symlinks. output_zip may be None, in which case the copy is
+  skipped (but the other side effects still happen). substitute is an
+  optional dict of {output filename: contents} to be output instead of
+  certain input files.
+  """
+
+  symlinks = []
+
+  for info in input_zip.infolist():
+    if info.filename.startswith("DATA/"):
+      basefilename = info.filename[5:]
+      if IsSymlink(info):
+        symlinks.append((input_zip.read(info.filename),
+                         "/data/" + basefilename))
+      else:
+        info2 = copy.copy(info)
+        fn = info2.filename = "data/" + basefilename
+        if substitute and fn in substitute and substitute[fn] is None:
+          continue
+        if output_zip is not None:
+          if substitute and fn in substitute:
+            data = substitute[fn]
+          else:
+            data = input_zip.read(info.filename)
+          output_zip.writestr(info2, data)
+        if fn.endswith("/"):
+          Item.Get(fn[:-1], dir=True)
+        else:
+          Item.Get(fn, dir=False)
+
+  symlinks.sort()
+  return symlinks
 
 def SignOutput(temp_zip_name, output_zip_name):
   key_passwords = common.GetKeyPasswords([OPTIONS.package_key])
@@ -471,10 +507,13 @@ def WriteFullOTAPackage(input_zip, output_zip):
 
   script.FormatPartition("/system")
   script.Mount("/system")
+  script.Mount("/data")
   #script.UnpackPackageDir("recovery", "/system")
   script.UnpackPackageDir("system", "/system")
+  script.UnpackPackageDir("data", "/data")
 
   symlinks = CopySystemFiles(input_zip, output_zip)
+  symlinks += CopyDataFiles(input_zip, output_zip)
   script.MakeSymlinks(symlinks)
 
   boot_img = common.GetBootableImage("boot.img", "boot.img",
