@@ -169,8 +169,14 @@ fi
 
 mkdir -p $OUTPUT_PATH/md5
 for i in $FILENAMES;do
-	start_job $i &
+	if [ -z $MK_OTA_LOW_SPEC ];then
+		start_job $i &
+	else
+		start_job $i
+	fi
 done
-wait
+if [ -z $MK_OTA_LOW_SPEC ];then
+	wait
+fi
 echo "$LATEST_DEVICE completed at `date`"
 echo "$LATEST_DEVICE completed at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
