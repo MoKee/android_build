@@ -16,9 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-MK_BUILDTYPE=`cd $ANDROID_BUILD_TOP;CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
-make --no-print-directory -C "$ANDROID_BUILD_TOP" -f build/core/config.mk dumpvar-MK_BUILDTYPE`
-
 if [ -z "`which bsdiff 2> /dev/null`" ];then
         echo "bsdiff is not installed!"
         echo "Please install it first!"
@@ -26,41 +23,53 @@ if [ -z "`which bsdiff 2> /dev/null`" ];then
 elif [ -z "$MK_OTA_INPUT" ];then
 	echo "MK_OTA_INPUT not defined!"
 	exit 1
+elif [ "$1" != "RELEASE" ] && [ "$1" != "NIGHTLY" ] && [ "$1" != "EXPERIMENTAL" ] && [ "$1" != "UNOFFICIAL" ];then
+	echo "No/wrong argument given! [RELEASE/NIGHTLY/EXPERIMENTAL/UNOFFICIAL]"
+	exit 1
 else
-	INPUT=$MK_OTA_INPUT/$MK_BUILDTYPE/$MK_BUILD
+	TYPE=$1
+	INPUT=$MK_OTA_INPUT/$TYPE
 fi
 
 if [ -z "$OUT_DIR" ];then
-	OUTPUT=out/target/OTA/$MK_BUILDTYPE/$MK_BUILD
-	LOGDIR=out/target/OTA/$MK_BUILDTYPE/logs/$MK_BUILD
+	OUTPUT=out/target/OTA/$TYPE
 else
-	OUTPUT=$OUT_DIR/target/OTA/$MK_BUILDTYPE/$MK_BUILD
-	LOGDIR=$OUT_DIR/target/OTA/$MK_BUILDTYPE/logs/$MK_BUILD
+	OUTPUT=$OUT_DIR/target/OTA/$TYPE
 fi
-
-if [ -z "$OUT_DIR" ];then
-	cp out/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
-else
-	cp $OUT_DIR/target/product/$MK_BUILD/MK*${MK_BUILDTYPE}.zip $INPUT 2> /dev/null
-fi
+LOGDIR=$OUTPUT/logs
+LIMIT=`nproc`
 
 . $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check_main.mokee
 
-DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$MK_BUILD"`
-if [ ! -z $DEVICE_TREE ];then
-	if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
-		. $DEVICE_TREE/exclude_check_device.mokee
-	else
-		unset EXCLUDE_CHECK_DEVICE
-		unset EXCLUDE_CHECK_COMMON
-	fi
+if [ ! -z "$2" ];then
+	TARGET=`echo $2 | tr "," " "`
+else
+	TARGET=`ls $INPUT`
 fi
 
-echo ""
-echo "OTA: $MK_BUILD"
-build/tools/mk_ota_script/ota $INPUT $OUTPUT $LOGDIR
+for i in $TARGET;do
+	export DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$i"`
+	if [ ! -z $DEVICE_TREE ];then
+		if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
+			. $DEVICE_TREE/exclude_check_device.mokee
+		else
+			unset EXCLUDE_CHECK_DEVICE
+			unset EXCLUDE_CHECK_COMMON
+		fi
+	fi
+
+	echo ""
+	echo "OTA: $i"
+	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
+	if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+		wait
+	fi
+done
+wait
 rm -rf $OUTPUT/../tmp
 if [ ! -z "$MK_OTA_EXTRA" ];then
-	mkdir -p $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD
-	cp -r $OUTPUT/* $MK_OTA_EXTRA/$MK_BUILDTYPE/$MK_BUILD 2> /dev/null
+	for i in $TARGET;do
+		mkdir -p $MK_OTA_EXTRA/$TYPE/$i
+		cp -r $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null
+	done
 fi
