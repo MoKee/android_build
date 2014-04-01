@@ -31,8 +31,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
 - clog:     Tool to generate changelog.
-- ota:      Generate OTA packages using the MoKee OTA system.
-- ota_all:  Batch generate OTA packages using the MoKee OTA system.
+- ota_all:  Generate OTA packages using the MoKee OTA system.
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -2165,13 +2164,8 @@ function clog() {
 }
 
 # OTA Script
-function ota() {
-    ./build/tools/mk_ota_script/gen_ota
-}
-
-# Batch OTA Script
 function ota_all() {
-    ./build/tools/mk_ota_script/gen_ota_all $1 $2
+    ./build/tools/mk_ota_script/gen_ota $1 $2
 }
 
 # Add completions
