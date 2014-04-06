@@ -37,7 +37,7 @@ else
 	OUTPUT=$OUT_DIR/target/OTA/$TYPE
 fi
 LOGDIR=$OUTPUT/logs
-LIMIT=`nproc`
+export LIMIT=`nproc`
 
 . $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check_main.mokee
 
@@ -49,7 +49,7 @@ fi
 
 for i in $TARGET;do
 	export DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$i"`
-	if [ ! -z $DEVICE_TREE ];then
+	if [ ! -z "$DEVICE_TREE" ];then
 		if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
 			. $DEVICE_TREE/exclude_check_device.mokee
 		else
@@ -60,12 +60,18 @@ for i in $TARGET;do
 
 	echo ""
 	echo "OTA: $i"
-	build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
-	if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
-		wait
+	if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+		build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
+		if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+			wait
+		fi
+	else
+		build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i
 	fi
 done
-wait
+if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+	wait
+fi
 rm -rf $OUTPUT/../tmp
 if [ ! -z "$MK_OTA_EXTRA" ];then
 	for i in $TARGET;do

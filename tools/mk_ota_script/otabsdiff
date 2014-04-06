@@ -164,7 +164,7 @@ if [ -d z1/system/etc/init.d ];then
 fi
 
 # Device specific pre-processing
-if [ ! -z $DEVICE_TREE ];then
+if [ ! -z "$DEVICE_TREE" ];then
 	if [ -f $DEVICE_TREE/ota_preprocess.mokee ];then
 		. $DEVICE_TREE/ota_preprocess.mokee
 	fi
@@ -199,6 +199,11 @@ for f in $(find . -mindepth 2);do
 
 	if [ -f $f ];then
 		gen_diff $f &
+		if [ ! -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+			if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+				wait
+			fi
+		fi
 	fi
 done
 wait
@@ -281,7 +286,7 @@ cat oldscript | grep "write_raw_image(" >> updater-script
 cat oldscript | grep "delete(\"/tmp/boot.img\")"  >> updater-script
 echo "" >> updater-script
 # Device specific post-processing
-if [ ! -z $DEVICE_TREE ];then
+if [ ! -z "$DEVICE_TREE" ];then
 	if [ -f $DEVICE_TREE/ota_postprocess.mokee ];then
 		. $DEVICE_TREE/ota_postprocess.mokee
 		echo "" >> updater-script
@@ -290,7 +295,6 @@ fi
 # Clean up
 echo "ui_print(\"Cleaning up...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
-echo "delete(\"/tmp/verifier\");" >> updater-script
 for i in `cat oldscript | grep "unmount(" | sort`;do
 	if [ "$i" != "$j" ];then
 		j=$i
