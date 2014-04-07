@@ -21,8 +21,8 @@
 clear
 
 # Defaults
-SAUCE=
-MOVE=y
+SAUCE="$PWD"
+MOVE=n
 STORAGE=
 SYNC=n
 J=8
@@ -202,10 +202,6 @@ fi
 
 if [[ $GO != y ]]; then
 
-  until eval SAUCE=$(demand "${bldblu}Enter the path to your build source directory:" $SAUCE) && [[ -d $SAUCE/android ]]; do
-    err "$SAUCE doesn't exist"
-  done
-
   declare -i i=${#DEVICES[*]}
   if ((i == 0)); then
     DEVICES[$((i++))]=$(demand "What device would you like to build?")
@@ -223,6 +219,13 @@ if [[ $GO != y ]]; then
   echo "Final device list: ${DEVICES[*]}"
   echo ""
 
+if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
+echo ""
+err "ADVANCED SETTINGS ENABLED"
+echo ""
+  until eval SAUCE=$(demand "${bldblu}Enter the path to your build source directory:" $SAUCE) && [[ -d $SAUCE/android ]]; do
+  err "$SAUCE doesn't exist"
+  done
   while :; do
     if MOVE=$(askyn "Should the finished ROMS be moved to a storage folder" $MOVE); then
       eval STORAGE=$(ask "Enter the path to your storage directory [blank cancels]:" $STORAGE)
@@ -322,14 +325,18 @@ if [[ $GO != y ]]; then
     err "Storage directory '"$STORAGE"' doesn't exist"
     exit 2
   fi
-
+else
+echo ""
+   err "OK, Sticking with the default build settings..."
+echo ""
+fi
 fi
 
 echo ""
 cat <<!EOD
 DEVICES=${DEVICES[@]}
-OTA=${OTABO[@]}
-FTP=${FTPUL[@]}
+DEVICES FOR OTA BUILD=${OTABO[@]}
+DEVICES FOR FTP UPLOAD=${FTPUL[@]}
 SYNC=$SYNC
 CCACHE=$CCACHE
 BP=$BP
