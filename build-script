@@ -22,10 +22,11 @@ clear
 
 # Defaults
 SAUCE="$PWD"
+ADVNC=n
 MOVE=n
 STORAGE=
 SYNC=n
-J=8
+J=4
 BP=y
 CCACHE=y
 QCLEAN=n
@@ -37,6 +38,7 @@ FTPUSER=
 FTPPASS=
 FTPFULL=FULL/UNOFFICIAL
 FTPOTA=OTA/UNOFFICIAL
+JB=n
 
 readonly red=$(tput setaf 1) #  red
 readonly grn=$(tput setaf 2) #  green
@@ -255,6 +257,10 @@ echo ""
   BP=$(askyn "Do you want to remove build.prop before the build (recomended)" $BP)
   QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
   CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
+  if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
+		CORE=$(ask "How many cores does your processor have?" $CORE)
+		JBN=$(($CORE + 1))
+  fi
   if OTA=$(askyn "Do you want to make an ota package for chosen devices?" $OTA); then
   declare -i i=${#OTABO[*]}
      for DEVICE in ${DEVICES[@]}; do
@@ -337,14 +343,34 @@ cat <<!EOD
 DEVICES=${DEVICES[@]}
 DEVICES FOR OTA BUILD=${OTABO[@]}
 DEVICES FOR FTP UPLOAD=${FTPUL[@]}
-SYNC=$SYNC
-CCACHE=$CCACHE
-BP=$BP
+REPO SYNC BEFORE BUILD=$SYNC
+!EOD
+if [ "$SYNC" = y ]; then
+cat <<!EOD
+THREADS USED FOR REPO SYNC=$J
+!EOD
+fi
+cat <<!EOD
+USE CCACHE=$CCACHE
+REMOVE BUILD.PROP BEFORE EACH BUILD=$BP
 QUICK CLEAN BUILD=$QCLEAN
 CLEAN BUILD=$CLEAN
 MOVE TO STORAGE=$MOVE
-STORAGE=$STORAGE
 !EOD
+if [ "$MOVE" = y ]; then
+cat <<!EOD
+STORAGE DIRECTORY=$STORAGE
+!EOD
+fi
+cat <<!EOD
+CUSTOM SCHED_BATCH SETTING=$JB
+!EOD
+if [ "$JB" = y ]; then
+cat <<!EOD
+CUSTOM SCHED_BATCH LEVEL=$JBN
+!EOD
+fi
+
 echo ""
 
 if [[ "${#DEVICES[@]}" = 0 ]]; then
@@ -393,8 +419,13 @@ cd "$SAUCE"
      mka installclean
   fi
 
-  info "Running mka bacon..."
-    mka -j3 bacon
+  info "Cooking the bacon..."
+  if [ "$JB" = y ]; then
+	make bacon -j"$JBN"
+  else
+	mka bacon
+  fi
+
   echo ""
 
   DET=$(date +%s)
@@ -496,4 +527,5 @@ fi
 echo ""
 TET=$(date +%s)
 info "All done in $(((TET-TST)/60)) minutes $(((TET-TST)%60)) seconds"
+"$txtrst"
 echo ""
