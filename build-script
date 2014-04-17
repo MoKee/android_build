@@ -527,5 +527,5 @@ fi
 echo ""
 TET=$(date +%s)
 info "All done in $(((TET-TST)/60)) minutes $(((TET-TST)%60)) seconds"
-"$txtrst"
+echo "$txtrst"
 echo ""
