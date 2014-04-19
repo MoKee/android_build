@@ -501,9 +501,9 @@ if [ "$MOVE" = y ]; then
     OTAN=$(ls -t "$OTAFOLDER"/*"$OTAO"*"UNOFFICIAL"*".zip" | head -1)
     OTAMD=$(dirname "$OTAN")/md5/$(basename "$OTAN").md5sum
 	if [ -e "$OTAN" ]; then
-         mkdir -p "$STORAGE"/"$DEVICE"/OTA/md5
-         mv "$OTAN" "$STORAGE"/"$DEVICE"/OTA
-         mv "$OTAMD" "$STORAGE"/"$DEVICE"/OTA/md5
+         mkdir -p "$STORAGE"/"$OTAO"/OTA/md5
+         mv "$OTAN" "$STORAGE"/"$OTAO"/OTA
+         mv "$OTAMD" "$STORAGE"/"$OTAO"/OTA/md5
 	fi
   done
   rm -rf out/target/OTA
