@@ -29,6 +29,7 @@ SYNC=n
 J=4
 BP=y
 CCACHE=y
+DEFAULT_CCACHE_DIR=~/.ccache
 QCLEAN=n
 CLEAN=n
 OTA=n
@@ -399,6 +400,9 @@ cd "$SAUCE" || exit 3
 
 if [[ "$CCACHE" = y ]]; then
   export USE_CCACHE=1
+  if [ ! "$CCACHE_DIR" ]; then
+    export CCACHE_DIR=$DEFAULT_CCACHE_DIR
+  fi
 elif [[ "$CCACHE" = n ]]; then
   unset USE_CCACHE
 fi

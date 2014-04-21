@@ -613,6 +613,9 @@ function lunch()
 
     if [ "$CCACHE_DIR" ]
     then
+        if [ ! -d "$CCACHE_DIR" ]; then
+          mkdir "$CCACHE_DIR"
+        fi
         TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
         export CCACHE_DIR=$TMP_CCACHE_DIR/$product
         if [ -z "$CCACHE_SIZE" ]; then
