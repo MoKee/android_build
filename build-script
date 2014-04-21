@@ -40,6 +40,11 @@ FTPPASS=
 FTPFULL=FULL/UNOFFICIAL
 FTPOTA=OTA/UNOFFICIAL
 JB=n
+if [ "$(uname)" = "Linux" ] ; then
+  DEF_CORE=$(cat /proc/cpuinfo | grep "processor" | wc -l)
+else
+  DEF_CORE=2
+fi
 
 readonly red=$(tput setaf 1) #  red
 readonly grn=$(tput setaf 2) #  green
@@ -259,8 +264,12 @@ echo ""
   QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
   CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
-		CORE=$(ask "How many cores does your processor have?" $CORE)
-		JBN=$(($CORE + 1))
+		CORE=$(ask "How many cores(including HT) does your processor have?[$DEF_CORE]" $CORE)
+		if [ ! "$CORE" ]; then
+		  JBN=$(($DEF_CORE + 1))
+		else
+		  JBN=$(($CORE + 1))
+		fi
   fi
   if OTA=$(askyn "Do you want to make an ota package for chosen devices?" $OTA); then
   declare -i i=${#OTABO[*]}
