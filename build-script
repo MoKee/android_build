@@ -424,7 +424,7 @@ cd "$SAUCE"
 
   if [ "$BP" = y ]; then
     info "Removing build.prop"
-     rm -f out/target/product/"$DEVICE"/system/build.prop
+     rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
   fi
 
   if [ "$QCLEAN" = y ]; then
@@ -448,7 +448,7 @@ done
 
 if [ "$OTA" = y ]; then
   for OTAO in ${OTABO[@]}; do
-  ROMFOLDER="$SAUCE"/out/target/product/"$OTAO"
+  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$OTAO"
   ROM=$(ls -t "$ROMFOLDER"/*"$OTAO"*"UNOFFICIAL.zip" | head -1)
   ROMMD="$ROM".md5sum
   OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$OTAO
@@ -480,7 +480,7 @@ fi
 
 if [ "$FTP" = y ]; then
    for FTPD in ${FTPUL[@]}; do
-   ROMFOLDER="$SAUCE"/out/target/product/"$FTPD"
+   ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$FTPD"
    ROM=$(ls -t "$ROMFOLDER"/*"$FTPD"*"UNOFFICIAL.zip" | head -1)
    ROMMD="$ROM".md5sum
    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$FTPD"
@@ -500,7 +500,7 @@ fi
 
 if [ "$MOVE" = y ]; then
   for DEVICE in ${DEVICES[@]}; do
-  ROMFOLDER="$SAUCE"/out/target/product/"$DEVICE"
+  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$DEVICE"
   ROM=$(ls -t "$ROMFOLDER"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
   ROMMD="$ROM".md5sum
   info "Moving "$DEVICE" ROM to "$STORAGE""
@@ -519,7 +519,7 @@ if [ "$MOVE" = y ]; then
          mv "$OTAMD" "$STORAGE"/"$OTAO"/OTA/md5
 	fi
   done
-  rm -rf out/target/OTA
+  rm -rf $(get_build_var OUT_DIR)/target/OTA
 echo ""
 fi
 
