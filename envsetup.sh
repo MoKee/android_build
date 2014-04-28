@@ -32,6 +32,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - installrecovery: Installs a recovery.img to the connected device.
 - clog:     Tool to generate changelog.
 - ota_all:  Generate OTA packages using the MoKee OTA system.
+- translate: Tool to to aid in translating strings
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -2169,6 +2170,11 @@ function clog() {
 # OTA Script
 function ota_all() {
     ./build/tools/mk_ota_script/gen_ota $1 $2
+}
+
+# Translation Tool
+function translate() {
+    $ANDROID_BUILD_TOP/build/tools/translate.py $1 $2
 }
 
 # Add completions
