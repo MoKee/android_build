@@ -37,6 +37,7 @@ PRODUCT_PACKAGES := \
 	libjni_pinyinime \
 	SoftKeyboard \
 	SystemUI \
+	MoKeeServices \
 	Trebuchet \
 	Development \
 	DevelopmentSettings \

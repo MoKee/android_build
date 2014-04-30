@@ -33,6 +33,7 @@ PRODUCT_PACKAGES := \
     InputDevices \
     Keyguard \
     Launcher2 \
+    MoKeeServices \
     Music \
     OneTimeInitializer \
     PrintSpooler \
