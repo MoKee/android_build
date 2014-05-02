@@ -40,6 +40,11 @@ FTPPASS=
 FTPFULL=FULL/UNOFFICIAL
 FTPOTA=OTA/UNOFFICIAL
 JB=n
+if [ "$(uname)" = "Linux" ] ; then
+  DEF_CORE=$(cat /proc/cpuinfo | grep "processor" | wc -l)
+else
+  DEF_CORE=2
+fi
 
 readonly red=$(tput setaf 1) #  red
 readonly grn=$(tput setaf 2) #  green
@@ -259,8 +264,12 @@ echo ""
   QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
   CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
-		CORE=$(ask "How many cores does your processor have?" $CORE)
-		JBN=$(($CORE + 1))
+		CORE=$(ask "How many cores(including HT) does your processor have?[$DEF_CORE]" $CORE)
+		if [ ! "$CORE" ]; then
+		  JBN=$(($DEF_CORE + 1))
+		else
+		  JBN=$(($CORE + 1))
+		fi
   fi
   if OTA=$(askyn "Do you want to make an ota package for chosen devices?" $OTA); then
   declare -i i=${#OTABO[*]}
@@ -415,7 +424,7 @@ cd "$SAUCE"
 
   if [ "$BP" = y ]; then
     info "Removing build.prop"
-     rm -f out/target/product/"$DEVICE"/system/build.prop
+     rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
   fi
 
   if [ "$QCLEAN" = y ]; then
@@ -439,7 +448,7 @@ done
 
 if [ "$OTA" = y ]; then
   for OTAO in ${OTABO[@]}; do
-  ROMFOLDER="$SAUCE"/out/target/product/"$OTAO"
+  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$OTAO"
   ROM=$(ls -t "$ROMFOLDER"/*"$OTAO"*"UNOFFICIAL.zip" | head -1)
   ROMMD="$ROM".md5sum
   OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$OTAO
@@ -471,7 +480,7 @@ fi
 
 if [ "$FTP" = y ]; then
    for FTPD in ${FTPUL[@]}; do
-   ROMFOLDER="$SAUCE"/out/target/product/"$FTPD"
+   ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$FTPD"
    ROM=$(ls -t "$ROMFOLDER"/*"$FTPD"*"UNOFFICIAL.zip" | head -1)
    ROMMD="$ROM".md5sum
    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$FTPD"
@@ -491,7 +500,7 @@ fi
 
 if [ "$MOVE" = y ]; then
   for DEVICE in ${DEVICES[@]}; do
-  ROMFOLDER="$SAUCE"/out/target/product/"$DEVICE"
+  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$DEVICE"
   ROM=$(ls -t "$ROMFOLDER"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
   ROMMD="$ROM".md5sum
   info "Moving "$DEVICE" ROM to "$STORAGE""
@@ -510,7 +519,7 @@ if [ "$MOVE" = y ]; then
          mv "$OTAMD" "$STORAGE"/"$OTAO"/OTA/md5
 	fi
   done
-  rm -rf out/target/OTA
+  rm -rf $(get_build_var OUT_DIR)/target/OTA
 echo ""
 fi
 
