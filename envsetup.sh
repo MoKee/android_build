@@ -2174,7 +2174,7 @@ function ota_all() {
 
 # Translation Tool
 function translate() {
-    $ANDROID_BUILD_TOP/build/tools/translate.py $1 $2
+    $ANDROID_BUILD_TOP/build/tools/translate.py $1 $2 $3
 }
 
 # Add completions

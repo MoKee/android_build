@@ -32,10 +32,11 @@ class bcolors:
 
 def usage():
     print ''
-    print 'Usage: translate [language] [file name]'
+    print 'Usage: translate [language] [file name] [1]'
     print ''
     print 'Compares target XML (strings) with main XML in res/values'
-    print 'Points out missing translations and generates new file'
+    print 'and points out missing translations. If parameter 1 is given,'
+    print 'generates new file'
     print ''
     print 'Note: Must be in res folder, output file will be in home directory'
 
@@ -43,6 +44,15 @@ try:
     if len(sys.argv) == 1:
         usage()
         exit(1)
+    if len(sys.argv) == 4:
+        if sys.argv[3] != "1":
+            print bcolors.FAIL+'Invalid parameters!'+bcolors.ENDC
+            usage()
+            exit(1)
+        else:
+            GENFILE = True
+    elif len(sys.argv) == 3:
+        GENFILE = False
     elif sys.argv[1] == 'help':
         usage()
         exit(1)
@@ -109,8 +119,10 @@ def genNew():
     if len(NODE_NIL) == 0:
         return
 
-    docPath = os.path.join(os.path.expanduser("~"), sys.argv[2])
-    commentText = "\n\
+    if not os.path.exists('values-'+sys.argv[1]):
+        os.makedirs('values-'+sys.argv[1])
+    docPath = os.path.join('values-'+sys.argv[1], sys.argv[2])
+    commentText = '\n\
     Copyright (C) 2014 The MoKee OpenSource Project\n\n\
     Licensed under the Apache License, Version 2.0 (the \"License\");\n\
     you may not use this file except in compliance with the License.\n\
@@ -120,7 +132,7 @@ def genNew():
     distributed under the License is distributed on an \"AS IS\" BASIS,\n\
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\
     See the License for the specific language governing permissions and\n\
-    limitations under the License.\n"
+    limitations under the License.\n'
 
     comment = doc.createComment(commentText)
     doc.appendChild(comment)
@@ -147,7 +159,7 @@ def genNew():
             genNode(parent, tempChild)
 
     doc.writexml(open(docPath, 'w'),
-                 addindent="    ",
+                 addindent='  ',
                  newl='\n',
                  encoding="UTF-8")
 
@@ -175,7 +187,8 @@ def main():
         compareXML()
 
     diffPrint()
-    genNew()
+    if GENFILE:
+        genNew()
 
 if __name__ == "__main__":
     main()
