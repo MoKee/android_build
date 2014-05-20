@@ -19,6 +19,7 @@ import base64
 import json
 import netrc
 import os
+import random
 import re
 import sys
 try:
@@ -246,8 +247,17 @@ if depsonly:
     sys.exit()
 
 else:
+    user_agents = [
+                    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0',
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36',
+                    'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',
+                    'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
+                    'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.137 Safari/537.36',
+                    'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+                  ]
     for repository in repositories:
         repo_name = repository['name']
+        rua = random.choice(user_agents)
         if repo_name.startswith("android_device_") and repo_name.endswith("_" + device):
             print("Found repository: %s" % repository['name'])
             
@@ -257,12 +267,14 @@ else:
             print("Default revision: %s" % default_revision)
             print("Checking branch info")
             githubreq = urllib.request.Request(repository['branches_url'].replace('{/branch}', ''))
+            githubreq.add_header('User-Agent', rua)
             add_auth(githubreq)
             result = json.loads(urllib.request.urlopen(githubreq).read().decode())
 
             ## Try tags, too, since that's what releases use
             if not has_branch(result, default_revision):
                 githubreq = urllib.request.Request(repository['tags_url'].replace('{/tag}', ''))
+                githubreq.add_header('User-Agent', rua)
                 add_auth(githubreq)
                 result.extend (json.loads(urllib.request.urlopen(githubreq).read().decode()))
             
