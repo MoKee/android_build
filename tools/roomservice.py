@@ -56,6 +56,17 @@ if not depsonly:
 
 repositories = []
 
+# Random UA List
+user_agents = [
+                'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0',
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',
+                'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
+                'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.137 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+                'Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; ja) Presto/2.10.289 Version/12.00',
+              ]
+
 try:
     authtuple = netrc.netrc().authenticators("api.github.com")
 
@@ -73,6 +84,8 @@ def add_auth(githubreq):
 page = 1
 while not depsonly:
     githubreq = urllib.request.Request("https://api.github.com/users/MoKee/repos?per_page=200&page=%d" % page)
+    rua = random.choice(user_agents)
+    githubreq.add_header('User-Agent', rua)
     add_auth(githubreq)
     result = json.loads(urllib.request.urlopen(githubreq).read().decode())
     if len(result) == 0:
@@ -247,14 +260,6 @@ if depsonly:
     sys.exit()
 
 else:
-    user_agents = [
-                    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0',
-                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36',
-                    'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',
-                    'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
-                    'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.137 Safari/537.36',
-                    'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-                  ]
     for repository in repositories:
         repo_name = repository['name']
         rua = random.choice(user_agents)
