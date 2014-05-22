@@ -24,10 +24,14 @@ MoKeeMarket.apk
 OneTimeInitializer.apk
 Provision.apk
 iFlyIME.apk
+libjni_eglfence.so
+libjni_filtershow_filters.so
+libjni_mosaic.so
 libjni_unbundled_latinimegoogle.so
 libmsc-v7.so
 libsmartaiwrite-jni-v7.so
 libsmartaiwrite-jni-v8.so
 libsmartaiwrite-jni-v9.so
+libsmartaiwrite-jni-v10.so
 libvadLib-v5.so
 su"
