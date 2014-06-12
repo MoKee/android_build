@@ -619,6 +619,7 @@ function lunch()
         fi
         TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
         export CCACHE_DIR=$TMP_CCACHE_DIR/$product
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
         if [ -z "$CCACHE_SIZE" ]; then
             CCACHE_SIZE=16G
         fi
