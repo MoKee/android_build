@@ -616,6 +616,9 @@ function lunch()
     then
         if [ ! -d "$CCACHE_DIR" ]; then
           mkdir "$CCACHE_DIR"
+          if [ "$CCACHE_SHARE" ]; then
+            chmod g+s $CCACHE_DIR
+          fi
         fi
         TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
         export CCACHE_DIR=$TMP_CCACHE_DIR/$product
