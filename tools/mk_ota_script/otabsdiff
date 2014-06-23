@@ -246,6 +246,7 @@ echo "" >> updater-script
 # Delete old files
 echo "ui_print(\"Removing unneeded files...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
+echo "delete(\"/system/app/MoKeeMarket.apk\");" >> updater-script
 if [ -f "deleted.txt" ];then
 	cat deleted.txt >> updater-script
 	echo "" >> updater-script
