@@ -18,11 +18,10 @@
 sdate=${1}
 edate=${2}
 if [ -z "$edate" ]; then
-    tdate=`date +"%m/%d/%Y"`
+    edate=`date +"%m/%d/%Y"`
     cdate=`date +"%y%m%d"`
 else
-    tdate=$edate
-    cdate=`echo ${sdate:8}${sdate::2}${sdate:3:2}-${tdate:8}${tdate::2}${tdate:3:2}`
+    cdate=`echo ${sdate:8}${sdate::2}${sdate:3:2}-${edate:8}${edate::2}${edate:3:2}`
 fi
 rdir=`pwd`
 logdir=$MK_CHANGELOG_PATH
@@ -50,14 +49,18 @@ fi
 echo "MoKee OpenSource Changelog Generating -------------------"
 echo ""
 # Log starter
-echo "MoKee OpenSource Changelog from $sdate" - "$tdate" >> "$logdir"/"$logfile"
+echo "MoKee OpenSource Changelog from $sdate" - "$edate" >> "$logdir"/"$logfile"
 echo "---------------------------------------------------------------" >> "$logdir"/"$logfile"
 echo "" >> "$logdir"/"$logfile"
 find -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read line
 do
 cd $line
     # Test to see if the repo needs to have a changelog written.
-    log=$(git log --pretty="%an - %s" --no-merges --since=$sdate --date-order)
+    if [ -z "$edate" ]; then
+        log=$(git log --pretty="%an - %s" --no-merges --since=$sdate --date-order)
+    else
+        log=$(git log --pretty="%an - %s" --no-merges --since=$sdate --until=$edate --date-order)
+    fi
     # Forgive my bad script :P
     project=${line#*/}
     if [ ! -z "$log" ] && echo $project | grep -vq repo; then
