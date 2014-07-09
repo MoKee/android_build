@@ -16,8 +16,14 @@
 #
 
 sdate=${1}
-tdate=`date +"%m/%d/%Y"`
-cdate=`date +"%y%m%d"`
+edate=${2}
+if [ -z "$edate" ]; then
+    tdate=`date +"%m/%d/%Y"`
+    cdate=`date +"%y%m%d"`
+else
+    tdate=$edate
+    cdate=`echo ${sdate:8}${sdate::2}${sdate:3:2}-${tdate:8}${tdate::2}${tdate:3:2}`
+fi
 rdir=`pwd`
 logdir=$MK_CHANGELOG_PATH
 if ["$MK_CHANGELOG_PATH" == ""]; then
