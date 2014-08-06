@@ -20,6 +20,10 @@ if [ -z "`which bsdiff 2> /dev/null`" ];then
         echo "bsdiff is not installed!"
         echo "Please install it first!"
         exit 1
+elif [ -z "`which imgdiff 2> /dev/null`" ];then
+	echo "imgdiff is not installed!"
+	echo "Please compile and install it first! (mka imgdiff)"
+	exit 1
 elif [ -z "$MK_OTA_INPUT" ];then
 	echo "MK_OTA_INPUT not defined!"
 	exit 1

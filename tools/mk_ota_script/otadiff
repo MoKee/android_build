@@ -26,19 +26,29 @@ if [ -z "$BSDIFF" ];then
 	BSDIFF=bsdiff
 fi
 
+if [ -z "$IMGDIFF" ];then
+	IMGDIFF=imgdiff
+fi
+
 gen_diff(){
 if [ -f $EQUIV ];then
 	oldsha1=`sha1sum $1 | cut -d' ' -f1`
 	newsha1=`sha1sum ../z2/$1 | cut -d' ' -f1`
-	file=`dirname $1 | cut -d'.' -f2`/`basename $1`
+	filename=`basename $1`
+	file=`dirname $1 | cut -d'.' -f2`/$filename
+	extension=`echo ${filename##*.}`
 	newsize=`du $EQUIV | head -n 1 | cut -f1`
 	if [ "$newsha1" == "$oldsha1" ]; then
 		echo "skipping: $1"
 	else
-		echo "bsdiff: $1"
 		mkdirp ../out/patch/$(dirname $1) 2> /dev/null
-		$BSDIFF $1 $EQUIV ${OUTFILE}.p
-		filename=`basename $1`
+		if [ "$extension" == "zip" ] || [ "$extension" == "jar" ] || [ "$extension" == "apk" ];then
+			echo "imgdiff: $1"
+			$IMGDIFF -z $1 $EQUIV ${OUTFILE}.p > /dev/null
+		else
+			echo "bsdiff: $1"
+			$BSDIFF $1 $EQUIV ${OUTFILE}.p
+		fi
 		if ! echo $EXCLUDE_CHECK_MAIN | grep -q $filename;then
 			if ! echo $EXCLUDE_CHECK_DEVICE | grep -q $filename;then
 				if ! echo $EXCLUDE_CHECK_COMMON | grep -q $filename;then

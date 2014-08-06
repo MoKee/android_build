@@ -124,7 +124,7 @@ if [ "$1" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$1 ] && [[ "$1" == *".zip" ]]
 		if [ $? -eq 0 ];then
 			echo "Generating OTA package for $1..."
 			echo "Generating OTA package for $1..." >> $LOG_PATH/${OUT_ZIP}.log
-			build/tools/mk_ota_script/otabsdiff $INPUT_PATH/$1 $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$OUT_ZIP >> $LOG_PATH/${OUT_ZIP}.log
+			build/tools/mk_ota_script/otadiff $INPUT_PATH/$1 $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$OUT_ZIP >> $LOG_PATH/${OUT_ZIP}.log
 			echo "Generating md5sum of OTA package for $1..."
 			echo "Generating md5sum of OTA package for $1..." >> $LOG_PATH/${OUT_ZIP}.log
 			md5sum $OUTPUT_PATH/$OUT_ZIP | cut -f1 -d' ' > $OUTPUT_PATH/md5/$OUT_ZIP.md5sum
