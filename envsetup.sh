@@ -612,7 +612,9 @@ function lunch()
         echo
         return 1
     fi
-
+    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" == 1 ]; then
+    	export CCACHE_DIR=~/.ccache
+    fi
     if [ "$CCACHE_DIR" ]
     then
         if [ ! -d "$CCACHE_DIR" ]; then
