@@ -511,6 +511,7 @@ function brunch()
 function breakfast()
 {
     target=$1
+    local variant=$2
     MK_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
@@ -530,8 +531,11 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the MK model name
-            lunch mk_$target-userdebug
+            # This is probably just the CM model name
+            if [ -z "$variant" ]; then
+                variant="userdebug"
+            fi
+            lunch mk_$target-$variant
         fi
     fi
     return $?
@@ -1565,7 +1569,6 @@ function cmremote()
     echo "Remote 'cm' created"
 }
 export -f cmremote
-
 
 function installboot()
 {
