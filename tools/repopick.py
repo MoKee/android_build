@@ -187,7 +187,7 @@ while(True):
 
 # Get all commits for a specified topic
 if args.topic:
-    url = 'http://review.cyanogenmod.org/changes/?q=topic:%s' % args.topic
+    url = 'http://review.mfunz.com/changes/?q=topic:%s' % args.topic
     if args.verbose:
         print('Fetching all commits from topic: %s\n' % args.topic)
     f = urllib.request.urlopen(url)
