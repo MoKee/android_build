@@ -30,4 +30,5 @@ libmsc-v8.so
 libsmartaiwrite-jni-v11.so
 libsmartaiwrite-jni-v12.so
 libvadLib-v5.so
-su"
+su
+otasigcheck.sh"
