@@ -637,6 +637,9 @@ function lunch()
         fi
     fi
 
+    #Setup prebuilt chromium
+    export USE_PREBUILT_CHROMIUM=1
+
     if [ "$(which pngquant)" == "" ]
     then
         echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
