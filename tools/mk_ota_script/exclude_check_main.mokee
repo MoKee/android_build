@@ -31,4 +31,5 @@ libsmartaiwrite-jni-v11.so
 libsmartaiwrite-jni-v12.so
 libvadLib-v5.so
 su
-otasigcheck.sh"
+otasigcheck.sh
+hosts"
