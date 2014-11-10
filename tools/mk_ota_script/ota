@@ -1,0 +1,182 @@
+#!/bin/bash
+#
+# Copyright (C) 2013-2015 The MoKee OpenSource Project
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+INPUT_PATH=$1
+OUTPUT_PATH=$2
+LOG_PATH=$3
+
+CHECK_OUTPUT_PATH=`dirname $(dirname $OUTPUT_PATH)`
+if [ ! -z $MK_OTA_EXTRA ];then
+	CHECK_OUTPUT_PATH=$MK_OTA_EXTRA
+fi
+
+get_timestamp(){
+echo $1 | cut -d'-' -f3 | cut -d'-' -f1
+}
+
+get_latest(){
+LATEST_DEVICE=`echo $LATEST_ZIP | cut -d'-' -f2`
+LATEST_TIMESTAMP=`get_timestamp $LATEST_ZIP`
+LATEST_VERSION=`echo $LATEST_ZIP | cut -d'-' -f1`
+LATEST_SHORT_VERSION=`echo $LATEST_VERSION | cut -d'.' -f1`
+LATEST_TYPE=`echo ${LATEST_ZIP##*-} | cut -d'.' -f1`
+if [ "$LATEST_TYPE" == "RELEASE" ];then
+	LATEST_YR=${LATEST_TIMESTAMP:0:2}
+	LATEST_MTH=${LATEST_TIMESTAMP:2:2}
+	LATEST_DATE=${LATEST_TIMESTAMP:4:2}
+else
+	LATEST_YR=${LATEST_TIMESTAMP:0:4}
+	LATEST_MTH=${LATEST_TIMESTAMP:4:2}
+	LATEST_DATE=${LATEST_TIMESTAMP:6:2}
+	LATEST_HR=${LATEST_TIMESTAMP:8:2}
+	LATEST_MIN=${LATEST_TIMESTAMP:10:2}
+fi
+}
+
+compare_file(){
+CUR_ZIP=$1
+CUR_TIMESTAMP=`get_timestamp $1`
+CUR_TYPE=`echo ${CUR_ZIP##*-} | cut -d'.' -f1`
+
+if [ -z "$LATEST_ZIP" ];then
+	LATEST_ZIP=$CUR_ZIP
+	return 0
+fi
+
+get_latest
+
+if [ "$CUR_TYPE" == "RELEASE" ];then
+	CUR_YR=${CUR_TIMESTAMP:0:2}
+	CUR_MTH=${CUR_TIMESTAMP:2:2}
+	CUR_DATE=${CUR_TIMESTAMP:4:2}
+	if [ $CUR_YR -gt $LATEST_YR ];then
+		LATEST_ZIP=$CUR_ZIP
+	elif [ $CUR_YR -eq $LATEST_YR ];then
+		if [ $CUR_MTH -gt $LATEST_MTH ];then
+			LATEST_ZIP=$CUR_ZIP
+		elif [ $CUR_MTH -eq $LATEST_MTH ];then
+			if [ $CUR_DATE -gt $LATEST_DATE ];then
+				LATEST_ZIP=$CUR_ZIP
+			fi
+		fi
+	fi
+else
+	CUR_YR=${CUR_TIMESTAMP:0:4}
+	CUR_MTH=${CUR_TIMESTAMP:4:2}
+	CUR_DATE=${CUR_TIMESTAMP:6:2}
+	CUR_HR=${CUR_TIMESTAMP:8:2}
+	CUR_MIN=${CUR_TIMESTAMP:10:2}
+	if [ $CUR_YR -gt $LATEST_YR ];then
+		LATEST_ZIP=$CUR_ZIP
+	elif [ $CUR_YR -eq $LATEST_YR ];then
+		if [ $CUR_MTH -gt $LATEST_MTH ];then
+			LATEST_ZIP=$CUR_ZIP
+		elif [ $CUR_MTH -eq $LATEST_MTH ];then
+			if [ $CUR_DATE -gt $LATEST_DATE ];then
+				LATEST_ZIP=$CUR_ZIP
+			elif [ $CUR_DATE -eq $LATEST_DATE ];then
+				if [ $CUR_HR -gt $LATEST_HR ];then
+					LATEST_ZIP=$CUR_ZIP
+				elif [ $CUR_HR -eq $LATEST_HR ];then
+					if [ $CUR_MIN -gt $LATEST_MIN ];then
+						LATEST_ZIP=$CUR_ZIP
+					fi
+				fi
+			fi
+		fi
+	fi
+fi
+}
+
+start_job(){
+CUR_TIMESTAMP=`get_timestamp $1`
+if [ "$1" != "$LATEST_ZIP" ] && [ ! -d $INPUT_PATH/$1 ] && [[ "$1" == *".zip" ]];then
+	OUT_ZIP=OTA-$LATEST_VERSION-$LATEST_DEVICE-$CUR_TIMESTAMP-$LATEST_TIMESTAMP-$LATEST_TYPE.zip
+	CUR_SHORT_VERSION=`echo $1 | cut -d'-' -f1 | cut -d'.' -f1`
+	echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
+	if [ -f $CHECK_OUTPUT_PATH/$LATEST_TYPE/$LATEST_DEVICE/$OUT_ZIP ];then
+		echo "OTA package for $1 already done! Skipping!"
+		echo "OTA package for $1 already done! Skipping!" >> $LOG_PATH/${OUT_ZIP}.log
+		echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
+	elif [ $LATEST_SHORT_VERSION != $CUR_SHORT_VERSION ];then
+		echo "Different versions! Skipping $1!"
+		echo "Different versions! Skipping $1!" >> $LOG_PATH/${OUT_ZIP}.log
+		echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
+	else
+		echo "Checking $1..."
+		echo "Checking $1..." >> $LOG_PATH/${OUT_ZIP}.log
+		unzip -tqq $INPUT_PATH/$1 > /dev/null 2>&1
+		if [ $? -eq 0 ];then
+			echo "Generating OTA package for $1..."
+			echo "Generating OTA package for $1..." >> $LOG_PATH/${OUT_ZIP}.log
+			build/tools/mk_ota_script/otadiff $INPUT_PATH/$1 $INPUT_PATH/$LATEST_ZIP $OUTPUT_PATH/$OUT_ZIP >> $LOG_PATH/${OUT_ZIP}.log
+			echo "Generating md5sum of OTA package for $1..."
+			echo "Generating md5sum of OTA package for $1..." >> $LOG_PATH/${OUT_ZIP}.log
+			md5sum $OUTPUT_PATH/$OUT_ZIP | cut -f1 -d' ' > $OUTPUT_PATH/md5/$OUT_ZIP.md5sum
+			echo "Completed OTA package for $1 at `date`" >> $LOG_PATH/${OUT_ZIP}.log
+			echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
+		else
+			echo "$1 is corrupted! Skipping!"
+			echo "$1 is corrupted! Skipping!" >> $LOG_PATH/${OUT_ZIP}.log
+			echo "------------------------------------" >> $LOG_PATH/${OUT_ZIP}.log
+		fi
+	fi
+fi
+}
+
+FILENAMES=`ls $INPUT_PATH`
+for i in $FILENAMES;do
+	if [ ! -d $INPUT_PATH/$i ] && [[ "$i" == *".zip" ]];then
+		compare_file $i
+	fi
+done
+
+get_latest
+LOG_DATE=`date '+%y%m%d%H%M'`
+mkdir -p $LOG_PATH
+if [ ! -z "$LATEST_ZIP" ];then
+	echo "Latest zip is $LATEST_ZIP"
+	echo "Latest zip is $LATEST_ZIP" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	echo "Checking $LATEST_ZIP..."
+	echo "Checking $LATEST_ZIP..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	unzip -tqq $INPUT_PATH/$LATEST_ZIP > /dev/null 2>&1
+	if [ $? -eq 0 ];then
+		echo "Generating OTA packages..." >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	else
+		echo "$LATEST_ZIP is corrupted!"
+		echo "LATEST_ZIP is corrupted!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+		exit 1
+	fi
+else
+	echo "Error! Check file names or input parameters!" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log
+	exit 1
+fi
+
+mkdir -p $OUTPUT_PATH/md5
+for i in $FILENAMES;do
+	if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+		start_job $i &
+	else
+		start_job $i
+	fi
+done
+if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+	wait
+fi
+echo "$LATEST_DEVICE completed at `date`"
+echo "$LATEST_DEVICE completed at `date`" >> $LOG_PATH/ota_${LATEST_DEVICE}_$LOG_DATE.log

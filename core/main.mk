@@ -323,8 +323,13 @@ user_variant := $(filter user userdebug,$(TARGET_BUILD_VARIANT))
 enable_target_debugging := true
 tags_to_install :=
 ifneq (,$(user_variant))
-  # Target is secure in user builds.
-  ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
+  ifdef MK_RELEASE
+    # Target is secure in release builds.
+    ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
+  else
+    # Set device insecure for other builds.
+    ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
+  endif
 
   ifeq ($(user_variant),userdebug)
     # Pick up some extra useful tools

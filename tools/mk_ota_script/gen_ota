@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# Copyright (C) 2013-2015 The MoKee OpenSource Project
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+if [ -z "`which bsdiff 2> /dev/null`" ];then
+        echo "bsdiff is not installed!"
+        echo "Please install it first!"
+        exit 1
+elif [ -z "`which imgdiff 2> /dev/null`" ];then
+	echo "imgdiff is not installed!"
+	echo "Please compile and install it first! (mka imgdiff)"
+	exit 1
+elif [ -z "$MK_OTA_INPUT" ];then
+	echo "MK_OTA_INPUT not defined!"
+	exit 1
+elif [ "$1" != "RELEASE" ] && [ "$1" != "NIGHTLY" ] && [ "$1" != "EXPERIMENTAL" ] && [ "$1" != "UNOFFICIAL" ];then
+	echo "No/wrong argument given! [RELEASE/NIGHTLY/EXPERIMENTAL/UNOFFICIAL]"
+	exit 1
+else
+	TYPE=$1
+	INPUT=$MK_OTA_INPUT/$TYPE
+fi
+
+if [ -z "$OUT_DIR" ];then
+	OUTPUT=out/target/OTA/$TYPE
+else
+	OUTPUT=$OUT_DIR/target/OTA/$TYPE
+fi
+LOGDIR=$OUTPUT/logs
+export LIMIT=`nproc`
+
+. $ANDROID_BUILD_TOP/build/tools/mk_ota_script/exclude_check_main.mokee
+
+if [ ! -z "$2" ];then
+	TARGET=`echo $2 | tr "," " "`
+else
+	TARGET=`ls $INPUT`
+fi
+
+for i in $TARGET;do
+	export DEVICE_TREE=`find $ANDROID_BUILD_TOP/device -type d -name "$i"`
+	if [ ! -z "$DEVICE_TREE" ];then
+		if [ -f $DEVICE_TREE/exclude_check_device.mokee ];then
+			. $DEVICE_TREE/exclude_check_device.mokee
+		else
+			unset EXCLUDE_CHECK_DEVICE
+			unset EXCLUDE_CHECK_COMMON
+		fi
+	fi
+
+	echo ""
+	echo "OTA: $i"
+	if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+		build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i &
+		if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+			wait
+		fi
+	else
+		build/tools/mk_ota_script/ota $INPUT/$i $OUTPUT/$i $LOGDIR/$i
+	fi
+done
+if [ -z "$MK_OTA_LOW_SPEC" ] && [ -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+	wait
+fi
+rm -rf $OUTPUT/../tmp
+if [ ! -z "$MK_OTA_EXTRA" ];then
+	for i in $TARGET;do
+		mkdir -p $MK_OTA_EXTRA/$TYPE/$i
+		cp -r $OUTPUT/$i/* $MK_OTA_EXTRA/$TYPE/$i 2> /dev/null
+	done
+fi

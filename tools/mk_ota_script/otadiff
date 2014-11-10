@@ -1,0 +1,324 @@
+#!/bin/bash
+#
+# Copyright (C) 2013-2015 The MoKee OpenSource Project
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+if [ -z "$OUT_DIR" ];then
+	TMP=out/target/OTA/tmp/$RANDOM
+else
+	TMP=$OUT_DIR/target/OTA/tmp/$RANDOM
+fi
+
+if [ -z "$BSDIFF" ];then
+	BSDIFF=bsdiff
+fi
+
+if [ -z "$IMGDIFF" ];then
+	IMGDIFF=imgdiff
+fi
+
+gen_diff(){
+if [ -f $EQUIV ];then
+	oldsha1=`sha1sum $1 | cut -d' ' -f1`
+	newsha1=`sha1sum ../z2/$1 | cut -d' ' -f1`
+	filename=`basename $1`
+	file=`dirname $1 | cut -d'.' -f2`/$filename
+	extension=`echo ${filename##*.}`
+	newsize=`du $EQUIV | head -n 1 | cut -f1`
+	if [ "$newsha1" == "$oldsha1" ]; then
+		echo "skipping: $1"
+	else
+		mkdirp ../out/patch/$(dirname $1) 2> /dev/null
+		if [ "$extension" == "zip" ] || [ "$extension" == "jar" ] || [ "$extension" == "apk" ];then
+			echo "imgdiff: $1"
+			$IMGDIFF -z $1 $EQUIV ${OUTFILE}.p > /dev/null
+		else
+			echo "bsdiff: $1"
+			$BSDIFF $1 $EQUIV ${OUTFILE}.p
+		fi
+		if ! echo $EXCLUDE_CHECK_MAIN | grep -q $filename;then
+			if ! echo $EXCLUDE_CHECK_DEVICE | grep -q $filename;then
+				if ! echo $EXCLUDE_CHECK_COMMON | grep -q $filename;then
+					echo "apply_patch_check(\"$file\", \"$newsha1\", \"$oldsha1\") || abort(\"$file has unexpected contents.\");" >> ../checkpatch.txt
+				fi
+			fi
+		fi
+		echo "apply_patch(\"$file\", \"-\", $newsha1, $newsize, $oldsha1, package_extract_file(\"patch${file}.p\"));" >> ../applypatch.txt
+	fi
+fi
+}
+
+SECURITYDIR=$ANDROID_BUILD_TOP/build/target/product/security
+
+realpath(){
+cd `dirname $1`
+echo $PWD/`basename $1`
+}
+
+mkdirp(){
+if [ "$1" == "." ];then
+	return
+fi
+if [ "$1" == "/" ];then
+	return
+fi
+  
+DIR=`dirname $1`
+mkdirp $DIR
+BASE=`basename $1`
+mkdir $1 2> /dev/null
+}
+
+Z1=$(realpath $1) # Old zip
+Z2=$(realpath $2) # New zip
+OUT=$(realpath $3) # Output
+
+rm -f $OUT
+
+if [ ! -f "$Z1" ];then
+	echo "$Z1 not found."
+fi
+
+if [ ! -f "$Z2" ];then
+	echo "$Z2 not found."
+fi
+
+rm -rf $TMP
+mkdirp $TMP 2> /dev/null
+cd $TMP
+
+mkdirp z1 2> /dev/null
+mkdirp z2 2> /dev/null
+mkdirp out/patch 2> /dev/null
+
+cd z1
+unzip -o $Z1
+cd ..
+cd z2
+unzip -o $Z2
+cd ..
+
+mkdirp out/META-INF/com/google/android 2> /dev/null
+mv z2/META-INF/com/google/android/update-binary out/META-INF/com/google/android/
+mv z2/META-INF/com/google/android/updater-script oldscript
+rm -rf z1/META-INF
+rm -rf z2/META-INF
+rm z1/system/bin/backuptool.sh
+rm z2/system/bin/backuptool.sh
+if [ -f z2/boot.img ];then
+	mv z2/boot.img out/boot.img
+	rm z1/boot.img
+fi
+
+# Don't change some customizable files
+if [ -f z2/system/bin/bootmenu ] && [ -f z2/system/bin/logwrapper ];then
+	mv z2/system/bin/logwrapper out/
+fi
+
+rm z2/system/etc/hosts
+rm z1/system/etc/hosts
+if [ -f z2/system/etc/sysctl.conf ];then
+	rm z2/system/etc/sysctl.conf
+fi
+if [ -f z1/system/etc/sysctl.conf ];then
+	rm z1/system/etc/sysctl.conf
+fi
+
+if [ -d z2/etc/motorola/bp_nvm_default ];then
+	rm -rf z2/system/etc/motorola/bp_nvm_default
+	rm -rf z1/system/etc/motorola/bp_nvm_default
+fi
+
+if [ -d z2/system/lib/me ];then
+	rm -rf z2/system/lib/me
+	rm -rf z1/system/lib/me
+	rm z1/system/bin/fixril
+	rm z2/system/lib/libril_rds.so
+	rm z1/system/lib/libril_rds.so
+	rm z2/system/lib/libpppd_plugin-ril.so
+	rm z1/system/lib/libpppd_plugin-ril.so
+	rm z2/system/lib/libril.so
+	rm z1/system/lib/libril.so
+	rm z2/system/lib/libmoto_ril.so
+	rm z1/system/lib/libmoto_ril.so
+fi
+
+if [ -d z2/system/bootmenu ];then
+	cp -R z2/system/bootmenu out/system/
+	rm -R z2/system/bootmenu
+fi
+if [ -d z1/system/bootmenu ];then
+	rm -R z1/system/bootmenu
+fi
+
+if [ -d z2/system/etc/init.d ];then
+	mkdirp out/system/etc 2> /dev/null
+	cp -R z2/system/etc/init.d out/system/etc/
+	rm -R z2/system/etc/init.d
+fi
+if [ -d z1/system/etc/init.d ];then
+	rm -R z1/system/etc/init.d
+fi
+
+# Device specific pre-processing
+if [ ! -z "$DEVICE_TREE" ];then
+	if [ -f $DEVICE_TREE/ota_preprocess.mokee ];then
+		. $DEVICE_TREE/ota_preprocess.mokee
+	fi
+fi
+
+# Generate file list to be removed
+for file in $(find z1 -mindepth 2 -type f -print);do
+	newfile=$(echo $file | sed 's/z1/z2/1')
+	rfile=$(echo $newfile | sed 's/z2\///1')
+	sfile=$(echo $file | sed 's/z1/system/1')
+	if [ -f $file ] && [ ! -f $newfile ];then
+		echo "delete(\"/$rfile\");" >> deleted.txt
+	fi
+done
+
+# Process extra or important files
+for file in $(find z2 -mindepth 2 -type f -print); do
+    oldfile=$(echo $file | sed 's/z2/z1/1')
+    sfile=$(echo $file | sed 's/z2\///1')
+    if [ ! -f $oldfile ] && [ -f $file ]; then
+		mkdirp `dirname out/$sfile` 2> /dev/null
+        cp $file out/$sfile
+        rm $file
+    fi
+done
+
+# Create patch
+cd z1
+for f in $(find . -mindepth 2);do
+	EQUIV=../z2/$f
+	OUTFILE=../out/patch/$f
+
+	if [ -f $f ];then
+		gen_diff $f &
+		if [ ! -z "$MK_OTA_SUPER_LOW_SPEC" ];then
+			if [ `jobs | grep -i 'running' | wc -l` -gt $LIMIT ];then
+				wait
+			fi
+		fi
+	fi
+done
+wait
+
+cd ..
+
+# Generating updater-script
+OLDVERSION=$(cat z1/system/build.prop | grep "ro\.modversion" | sed "s/ //g" | cut -d"=" -f2)
+NEWVERSION=$(cat z2/system/build.prop | grep "ro\.modversion" | sed "s/ //g" | cut -d"=" -f2)
+echo "ui_print(\"Updating from ${OLDVERSION}\");" >> updater-script
+echo "ui_print(\"to ${NEWVERSION} for your device.\");" >> updater-script
+echo "ui_print(\"It may take several minutes, please be patient.\");" >> updater-script
+# Mount file system
+OLD_IFS=$IFS
+IFS=$'\n'
+for a in `cat oldscript | grep "mount(" | grep -v "unmount" | sort`;do
+	if [ "$a" != "$b" ];then
+		b=$a
+		echo $b >> updater-script
+	fi
+done
+IFS=$OLD_IFS
+echo "" >> updater-script
+# Verifying system
+echo "ui_print(\"Verifying product version...\");" >> updater-script
+echo "ifelse(run_program(\"/system/bin/verifier\", \"$OLDVERSION\") == 0, ui_print(\"Versions match...\"), (unmount(\"/system\");abort(\"Versions mismatch...\")));" >> updater-script
+echo "show_progress(0.100000,0);" >> updater-script
+echo "" >> updater-script
+# Apply patch
+echo "# ---- start making changes here ----" >> updater-script
+echo "" >> updater-script
+echo "ui_print(\"Checking system files...\");" >> updater-script
+echo "show_progress(0.100000,0);" >> updater-script
+cat checkpatch.txt >> updater-script
+echo "" >> updater-script
+echo "ui_print(\"Patching system files...\");" >> updater-script
+echo "show_progress(0.200000,0);" >> updater-script
+cat applypatch.txt >> updater-script
+echo "" >> updater-script
+# Delete old files
+echo "ui_print(\"Removing unneeded files...\");" >> updater-script
+echo "show_progress(0.100000,0);" >> updater-script
+if [ -f "deleted.txt" ];then
+	cat deleted.txt >> updater-script
+	echo "" >> updater-script
+fi
+echo "delete_recursive(\"/system/etc/init.d\");" >> updater-script
+echo "" >> updater-script
+# New files
+echo "ui_print(\"Unpacking new files...\");" >> updater-script
+echo "show_progress(0.300000,0);" >> updater-script
+for dir in $(find z2 -maxdepth 1 -mindepth 1 -type d | awk -F'/' '{print $NF}'); do
+    echo "package_extract_dir(\"$dir\", \"/$dir\");" >> updater-script
+done
+echo "" >> updater-script
+# Permissions
+if cat oldscript | grep set_perm | grep -v backuptool | grep -vq tmp;then
+	echo "ui_print(\"Setting permissions...\");" >> updater-script
+else
+	echo "ui_print(\"Setting metadata...\");" >> updater-script
+fi
+echo "show_progress(0.100000,0);" >> updater-script
+OLD_IFS=$IFS
+IFS=$'\n'
+for x in `cat oldscript | grep set_metadata`; do
+	echo $x >> updater-script
+done
+for x in `cat oldscript | grep set_perm`;do
+	if [[ ! `echo $x | grep "backuptool"` ]] && [[ ! `echo $x | grep "/tmp"` ]] ;then
+		echo $x >> updater-script
+	fi
+done
+IFS=$OLD_IFS
+echo "" >> updater-script
+# Flash kernel
+echo "ui_print(\"Flashing kernel...\");" >> updater-script
+echo "show_progress(0.100000,0);" >> updater-script
+cat oldscript | grep "package_extract_file(\"boot.img\"" >> updater-script
+cat oldscript | grep "write_raw_image(" >> updater-script
+cat oldscript | grep "delete(\"/tmp/boot.img\")"  >> updater-script
+echo "" >> updater-script
+# Device specific post-processing
+if [ ! -z "$DEVICE_TREE" ];then
+	if [ -f $DEVICE_TREE/ota_postprocess.mokee ];then
+		. $DEVICE_TREE/ota_postprocess.mokee
+		echo "" >> updater-script
+	fi
+fi
+# Clean up
+echo "ui_print(\"Cleaning up...\");" >> updater-script
+echo "show_progress(0.100000,0);" >> updater-script
+for i in `cat oldscript | grep "unmount(" | sort`;do
+	if [ "$i" != "$j" ];then
+		j=$i
+		echo $j >> updater-script
+	fi
+done
+echo "sleep(2);" >> updater-script
+echo "" >> updater-script
+echo "ui_print(\"Done!\");" >> updater-script
+sed -i 's/z2/system/g' updater-script
+mv updater-script out/META-INF/com/google/android/updater-script
+
+cd out
+zip -r ../ota.zip .
+java -Xmx1024m -jar $ANDROID_BUILD_TOP/build/tools/mk_ota_script/sign_mokee_ota.jar -w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 ../ota.zip $OUT
+cd $ANDROID_BUILD_TOP
+rm -rf $TMP
