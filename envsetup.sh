@@ -663,11 +663,6 @@ function lunch()
         fi
     fi
 
-    if [ "$(which pngquant)" == "" ]
-    then
-        echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
-    fi
-
     export TARGET_PRODUCT=$product
     export TARGET_BUILD_VARIANT=$variant
     export TARGET_BUILD_TYPE=release
