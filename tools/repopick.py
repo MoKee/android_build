@@ -307,7 +307,7 @@ for change in args.change_number:
                 else:
                     project_path = '/'.join(split_path[:-1])
 
-                if len(split_branch) == 4 and split_branch[0] == 'cm' and split_branch[2] == 'caf':
+                if len(split_branch) == 4 and split_branch[0] == 'mkl' and split_branch[2] == 'caf':
                     project_path += '-caf/msm' + split_branch[3]
                 # audio and media are different from display
                 elif split_path[2] == 'audio' or split_path[2] == 'media':
