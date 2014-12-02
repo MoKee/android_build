@@ -669,6 +669,13 @@ function lunch()
 
     echo
 
+    if [[ $USE_PREBUILT_CHROMIUM -eq 1 ]]; then
+        chromium_prebuilt
+    else
+        # Unset flag in case user opts out later on
+        export PRODUCT_PREBUILT_WEBVIEWCHROMIUM=""
+    fi
+
     fixup_common_out_dir
 
     set_stuff_for_environment
@@ -2300,6 +2307,19 @@ function make()
     echo -e " ####"
     echo
     return $ret
+}
+
+function chromium_prebuilt() {
+    T=$(gettop)
+    hash=$T/prebuilts/chromium/$MK_BUILD/hash.txt
+
+    if [ -r $hash ] && [ $(git --git-dir=$T/external/chromium_org/.git --work-tree=$T/external/chromium_org rev-parse --verify HEAD) == $(cat $hash) ]; then
+        export PRODUCT_PREBUILT_WEBVIEWCHROMIUM=yes
+        echo "** Prebuilt Chromium is up-to-date; Will be used for build **"
+    else
+        export PRODUCT_PREBUILT_WEBVIEWCHROMIUM=no
+        echo "** Prebuilt Chromium out-of-date/not found; Will build from source **"
+    fi
 }
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
