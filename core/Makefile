@@ -1007,7 +1007,17 @@ INTERNAL_SYSTEMIMAGE_FILES := $(filter $(TARGET_OUT)/%, \
     $(PDK_FUSION_SYSIMG_FILES) \
     $(RECOVERY_RESOURCE_ZIP))
 
-FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEPS)
+ifneq ($(MK_BUILDTYPE),RELEASE)
+systemimage-crusher: $(INTERNAL_SYSTEMIMAGE_FILES)
+    @echo -e "Optimizing PNGs to Shrink ROM Size!"
+    $(hide) APKCERTS=$(APKCERTS_FILE) ./build/tools/releasetools/pngcrusher
+else
+systemimage-crusher:
+endif
+
+.PHONY: systemimage-crusher
+
+FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEPS) systemimage-crusher
 # -----------------------------------------------------------------
 # installed file list
 # Depending on anything that $(BUILT_SYSTEMIMAGE) depends on.
