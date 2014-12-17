@@ -1596,17 +1596,13 @@ function godir () {
 function mkremote()
 {
     git remote rm mkremote 2> /dev/null
-    if [ ! -d .git ]
-    then
-        echo .git directory not found. Please run this from the root directory of the Android repository you wish to set up.
-    fi
-    GERRIT_REMOTE=`cat .git/config | grep projectname | cut -d"=" -f2 | sed -e 's/^[ \t]*//'`
+    GERRIT_REMOTE=$(git config --get remote.github.projectname)
     if [ -z "$GERRIT_REMOTE" ]
     then
-        echo Unable to set up the git remote, are you in the root of the repo?
+        echo Unable to set up the git remote, are you under a git repo?
         return 0
     fi
-    MKUSER=`git config --get review.review.mfunz.com.username`
+    MKUSER=$(git config --get review.review.mfunz.com.username)
     if [ -z "$MKUSER" ]
     then
         git remote add mkremote ssh://review.mfunz.com:29418/$GERRIT_REMOTE
