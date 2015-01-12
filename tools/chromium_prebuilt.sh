@@ -49,8 +49,10 @@ fi
 
 echo "Generating Makefiles..."
 
-HASH=$(git --git-dir=$TOP/external/chromium_org/.git --work-tree=$TOP/external/chromium_org rev-parse --verify HEAD)
-echo $HASH > $PREBUILT_DIR/hash.txt
+HASH1=$(git --git-dir=$TOP/external/chromium_org/.git --work-tree=$TOP/external/chromium_org rev-parse --verify HEAD)
+HASH2=$(git --git-dir=$TOP/external/chromium_org/.git --work-tree=$TOP/frameworks/webview rev-parse --verify HEAD)
+echo $HASH1 > $PREBUILT_DIR/hash_chromium.txt
+echo $HASH2 > $PREBUILT_DIR/hash_webview.txt
 
 cat > $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
 # Copyright (C) 2014 The MoKee OpenSource Project
