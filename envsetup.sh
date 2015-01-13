@@ -35,6 +35,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - clog:     Tool to generate changelog.
 - ota_all:  Generate OTA packages using the MoKee OTA system.
 - chglog:   Alternative tool to generate changelog.
+- clearstr: Helper script to remove unneeded strings from xml
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -2477,6 +2478,11 @@ function ota_all() {
 # Alternative Changelog Tool
 function chglog() {
     $ANDROID_BUILD_TOP/build/tools/chglog.py $ANDROID_BUILD_TOP $1 $2
+}
+
+# Helper script to remove unneeded strings from xml
+function clearstr() {
+    $ANDROID_BUILD_TOP/build/tools/clearstr.py $1 $2 $3
 }
 
 # Add completions
