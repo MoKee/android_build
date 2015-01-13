@@ -23,7 +23,7 @@ import sys
 import requests
 import subprocess
 
-DEF_BRANCH = 'kk_mkt'
+DEF_BRANCH = 'mkl'
 TOKEN_FILE = '.gh_token'
 
 class bcolors:
