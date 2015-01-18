@@ -259,7 +259,11 @@ echo ""
   if SYNC=$(askyn "Should we sync repositories before build" $SYNC); then
 		J=$(ask "what -j level should we use? 1 for slow internet 16 for fast..." $J)
   fi
-  CCACHE=$(askyn "Do you want to use ccache" ${CCACHE:-y})
+  if CCACHE=$(askyn "Do you want to use ccache" $CCACHE); then
+    if CCDIR=$(askyn "Would you like to specify the .ccache dir" $CCDIR); then
+      NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR) 
+    fi
+  fi
   BP=$(askyn "Do you want to remove build.prop before the build (recomended)" $BP)
   QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
   CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
@@ -362,6 +366,13 @@ THREADS USED FOR REPO SYNC=$J
 fi
 cat <<!EOD
 USE CCACHE=$CCACHE
+!EOD
+if [ "$CCDIR" = y ]; then
+cat <<!EOD
+CUSTOM CCACHE DIRECTORY=$NEW_CCACHE_DIR
+!EOD
+fi
+cat <<!EOD
 REMOVE BUILD.PROP BEFORE EACH BUILD=$BP
 QUICK CLEAN BUILD=$QCLEAN
 CLEAN BUILD=$CLEAN
@@ -409,7 +420,9 @@ cd "$SAUCE" || exit 3
 
 if [[ "$CCACHE" = y ]]; then
   export USE_CCACHE=1
-  if [ ! "$CCACHE_DIR" ]; then
+  if [[ "$CCDIR" = y ]]; then
+    export CCACHE_DIR=$NEW_CCACHE_DIR
+  elif [[ "$CCDIR" = n ]]; then
     export CCACHE_DIR=$DEFAULT_CCACHE_DIR
   fi
 elif [[ "$CCACHE" = n ]]; then
