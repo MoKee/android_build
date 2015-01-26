@@ -1671,7 +1671,7 @@ MK_TARGET_PACKAGE := $(PRODUCT_OUT)/$(MK_VERSION).zip
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(MK_TARGET_PACKAGE)
+	$(hide) ./build/tools/gen.pyo $(INTERNAL_OTA_PACKAGE_TARGET) $(MK_TARGET_PACKAGE) $(DEVELOPER_MAINTAINER)
 	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) | cut -f1 -d' ' > $(MK_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(MK_TARGET_PACKAGE)"${CL_RST}
 
