@@ -16,8 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-export EXCLUDE_CHECK_MAIN="QuickSearchBox.apk
-GoogleIME.apk
+export EXCLUDE_CHECK_MAIN="GoogleIME.apk
 OneTimeInitializer.apk
 Provision.apk
 iFlyIME.apk
