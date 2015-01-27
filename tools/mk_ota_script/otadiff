@@ -116,8 +116,10 @@ mv z2/META-INF/com/google/android/update-binary out/META-INF/com/google/android/
 mv z2/META-INF/com/google/android/updater-script oldscript
 rm -rf z1/META-INF
 rm -rf z2/META-INF
-rm z1/system/bin/backuptool.sh
-rm z2/system/bin/backuptool.sh
+rm -rf z1/install
+rm -rf z2/install
+rm -f z1/file_contexts
+rm -f z2/file_contexts
 if [ -f z2/boot.img ];then
 	mv z2/boot.img out/boot.img
 	rm z1/boot.img
@@ -137,25 +139,6 @@ if [ -f z1/system/etc/sysctl.conf ];then
 	rm z1/system/etc/sysctl.conf
 fi
 
-if [ -d z2/etc/motorola/bp_nvm_default ];then
-	rm -rf z2/system/etc/motorola/bp_nvm_default
-	rm -rf z1/system/etc/motorola/bp_nvm_default
-fi
-
-if [ -d z2/system/lib/me ];then
-	rm -rf z2/system/lib/me
-	rm -rf z1/system/lib/me
-	rm z1/system/bin/fixril
-	rm z2/system/lib/libril_rds.so
-	rm z1/system/lib/libril_rds.so
-	rm z2/system/lib/libpppd_plugin-ril.so
-	rm z1/system/lib/libpppd_plugin-ril.so
-	rm z2/system/lib/libril.so
-	rm z1/system/lib/libril.so
-	rm z2/system/lib/libmoto_ril.so
-	rm z1/system/lib/libmoto_ril.so
-fi
-
 if [ -d z2/system/bootmenu ];then
 	cp -R z2/system/bootmenu out/system/
 	rm -R z2/system/bootmenu
@@ -171,6 +154,15 @@ if [ -d z2/system/etc/init.d ];then
 fi
 if [ -d z1/system/etc/init.d ];then
 	rm -R z1/system/etc/init.d
+fi
+
+if [ -f z2/system/bin/mkta ];then
+	mkdirp out/system/bin 2> /dev/null
+	cp z2/system/bin/mkta out/system/bin/
+	rm z2/system/bin/mkta
+fi
+if [ -f z1/system/bin/mkta ];then
+	rm z1/system/bin/mkta
 fi
 
 # Device specific pre-processing
@@ -227,15 +219,7 @@ echo "ui_print(\"Updating from ${OLDVERSION}\");" >> updater-script
 echo "ui_print(\"to ${NEWVERSION} for your device.\");" >> updater-script
 echo "ui_print(\"It may take several minutes, please be patient.\");" >> updater-script
 # Mount file system
-OLD_IFS=$IFS
-IFS=$'\n'
-for a in `cat oldscript | grep "mount(" | grep -v "unmount" | sort`;do
-	if [ "$a" != "$b" ];then
-		b=$a
-		echo $b >> updater-script
-	fi
-done
-IFS=$OLD_IFS
+cat oldscript | grep "^mount(" | grep -m 1 "system" >> updater-script
 echo "" >> updater-script
 # Verifying system
 echo "ui_print(\"Verifying product version...\");" >> updater-script
@@ -269,31 +253,21 @@ for dir in $(find z2 -maxdepth 1 -mindepth 1 -type d | awk -F'/' '{print $NF}');
     echo "package_extract_dir(\"$dir\", \"/$dir\");" >> updater-script
 done
 echo "" >> updater-script
-# Permissions
-if cat oldscript | grep set_perm | grep -v backuptool | grep -vq tmp;then
-	echo "ui_print(\"Setting permissions...\");" >> updater-script
-else
-	echo "ui_print(\"Setting metadata...\");" >> updater-script
-fi
-echo "show_progress(0.100000,0);" >> updater-script
-OLD_IFS=$IFS
-IFS=$'\n'
-for x in `cat oldscript | grep set_metadata`; do
-	echo $x >> updater-script
-done
-for x in `cat oldscript | grep set_perm`;do
-	if [[ ! `echo $x | grep "backuptool"` ]] && [[ ! `echo $x | grep "/tmp"` ]] ;then
-		echo $x >> updater-script
-	fi
-done
-IFS=$OLD_IFS
+# Symlinks and permissions
+python $ANDROID_BUILD_TOP/build/tools/mk_ota_script/script.py oldscript >> updater-script
 echo "" >> updater-script
 # Flash kernel
 echo "ui_print(\"Flashing kernel...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
-cat oldscript | grep "package_extract_file(\"boot.img\"" >> updater-script
-cat oldscript | grep "write_raw_image(" >> updater-script
-cat oldscript | grep "delete(\"/tmp/boot.img\")"  >> updater-script
+if [ ! -z "$DEVICE_TREE" ];then
+	if [ -f $DEVICE_TREE/ota_flash_kernel.mokee ];then
+		. $DEVICE_TREE/ota_flash_kernel.mokee
+	else
+		cat oldscript | grep "package_extract_file(\"boot.img\"" >> updater-script
+		cat oldscript | grep "write_raw_image(" >> updater-script
+		cat oldscript | grep "delete(\"/tmp/boot.img\")"  >> updater-script
+	fi
+fi
 echo "" >> updater-script
 # Device specific post-processing
 if [ ! -z "$DEVICE_TREE" ];then
@@ -305,12 +279,7 @@ fi
 # Clean up
 echo "ui_print(\"Cleaning up...\");" >> updater-script
 echo "show_progress(0.100000,0);" >> updater-script
-for i in `cat oldscript | grep "unmount(" | sort`;do
-	if [ "$i" != "$j" ];then
-		j=$i
-		echo $j >> updater-script
-	fi
-done
+cat oldscript | grep "^unmount(" | grep -m 1 "system" >> updater-script
 echo "sleep(2);" >> updater-script
 echo "" >> updater-script
 echo "ui_print(\"Done!\");" >> updater-script
