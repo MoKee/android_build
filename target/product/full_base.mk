@@ -21,9 +21,6 @@
 
 PRODUCT_PACKAGES := \
     libfwdlockengine \
-    libWnnEngDic \
-    libWnnJpnDic \
-    libwnndict \
     WAPPushManager
 
 # Additional settings used in all AOSP builds
