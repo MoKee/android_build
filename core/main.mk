@@ -326,6 +326,10 @@ ifneq (,$(user_variant))
   ifdef MK_RELEASE
     # Target is secure in release builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
+  endif
+  ifdef MK_HISTORY
+    # Target is secure in history builds.
+    ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
   else
     # Set device insecure for other builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
