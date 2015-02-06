@@ -67,6 +67,7 @@ parser.add_argument('-v', '--verbose', action='store_true', help='print extra in
 parser.add_argument('-f', '--force', action='store_true', help='force cherry pick even if commit has been merged')
 parser.add_argument('-p', '--pull', action='store_true', help='execute pull instead of cherry-pick')
 parser.add_argument('-t', '--topic', help='pick all commits from a specified topic')
+parser.add_argument('-Q', '--query', help='pick all commits using the specified query')
 args = parser.parse_args()
 if args.start_branch == None and args.abandon_first:
     parser.error('if --abandon-first is set, you must also give the branch name with --start-branch')
@@ -77,10 +78,13 @@ if args.auto_branch:
         args.start_branch = ['auto']
 if args.quiet and args.verbose:
     parser.error('--quiet and --verbose cannot be specified together')
-if len(args.change_number) > 0 and args.topic:
-    parser.error('cannot specify a topic and change number(s) together')
-if len(args.change_number) == 0 and not args.topic:
-    parser.error('must specify at least one commit id or a topic')
+if len(args.change_number) > 0:
+    if args.topic or args.query:
+        parser.error('cannot specify a topic (or query) and change number(s) together')
+if args.topic and args.query:
+    parser.error('cannot specify a topic and a query together')
+if len(args.change_number) == 0 and not args.topic and not args.query:
+    parser.error('must specify at least one commit id or a topic or a query')
 
 # Helper function to determine whether a path is an executable file
 def is_exe(fpath):
@@ -104,10 +108,10 @@ def which(program):
     return None
 
 # Simple wrapper for os.system() that:
-#   - exits on error
+#   - exits on error if !can_fail
 #   - prints out the command if --verbose
 #   - suppresses all output if --quiet
-def execute_cmd(cmd):
+def execute_cmd(cmd, can_fail=False):
     if args.verbose:
         print('Executing: %s' % cmd)
     if args.quiet:
@@ -116,7 +120,8 @@ def execute_cmd(cmd):
     if os.system(cmd):
         if not args.verbose:
             print('\nCommand that failed:\n%s' % cmd)
-        sys.exit(1)
+        if not can_fail:
+             sys.exit(1)
 
 # Verifies whether pathA is a subdirectory (or the same) as pathB
 def is_pathA_subdir_of_pathB(pathA, pathB):
@@ -187,11 +192,11 @@ while(True):
     ppaths = re.split('\s*:\s*', pline.decode())
     project_name_to_path[ppaths[1]] = ppaths[0]
 
-# Get all commits for a specified topic
-if args.topic:
-    url = 'http://review.mfunz.com/changes/?q=topic:%s' % args.topic
+# Get all commits for a specified query
+def fetch_query(query):
+    url = 'http://review.mfunz.com/changes/?q=%s' % query
     if args.verbose:
-        print('Fetching all commits from topic: %s\n' % args.topic)
+        print('Fetching all commits using query: %s\n' % query)
     f = urllib.request.urlopen(url)
     d = f.read().decode("utf-8")
     if args.verbose:
@@ -201,7 +206,7 @@ if args.topic:
     d = d.split(')]}\'\n')[1]
     matchObj = re.match(r'\[\s*\]', d)
     if matchObj:
-        sys.stderr.write('ERROR: Topic %s was not found on the server\n' % args.topic)
+        sys.stderr.write('ERROR: Query %s was not found on the server\n' % query)
         sys.exit(1)
     d = re.sub(r'\[(.*)\]', r'\1', d)
     if args.verbose:
@@ -214,6 +219,12 @@ if args.topic:
 
     # Reverse the array as we want to pick the lowest one first
     args.change_number = reversed(changelist)
+
+if args.topic:
+    fetch_query("topic:{0}".format(args.topic))
+
+if args.query:
+    fetch_query(args.query)
 
 # Check for range of commits and rebuild array
 changelist = []
@@ -382,7 +393,7 @@ for changeps in args.change_number:
       cmd = 'cd %s && git pull --no-edit github %s' % (project_path, fetch_ref)
     else:
       cmd = 'cd %s && git fetch github %s' % (project_path, fetch_ref)
-    execute_cmd(cmd)
+    execute_cmd(cmd, True)
     # Check if it worked
     FETCH_HEAD = '%s/.git/FETCH_HEAD' % project_path
     if os.stat(FETCH_HEAD).st_size == 0:
