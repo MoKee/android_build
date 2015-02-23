@@ -299,25 +299,29 @@ echo ""
       fi
     done
   fi
-  if BP=$(askyn "Do you want to remove build.prop for chosen devices before the build? (recomended)" $BP); then
-    for DEVICE in ${DEVICES[@]}; do
-      if askyn "Would you like to remove the build.prop for "$DEVICE"?"; then
-        echo "Removing build.prop for "$DEVICE"..."
-        echo "$DEVICE">>""$SAUCE"/out/buildrules/bp.devices"
-      else
-        echo "Not removing build.prop for "$DEVICE"..."
-      fi
-    done
+  if [[ "$CLEAN" =~ ^([nN]) ]]; then
+    if BP=$(askyn "Do you want to remove build.prop for chosen devices before the build? (recomended)" $BP); then
+      for DEVICE in ${DEVICES[@]}; do
+        if askyn "Would you like to remove the build.prop for "$DEVICE"?"; then
+          echo "Removing build.prop for "$DEVICE"..."
+          echo "$DEVICE">>""$SAUCE"/out/buildrules/bp.devices"
+        else
+          echo "Not removing build.prop for "$DEVICE"..."
+        fi
+      done
+    fi
   fi 
-  if QCLEAN=$(askyn "Do you want to run mka installclean for chosen devices before the build? (quick clean build)" $QCLEAN); then
-    for DEVICE in ${DEVICES[@]}; do
-      if askyn "Would you like to mka installclean for "$DEVICE"?"; then
-        echo "Running mka installclean for "$DEVICE"..."
-        echo "$DEVICE">>""$SAUCE"/out/buildrules/qclean.devices"
-      else
-        echo "Not not running mka installclean for "$DEVICE"..."
-      fi
-    done
+  if [[ "$CLEAN" =~ ^([nN]) ]]; then
+    if QCLEAN=$(askyn "Do you want to run mka installclean for chosen devices before the build? (quick clean build)" $QCLEAN); then
+      for DEVICE in ${DEVICES[@]}; do
+        if askyn "Would you like to mka installclean for "$DEVICE"?"; then
+          echo "Running mka installclean for "$DEVICE"..."
+          echo "$DEVICE">>""$SAUCE"/out/buildrules/qclean.devices"
+        else
+          echo "Not not running mka installclean for "$DEVICE"..."
+        fi
+      done
+    fi
   fi 
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
     DEF_CORE=$(ask "How many cores (including HT) does your processor have?" $DEF_CORE)
