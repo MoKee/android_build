@@ -30,6 +30,7 @@ J=4
 BP=y
 CCACHE=y
 DEFAULT_CCACHE_DIR=~/.ccache
+PRCHR=n
 QCLEAN=n
 CLEAN=n
 OTA=n
@@ -264,6 +265,21 @@ echo ""
       NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR) 
     fi
   fi
+
+  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then
+    for DEVICE in ${DEVICES[@]}; do
+      if USECH=$(askyn "Would you like to use a prebuilt Chromium for "$DEVICE"?" $USECH); then
+        if [[ ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_chromium.txt" && ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_webview.txt" ]]; then
+          err "You have not built with a prebuilt Chromium before..."
+          err "Chromium will be built from source this time, but will be set up for future prebuilt builds..."
+        else 
+          info "Using prebuilt Chromium for "$DEVICE", as long as it is up to date..."
+          echo ""$DEVICE"_USE_CHROMIUM">>""$SAUCE"/buildscriptrules.txt"
+        fi
+      else echo "Not using prebuilt Chronium for "$DEVICE"..."
+      fi
+    done
+  fi
   BP=$(askyn "Do you want to remove build.prop before the build (recomended)" $BP)
   QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
   CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
@@ -373,6 +389,7 @@ CUSTOM CCACHE DIRECTORY=$NEW_CCACHE_DIR
 !EOD
 fi
 cat <<!EOD
+BUILD WITH PREBUILT CHROMIUM=$PRCHR
 REMOVE BUILD.PROP BEFORE EACH BUILD=$BP
 QUICK CLEAN BUILD=$QCLEAN
 CLEAN BUILD=$CLEAN
@@ -404,8 +421,8 @@ cd "$SAUCE"
 if [ "$SYNC" = y ]; then
   info "Running repo sync..."
     repo sync -j"$J"
-fi
 
+fi
 if [ "$CLEAN" = y ]; then
   info "Running make clean..."
     make clean
@@ -429,10 +446,17 @@ elif [[ "$CCACHE" = n ]]; then
   unset USE_CCACHE
 fi
 
+if grep -q "$DEVICE"_USE_CHROMIUM "$SAUCE"/buildscriptrules.txt; then
+  export USE_PREBUILT_CHROMIUM=1
+else 
+  unset USE_PREBUILT_CHROMIUM
+fi
+
   info "Building "$DEVICE""
 cd "$SAUCE"
  . build/envsetup.sh
  croot
+
  lunch mk_"${DEVICE}"-userdebug
 
   if [ "$BP" = y ]; then
@@ -549,6 +573,8 @@ if [[ "$FTP" = y && "$OTA" = y ]]; then
    done
 echo ""
 fi
+
+rm ""$SAUCE"/buildscriptrules.txt"
 
 echo ""
 TET=$(date +%s)
