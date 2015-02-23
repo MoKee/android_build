@@ -27,7 +27,7 @@ MOVE=n
 STORAGE=
 SYNC=n
 J=4
-BP=y
+BP=n
 CCACHE=y
 DEFAULT_CCACHE_DIR=~/.ccache
 PRCHR=n
@@ -235,6 +235,13 @@ echo ""
   until eval SAUCE=$(demand "${bldblu}Enter the path to your build source directory:" $SAUCE) && [[ -d $SAUCE/android ]]; do
   err "$SAUCE doesn't exist"
   done
+
+  if [ -d "$SAUCE"/buildrules ]; then
+    rm -rf "$SAUCE"/buildrules/*
+  else
+    mkdir -p ""$SAUCE"/buildrules"
+  fi
+
   while :; do
     if MOVE=$(askyn "Should the finished ROMS be moved to a storage folder" $MOVE); then
       eval STORAGE=$(ask "Enter the path to your storage directory [blank cancels]:" $STORAGE)
@@ -266,30 +273,49 @@ echo ""
     fi
   fi
 
-  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then
-    for DEVICE in ${DEVICES[@]}; do
+  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then 
+  for DEVICE in ${DEVICES[@]}; do
       if USECH=$(askyn "Would you like to use a prebuilt Chromium for "$DEVICE"?" $USECH); then
         if [[ ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_chromium.txt" && ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_webview.txt" ]]; then
           err "You have not built with a prebuilt Chromium before..."
           err "Chromium will be built from source this time, but will be set up for future prebuilt builds..."
+          echo ""$DEVICE"_USE_CHROMIUM">>""$SAUCE"/buildrules/buildscript.rules"
+          echo "$DEVICE">>""$SAUCE"/buildrules/chromium.devices"
         else 
-          info "Using prebuilt Chromium for "$DEVICE", as long as it is up to date..."
-          echo ""$DEVICE"_USE_CHROMIUM">>""$SAUCE"/buildscriptrules.txt"
+          echo "Using prebuilt Chromium for "$DEVICE", as long as it is up to date..."
+          echo ""$DEVICE"_USE_CHROMIUM">>""$SAUCE"/buildrules/buildscript.rules"
+          echo "$DEVICE">>""$SAUCE"/buildrules/chromium.devices"
         fi
       else echo "Not using prebuilt Chronium for "$DEVICE"..."
       fi
     done
   fi
-  BP=$(askyn "Do you want to remove build.prop before the build (recomended)" $BP)
-  QCLEAN=$(askyn "Do you want to run mka installclean first (quick clean build)" $QCLEAN)
-  CLEAN=$(askyn "Do you want to run make clean first (slow clean build, will delete entire contents of out folder..." $CLEAN)
+  if BP=$(askyn "Do you want to remove build.prop for chosen devices before the build? (recomended)" $BP); then
+    for DEVICE in ${DEVICES[@]}; do
+      if askyn "Would you like to remove the build.prop for "$DEVICE"?"; then
+        echo "Removing build.prop for "$DEVICE"..."
+        echo ""$DEVICE"_REMOVE_BP">>""$SAUCE"/buildrules/buildscript.rules"
+        echo "$DEVICE">>""$SAUCE"/buildrules/bp.devices"
+      else 
+        echo "Not removing build.prop for "$DEVICE"..."
+      fi
+    done
+  fi 
+  if QCLEAN=$(askyn "Do you want to run mka installclean for chosen devices before the build? (quick clean build)" $QCLEAN); then
+    for DEVICE in ${DEVICES[@]}; do
+      if askyn "Would you like to mka installclean for "$DEVICE"?"; then
+        echo "Running mka installclean for "$DEVICE"..."
+        echo ""$DEVICE"_MKAINSTALLCLEAN">>""$SAUCE"/buildrules/buildscript.rules"
+        echo "$DEVICE">>""$SAUCE"/buildrules/qclean.devices"
+      else 
+        echo "Not not running mka installclean for "$DEVICE"..."
+      fi
+    done
+  fi 
+  CLEAN=$(askyn "Do you want to run make clean first? (slow clean build, will delete entire contents of out folder...)" $CLEAN)
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
-		CORE=$(ask "How many cores(including HT) does your processor have?[$DEF_CORE]" $CORE)
-		if [ ! "$CORE" ]; then
-		  JBN=$(($DEF_CORE + 1))
-		else
-		  JBN=$(($CORE + 1))
-		fi
+    DEF_CORE=$(ask "How many cores (including HT) does your processor have?" $DEF_CORE)
+    JBN=$(($DEF_CORE + 1))
   fi
   if OTA=$(askyn "Do you want to make an ota package for chosen devices?" $OTA); then
   declare -i i=${#OTABO[*]}
@@ -390,8 +416,26 @@ CUSTOM CCACHE DIRECTORY=$NEW_CCACHE_DIR
 fi
 cat <<!EOD
 BUILD WITH PREBUILT CHROMIUM=$PRCHR
+!EOD
+if [ "$PRCHR" = y ]; then
+  echo "Devices using prebuilt Chromium:"
+  cat "$SAUCE"/buildrules/chromium.devices
+fi
+cat <<!EOD
 REMOVE BUILD.PROP BEFORE EACH BUILD=$BP
+!EOD
+if [ "$BP" = y ]; then
+  echo "Remove build.prop for:"
+  cat "$SAUCE"/buildrules/bp.devices
+fi
+cat <<!EOD
 QUICK CLEAN BUILD=$QCLEAN
+!EOD
+if [ "$QCLEAN" = y ]; then
+  echo "Devices set for a quick clean buid:"
+  cat "$SAUCE"/buildrules/qclean.devices
+fi
+cat <<!EOD
 CLEAN BUILD=$CLEAN
 MOVE TO STORAGE=$MOVE
 !EOD
@@ -446,7 +490,7 @@ elif [[ "$CCACHE" = n ]]; then
   unset USE_CCACHE
 fi
 
-if grep -q "$DEVICE"_USE_CHROMIUM "$SAUCE"/buildscriptrules.txt; then
+if grep -q "$DEVICE"_USE_CHROMIUM "$SAUCE"/buildrules/buildscript.rules; then
   export USE_PREBUILT_CHROMIUM=1
 else 
   unset USE_PREBUILT_CHROMIUM
@@ -459,12 +503,12 @@ cd "$SAUCE"
 
  lunch mk_"${DEVICE}"-userdebug
 
-  if [ "$BP" = y ]; then
+  if grep -q "$DEVICE"_REMOVE_BP "$SAUCE"/buildrules/buildscript.rules; then
     info "Removing build.prop"
      rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
   fi
 
-  if [ "$QCLEAN" = y ]; then
+  if grep -q "$DEVICE"_MKAINSTALLCLEAN "$SAUCE"/buildrules/buildscript.rules; then
     info "Running mka installclean..."
      mka installclean
   fi
@@ -574,7 +618,7 @@ if [[ "$FTP" = y && "$OTA" = y ]]; then
 echo ""
 fi
 
-rm ""$SAUCE"/buildscriptrules.txt"
+rm -rf "$SAUCE"/buildrules
 
 echo ""
 TET=$(date +%s)
