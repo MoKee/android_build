@@ -41,12 +41,15 @@ FTPPASS=
 FTPFULL=FULL/UNOFFICIAL
 FTPOTA=OTA/UNOFFICIAL
 JB=n
+
+# Find processor cores
 if [ "$(uname)" = "Linux" ] ; then
   DEF_CORE=$(cat /proc/cpuinfo | grep "processor" | wc -l)
 else
   DEF_CORE=2
 fi
 
+# Set text colors
 readonly red=$(tput setaf 1) #  red
 readonly grn=$(tput setaf 2) #  green
 readonly ylw=$(tput setaf 3) #  yellow
@@ -71,6 +74,8 @@ echo "                            opensource"
 echo ""
 echo ""
 echo -e "$txtrst"
+
+# Script functions
 function err {
   echo "$txtrst${red}$*$txtrst" >&2
 }
@@ -82,7 +87,6 @@ function warn {
 function info {
   echo "$txtrst${grn}$*$txtrst"
 }
-
 
 function askyn {
   local question=$1
@@ -205,6 +209,7 @@ while :; do
   shift
 done
 
+# Add devices to the script
 if [[ $# > 0 ]]; then
   DEVICES=( $* )
 fi
@@ -228,14 +233,18 @@ if [[ $GO != y ]]; then
   echo "Final device list: ${DEVICES[*]}"
   echo ""
 
+# Enable advanced settings
 if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
-echo ""
-err "ADVANCED SETTINGS ENABLED"
-echo ""
+  echo ""
+  err "ADVANCED SETTINGS ENABLED"
+  echo ""
+
   until eval SAUCE=$(demand "${bldblu}Enter the path to your build source directory:" $SAUCE) && [[ -d $SAUCE/android ]]; do
-  err "$SAUCE doesn't exist"
+    err "$SAUCE doesn't exist"
   done
 
+# Make clean before doing anything else, this way we can store temp files for the build-script
+# in the "out" directory
   if CLEAN=$(askyn "Before we begin, would you like to run make clean?" $CLEAN); then
     echo ""
     err "WARNING!!! MAKE CLEAN WILL DELETE THE ENTIRE CONTENTS OF YOUR OUT FOLDER!!!"
@@ -247,24 +256,25 @@ echo ""
       fi
   fi
 
+# Make sure any previous build rules are removed before proceding
   if [ -d "$SAUCE"/out/buildrules ]; then
     rm -rf "$SAUCE"/out/buildrules/*
   else
     mkdir -p ""$SAUCE"/out/buildrules"
   fi
 
+# Should we move to a storage folder?
   while :; do
     if MOVE=$(askyn "Should the finished ROMS be moved to a storage folder" $MOVE); then
       eval STORAGE=$(ask "Enter the path to your storage directory [blank cancels]:" $STORAGE)
       until [[ ! $STORAGE || ( -d "$STORAGE" && -w "$STORAGE" ) ]]; do
         if [[ ! -d "$STORAGE" ]]; then
-          askyn "Storage directory $STORAGE doesn't exit, mkdir" y && mkdir -p "$STORAGE" && break
+          askyn "Storage directory $STORAGE doesn't exist, mkdir?" y && mkdir -p "$STORAGE" && break
         else
           err "Storage directory $STORAGE is not writable"
         fi
         STORAGE=$(ask "Enter the path to your storage directory [blank cancels]:" $STORAGE)
       done
-
       if [[ $STORAGE ]]; then
         # Canonicalize
         STORAGE=$(cd "$STORAGE"; pwd -P)
@@ -275,17 +285,21 @@ echo ""
     fi
   done
 
+# Sync repos before the build starts?
   if SYNC=$(askyn "Should we sync repositories before build" $SYNC); then
-		J=$(ask "what -j level should we use? 1 for slow internet 16 for fast..." $J)
+    J=$(ask "what -j level should we use? 1 for slow internet 16 for fast..." $J)
   fi
+
+# Use ccache?
   if CCACHE=$(askyn "Do you want to use ccache" $CCACHE); then
     if CCDIR=$(askyn "Would you like to specify the .ccache dir" $CCDIR); then
       NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR) 
     fi
   fi
 
+# Use a prebuilt chromium?
   if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then 
-  for DEVICE in ${DEVICES[@]}; do
+    for DEVICE in ${DEVICES[@]}; do
       if USECH=$(askyn "Would you like to use a prebuilt Chromium for "$DEVICE"?" $USECH); then
         if [[ ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_chromium.txt" && ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_webview.txt" ]]; then
           err "You have not built with a prebuilt Chromium before..."
@@ -299,6 +313,8 @@ echo ""
       fi
     done
   fi
+
+# Remove the build.prop before the build? (We only do this if "make clean" was not selected)
   if [[ "$CLEAN" =~ ^([nN]) ]]; then
     if BP=$(askyn "Do you want to remove build.prop for chosen devices before the build? (recomended)" $BP); then
       for DEVICE in ${DEVICES[@]}; do
@@ -310,7 +326,9 @@ echo ""
         fi
       done
     fi
-  fi 
+  fi
+
+# Do a "mka installclean" before the build? (We only do this if "make clean" if not selected)
   if [[ "$CLEAN" =~ ^([nN]) ]]; then
     if QCLEAN=$(askyn "Do you want to run mka installclean for chosen devices before the build? (quick clean build)" $QCLEAN); then
       for DEVICE in ${DEVICES[@]}; do
@@ -322,149 +340,173 @@ echo ""
         fi
       done
     fi
-  fi 
+  fi
+
+# Set build thread count
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
     DEF_CORE=$(ask "How many cores (including HT) does your processor have?" $DEF_CORE)
     JBN=$(($DEF_CORE + 1))
   fi
+
+# Make OTA's for chosen devices?
   if OTA=$(askyn "Do you want to make an ota package for chosen devices?" $OTA); then
   declare -i i=${#OTABO[*]}
-     for DEVICE in ${DEVICES[@]}; do
-	OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$DEVICE
-	if OTABUILD=$(askyn "Do you want to make an ota package for "$DEVICE"?" $OTABUILD); then
-		if [ ! -f "$OTABDIR"/*".zip" ]; then
-		   err "YOU ARE NOT SET UP FOR "$DEVICE" OTA BUILDS"
-		   err "SETTING UP BUILD FOLDER"
-		   mkdir -p "$OTABDIR"
-			while :; do
-		   	   USRSTR=$(ask "Enter the path to your "$DEVICE" rom storage directory:" "$USRSTR")
-			   OLDIE=$(ls -t "$USRSTR"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
-			   until [ -e "$OLDIE" ]; do
-			   err ""$USRSTR" DOES NOT HAVE ANY ROMS FOR "$DEVICE" INSIDE!!"
-				USRSTR=$(ask "Enter the path to your "$DEVICE" rom storage directory:" "$USRSTR")
-				OLDIE=$(ls -t "$USRSTR"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
-			   done
-		   	cp "$OLDIE" "$OTABDIR"
-		   	OTABO[$((i++))]=$DEVICE
-		   	echo "Added to OTA build list: "${OTABO[@]}""
-			break
-			done
-		elif [ -f "$OTABDIR"/*".zip" ];then
-		   OTABO[$((i++))]=$DEVICE
-		   echo "Added to OTA build list: "${OTABO[@]}""
-		fi
-	else
-	   err "NOT BUILDING OTA FOR "$DEVICE"..."
-	fi
-     done
+    for DEVICE in ${DEVICES[@]}; do
+      OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$DEVICE
+        if OTABUILD=$(askyn "Do you want to make an ota package for "$DEVICE"?" $OTABUILD); then
+          if [ ! -f "$OTABDIR"/*".zip" ]; then
+            err "YOU ARE NOT SET UP FOR "$DEVICE" OTA BUILDS"
+            err "SETTING UP BUILD FOLDER"
+            mkdir -p "$OTABDIR"
+              while :; do
+                USRSTR=$(ask "Enter the path to your "$DEVICE" rom storage directory:" "$USRSTR")
+                OLDIE=$(ls -t "$USRSTR"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
+                  until [ -e "$OLDIE" ]; do
+                    err ""$USRSTR" DOES NOT HAVE ANY ROMS FOR "$DEVICE" INSIDE!!"
+                    USRSTR=$(ask "Enter the path to your "$DEVICE" rom storage directory:" "$USRSTR")
+                    OLDIE=$(ls -t "$USRSTR"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
+                  done
+                cp "$OLDIE" "$OTABDIR"
+                OTABO[$((i++))]=$DEVICE
+                echo "Added to OTA build list: "${OTABO[@]}""
+                break
+              done
+          elif [ -f "$OTABDIR"/*".zip" ];then
+            OTABO[$((i++))]=$DEVICE
+            echo "Added to OTA build list: "${OTABO[@]}""
+          fi
+        else
+          err "NOT BUILDING OTA FOR "$DEVICE"..."
+        fi
+    done
   echo "Final OTA build list: "${OTABO[*]}""
   echo ""
   fi
 
+# Upload to mokeedev.com?
   while :; do
     if FTP=$(askyn "Do you want to enable FTP uploading" "$FTP"); then
+      FTPUSER=$(ask "What is your mokeedev.com username:" "$FTPUSER")
+      FTPPASS=$(ask -s "What is your mokeedev.com password:" "$FTPPASS")
+      info "Checking access to "$FTPHOST""
+        until curl -# ftp://"$FTPUSER":"$FTPPASS"@"$FTPHOST"/ >/dev/null; do
+          err "User Name and or Password not correct..."
           FTPUSER=$(ask "What is your mokeedev.com username:" "$FTPUSER")
-          FTPPASS=$(ask -s "What is your mokeedev.com password:" "$FTPPASS")
+          FTPPASS=$(ask -s "What is your mokeedev.com password:")
           info "Checking access to "$FTPHOST""
-          until curl -# ftp://"$FTPUSER":"$FTPPASS"@"$FTPHOST"/ >/dev/null; do
-		err "User Name and or Password not correct..."
-		FTPUSER=$(ask "What is your mokeedev.com username:" "$FTPUSER")
-		FTPPASS=$(ask -s "What is your mokeedev.com password:")
-		info "Checking access to "$FTPHOST""
-	  done
-          info "Success!"
-	  FTPUSERPASS=""$FTPUSER":"$FTPPASS"@"
-          break
+        done
+      info "Success!"
+      FTPUSERPASS=""$FTPUSER":"$FTPPASS"@"
+      break
     else
       break
-   fi
-   done
+    fi
+  done
+  
+# Choose devices to upload to mokeedev.com
   if [ "$FTP" = y ]; then
-  declare -i i=${#FTPUL[*]}
-	for DEVICE in ${DEVICES[@]}; do
-	   if FTPUP=$(askyn "Do you want to upload "$DEVICE"?" $FTPUP); then
-		FTPUL[$((i++))]=$DEVICE
-		echo "Added to FTP upload list: "${FTPUL[@]}""
-	   else
-		err "NOT UPLOADING "$DEVICE"..."
-	   fi
-	done
-  echo "Final FTP upload list: "${FTPUL[@]}""
-  echo ""
+    declare -i i=${#FTPUL[*]}
+    for DEVICE in ${DEVICES[@]}; do
+      if FTPUP=$(askyn "Do you want to upload "$DEVICE"?" $FTPUP); then
+        FTPUL[$((i++))]=$DEVICE
+        echo "Added to FTP upload list: "${FTPUL[@]}""
+      else
+        err "NOT UPLOADING "$DEVICE"..."
+      fi
+    done
+    echo "Final FTP upload list: "${FTPUL[@]}""
+    echo ""
   fi
 
-  if [[ "$MOVE" = y && ! -d "$STORAGE" ]]; then
-    err "Storage directory '"$STORAGE"' doesn't exist"
-    exit 2
-  fi
+# Skip the advanced stuff and just build
 else
-echo ""
-   err "OK, Sticking with the default build settings..."
-echo ""
+  echo ""
+  err "OK, Sticking with the default build settings..."
+  echo ""
 fi
 fi
 
+# Final build settings
 echo ""
-cat <<!EOD
-DEVICES=${DEVICES[@]}
-DEVICES FOR OTA BUILD=${OTABO[@]}
-DEVICES FOR FTP UPLOAD=${FTPUL[@]}
-REPO SYNC BEFORE BUILD=$SYNC
+info "Final build settings..."
+echo ""
+  cat <<!EOD
+DEVICES TO BUILD: ${DEVICES[@]}
+!EOD
+if [ "$OTA" = y ]; then
+  cat <<!EOD
+DEVICES FOR OTA BUILD: ${OTABO[@]}
+!EOD
+fi
+if [ "$FTP" = y ]; then
+  cat <<!EOD
+DEVICES FOR FTP UPLOAD: ${FTPUL[@]}
+!EOD
+fi
+  cat <<!EOD
+REPO SYNC BEFORE BUILD: $SYNC
 !EOD
 if [ "$SYNC" = y ]; then
-cat <<!EOD
-THREADS USED FOR REPO SYNC=$J
+  cat <<!EOD
+THREADS USED FOR REPO SYNC: $J
 !EOD
 fi
-cat <<!EOD
-USE CCACHE=$CCACHE
+  cat <<!EOD
+USE CCACHE: $CCACHE
 !EOD
 if [ "$CCDIR" = y ]; then
 cat <<!EOD
-CUSTOM CCACHE DIRECTORY=$NEW_CCACHE_DIR
+CUSTOM CCACHE DIRECTORY: $NEW_CCACHE_DIR
 !EOD
 fi
 cat <<!EOD
-BUILD WITH PREBUILT CHROMIUM=$PRCHR
+BUILD WITH PREBUILT CHROMIUM: $PRCHR
 !EOD
 if [ "$PRCHR" = y ]; then
-  echo "Devices using prebuilt Chromium:"
-  cat "$SAUCE"/out/buildrules/chromium.devices
+  echo "DEVICES USING PREBUILT CHRONIUM:" && cat "$SAUCE"/out/buildrules/chromium.devices
 fi
 cat <<!EOD
-REMOVE BUILD.PROP BEFORE EACH BUILD=$BP
+REMOVE BUILD.PROP BEFORE EACH BUILD: $BP
 !EOD
 if [ "$BP" = y ]; then
-  echo "Remove build.prop for:"
-  cat "$SAUCE"/out/buildrules/bp.devices
+  echo "REMOVING BUILD.PROP FOR:" && cat "$SAUCE"/out/buildrules/bp.devices
 fi
 cat <<!EOD
-QUICK CLEAN BUILD=$QCLEAN
+QUICK CLEAN BUILD: $QCLEAN
 !EOD
 if [ "$QCLEAN" = y ]; then
-  echo "Devices set for a quick clean buid:"
-  cat "$SAUCE"/out/buildrules/qclean.devices
+  echo "RUN MKA INSTALLCLEAN BEFORE BUILDING:" && cat "$SAUCE"/out/buildrules/qclean.devices
 fi
 cat <<!EOD
-CLEAN BUILD=$CLEAN
-MOVE TO STORAGE=$MOVE
+CLEAN BUILD: $CLEAN
+MOVE TO STORAGE: $MOVE
 !EOD
 if [ "$MOVE" = y ]; then
 cat <<!EOD
-STORAGE DIRECTORY=$STORAGE
+STORAGE DIRECTORY: $STORAGE
 !EOD
 fi
 cat <<!EOD
-CUSTOM SCHED_BATCH SETTING=$JB
+CUSTOM SCHED_BATCH SETTING: $JB
 !EOD
 if [ "$JB" = y ]; then
 cat <<!EOD
-CUSTOM SCHED_BATCH LEVEL=$JBN
+CUSTOM SCHED_BATCH LEVEL: $JBN
 !EOD
 fi
 
 echo ""
 
+if [ "$ADVNC" = y ]; then
+  if askyn "Are the settings above correct? Would you like to continue?"; then
+    echo "Continuing with build..."
+  else
+    err "Canceling build process..."
+    exit
+  fi
+fi
+
+# Pre-build settup
 if [[ "${#DEVICES[@]}" = 0 ]]; then
   err "Nothing to build"
 fi
@@ -474,41 +516,40 @@ cd "$SAUCE"
 
 if [ "$SYNC" = y ]; then
   info "Running repo sync..."
-    repo sync -j"$J"
-
+  repo sync -j"$J"
 fi
 
-  for DEVICE in ${DEVICES[@]}; do
+for DEVICE in ${DEVICES[@]}; do
 
-DST=$(date +%s)
+  DST=$(date +%s)
 
-cd "$SAUCE" || exit 3
+  cd "$SAUCE" || exit 3
 
-
-if [[ "$CCACHE" = y ]]; then
-  export USE_CCACHE=1
-  if [[ "$CCDIR" = y ]]; then
-    export CCACHE_DIR=$NEW_CCACHE_DIR
-  elif [[ "$CCDIR" = n ]]; then
-    export CCACHE_DIR=$DEFAULT_CCACHE_DIR
+  if [[ "$CCACHE" = y ]]; then
+    export USE_CCACHE=1
+      if [[ "$CCDIR" = y ]]; then
+        export CCACHE_DIR=$NEW_CCACHE_DIR
+      elif [[ "$CCDIR" = n ]]; then
+        export CCACHE_DIR=$DEFAULT_CCACHE_DIR
+      fi
+  elif [[ "$CCACHE" = n ]]; then
+    unset USE_CCACHE
   fi
-elif [[ "$CCACHE" = n ]]; then
-  unset USE_CCACHE
-fi
-if [ -f ""$SAUCE"/out/buildrules/chromium.devices" ]; then
-  if grep -q "$DEVICE" "$SAUCE"/out/buildrules/chromium.devices; then
-    export USE_PREBUILT_CHROMIUM=1
-  else
-    unset USE_PREBUILT_CHROMIUM
-  fi
-fi
 
+  if [ -f ""$SAUCE"/out/buildrules/chromium.devices" ]; then
+    if grep -q "$DEVICE" "$SAUCE"/out/buildrules/chromium.devices; then
+      export USE_PREBUILT_CHROMIUM=1
+    else
+      unset USE_PREBUILT_CHROMIUM
+    fi
+  fi
+
+# Start the build
   info "Building "$DEVICE""
-cd "$SAUCE"
- . build/envsetup.sh
- croot
-
- lunch mk_"${DEVICE}"-userdebug
+  cd "$SAUCE"
+  . build/envsetup.sh
+  croot
+  lunch mk_"${DEVICE}"-userdebug
 
   if [ -f ""$SAUCE"/out/buildrules/bp.devices" ]; then
     if grep -q "$DEVICE" "$SAUCE"/out/buildrules/bp.devices; then
@@ -525,10 +566,11 @@ cd "$SAUCE"
   fi
 
   info "Cooking the bacon..."
+
   if [ "$JB" = y ]; then
-	make bacon -j"$JBN"
+    make bacon -j"$JBN"
   else
-	mka bacon
+    mka bacon
   fi
 
   echo ""
@@ -538,14 +580,15 @@ cd "$SAUCE"
   echo ""
 done
 
+# Build OTA for chosen devices
 if [ "$OTA" = y ]; then
   for OTAO in ${OTABO[@]}; do
-  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$OTAO"
-  ROM=$(ls -t "$ROMFOLDER"/*"$OTAO"*"UNOFFICIAL.zip" | head -1)
-  ROMMD="$ROM".md5sum
-  OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$OTAO
-  OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
-  echo ""
+    ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$OTAO"
+    ROM=$(ls -t "$ROMFOLDER"/*"$OTAO"*"UNOFFICIAL.zip" | head -1)
+    ROMMD="$ROM".md5sum
+    OTABDIR=$SAUCE/mokee/FULL/UNOFFICIAL/$OTAO
+    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
+      echo ""
       info "Copying "$OTAO" ROM to OTA build dir..."
       cp "$ROM" "$OTABDIR"
 
@@ -557,82 +600,86 @@ if [ "$OTA" = y ]; then
       OTAMD=$(dirname "$OTAN")/md5/$(basename "$OTAN").md5sum
       TEMP=$OTAFOLDER/temp
       TEMPMD=$OTAFOLDER/temp/md5
-	if [ "$FTP" = y ]; then
-	   mkdir -p "$TEMPMD"
-	   cp "$OTAN" "$TEMP"
-	   cp "$OTAMD" "$TEMPMD"
-	fi
+        if [ "$FTP" = y ]; then
+          mkdir -p "$TEMPMD"
+          cp "$OTAN" "$TEMP"
+          cp "$OTAMD" "$TEMPMD"
+      fi
       info "Cleaning up..."
       OLDROMS=$(ls -tr "$OTABDIR"/*"$OTAO"*"UNOFFICIAL.zip" | head -n 1)
       if [[ "$OLDROMS" ]]; then
-         rm "$OLDROMS"
+        rm "$OLDROMS"
       fi
   done
 fi
 
+# Upload to mokeedev.com
 if [ "$FTP" = y ]; then
-   for FTPD in ${FTPUL[@]}; do
-   ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$FTPD"
-   ROM=$(ls -t "$ROMFOLDER"/*"$FTPD"*"UNOFFICIAL.zip" | head -1)
-   ROMMD="$ROM".md5sum
-   OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$FTPD"
-   TEMP=$OTAFOLDER/temp
-   echo ""
+  for FTPD in ${FTPUL[@]}; do
+    ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$FTPD"
+    ROM=$(ls -t "$ROMFOLDER"/*"$FTPD"*"UNOFFICIAL.zip" | head -1)
+    ROMMD="$ROM".md5sum
+    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$FTPD"
+    TEMP=$OTAFOLDER/temp
+    echo ""
     info "Uploading "$FTPD"..."
-     curl -v -T "$ROM" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPFULL"/"$FTPD"/
-     curl -v -T "$ROMMD" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPFULL"/"$FTPD"/md5/
-	if [ -d "$TEMP" ]; then
-	   OTAN=$(ls -t "$TEMP"/*"$FTPD"*"UNOFFICIAL"*".zip" | head -1)
-	   OTAMD=$(dirname "$TEMP")/md5/$(basename "$OTAN").md5sum
-	   curl -v -T "$OTAN" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPOTA"/"$FTPD"/
-	   curl -v -T "$OTAMD" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPOTA"/"$FTPD"/md5/
-	fi
+      curl -v -T "$ROM" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPFULL"/"$FTPD"/
+      curl -v -T "$ROMMD" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPFULL"/"$FTPD"/md5/
+      if [ -d "$TEMP" ]; then
+        OTAN=$(ls -t "$TEMP"/*"$FTPD"*"UNOFFICIAL"*".zip" | head -1)
+        OTAMD=$(dirname "$TEMP")/md5/$(basename "$OTAN").md5sum
+          curl -v -T "$OTAN" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPOTA"/"$FTPD"/
+          curl -v -T "$OTAMD" ftp://"$FTPUSERPASS""$FTPHOST"/"$FTPOTA"/"$FTPD"/md5/
+      fi
    done
 fi
 
+# Move devices to storage
 if [ "$MOVE" = y ]; then
   for DEVICE in ${DEVICES[@]}; do
-  ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$DEVICE"
-  ROM=$(ls -t "$ROMFOLDER"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
-  ROMMD="$ROM".md5sum
-  info "Moving "$DEVICE" ROM to "$STORAGE""
-     mkdir -p "$STORAGE"/"$DEVICE"/md5 &&
-     mv "$ROM" "$STORAGE"/"$DEVICE" &&
-     mv "$ROMMD" "$STORAGE"/"$DEVICE"/md5
+    ROMFOLDER=$(get_build_var OUT_DIR)/target/product/"$DEVICE"
+    ROM=$(ls -t "$ROMFOLDER"/*"$DEVICE"*"UNOFFICIAL.zip" | head -1)
+    ROMMD="$ROM".md5sum
+      info "Moving "$DEVICE" ROM to "$STORAGE""
+      mkdir -p "$STORAGE"/"$DEVICE"/md5 &&
+      mv "$ROM" "$STORAGE"/"$DEVICE" &&
+      mv "$ROMMD" "$STORAGE"/"$DEVICE"/md5
   done
   for OTAO in ${OTABO[@]}; do
-  info "Moving "$OTAO" OTA to "$STORAGE""
-    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
-    OTAN=$(ls -t "$OTAFOLDER"/*"$OTAO"*"UNOFFICIAL"*".zip" | head -1)
-    OTAMD=$(dirname "$OTAN")/md5/$(basename "$OTAN").md5sum
-	if [ -e "$OTAN" ]; then
-         mkdir -p "$STORAGE"/"$OTAO"/OTA/md5
-         mv "$OTAN" "$STORAGE"/"$OTAO"/OTA
-         mv "$OTAMD" "$STORAGE"/"$OTAO"/OTA/md5
-	fi
+    info "Moving "$OTAO" OTA to "$STORAGE""
+      OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
+      OTAN=$(ls -t "$OTAFOLDER"/*"$OTAO"*"UNOFFICIAL"*".zip" | head -1)
+      OTAMD=$(dirname "$OTAN")/md5/$(basename "$OTAN").md5sum
+    if [ -e "$OTAN" ]; then
+      mkdir -p "$STORAGE"/"$OTAO"/OTA/md5
+      mv "$OTAN" "$STORAGE"/"$OTAO"/OTA
+      mv "$OTAMD" "$STORAGE"/"$OTAO"/OTA/md5
+    fi
   done
   rm -rf $(get_build_var OUT_DIR)/target/OTA
-echo ""
+  echo ""
 fi
 
+# Clean up
 if [[ "$FTP" = y && "$OTA" = y ]]; then
-   for OTAO in ${OTABO[@]}; do
-	OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
-	TEMP=$OTAFOLDER/temp
-	TEMPMD=$OTAFOLDER/temp/md5
-	if [ -d "$TEMP" ]; then
-	   info "Cleaning up "$OTAO"...."
-	   rm -rf "$TEMP"
-	   rm -rf "$TEMPMD"
-	fi
-   done
-echo ""
+  for OTAO in ${OTABO[@]}; do
+    OTAFOLDER="$SAUCE"/mokee/OTA/UNOFFICIAL/"$OTAO"
+    TEMP=$OTAFOLDER/temp
+    TEMPMD=$OTAFOLDER/temp/md5
+      if [ -d "$TEMP" ]; then
+        info "Cleaning up "$OTAO"...."
+        rm -rf "$TEMP"
+        rm -rf "$TEMPMD"
+      fi
+  done
+  echo ""
 fi
 
 if [ -d "$SAUCE"/out/buildrules ]; then
   rm -rf "$SAUCE"/out/buildrules
 fi
 
+# How long did the build take altogether?
 echo ""
 TET=$(date +%s)
 info "All done in $(((TET-TST)/60)) minutes $(((TET-TST)%60)) seconds"
