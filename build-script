@@ -228,6 +228,7 @@ if [ -f ""$SAUCE"/out/buildrules/build.conf" ]; then
     rm "$SAUCE"/out/buildrules/*
     echo '#!/bin/bash' >> ""$SAUCE"/out/buildrules/build.conf"
 
+# Add devices
   declare -i i=${#DEVICES[*]}
   if ((i == 0)); then
     DEVICES[$((i++))]=$(demand "What device would you like to build?")
@@ -263,18 +264,11 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
     echo ""
     err "WARNING!!! MAKE CLEAN WILL DELETE THE ENTIRE CONTENTS OF YOUR OUT FOLDER!!!"
       if SURE=$(askyn "Are you sure you would like to continue?" $SURE); then
-        echo "Backing up your build.conf..."
-        mkdir -p ""$SAUCE"/tmp"
-        mv ""$SAUCE"/out/buildrules/build.conf" ""$SAUCE"/tmp"
-        err "Running make clean..."
-        make clean
-        echo "Restoring build.conf"
-        mkdir -p ""$SAUCE"/out/buildrules"
-        mv ""$SAUCE"/tmp/build.conf" ""$SAUCE"/out/buildrules"
-        rm -rf ""$SAUCE"/tmp"
+        echo "Ok running make clean."
         BP=n
       else
         err "Canceling make clean..."
+        CLEAN=n
       fi
   fi
 
@@ -448,26 +442,6 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
     echo ""
   fi
 
-# Save variables for next build
-echo SAUCE="$SAUCE">>""$SAUCE"/out/buildrules/build.conf"
-echo MOVE="$MOVE">>""$SAUCE"/out/buildrules/build.conf"
-echo STORAGE="$STORAGE">>""$SAUCE"/out/buildrules/build.conf"
-echo SYNC="$SYNC">>""$SAUCE"/out/buildrules/build.conf"
-echo J="$J">>""$SAUCE"/out/buildrules/build.conf"
-echo PRCHR="$PRCHR">>""$SAUCE"/out/buildrules/build.conf"
-echo BP="$BP">>""$SAUCE"/out/buildrules/build.conf"
-echo CCACHE="$CCACHE">>""$SAUCE"/out/buildrules/build.conf"
-echo CCDIR="$CCDIR">>""$SAUCE"/out/buildrules/build.conf"
-echo NEW_CCACHE_DIR="$NEW_CCACHE_DIR">>""$SAUCE"/out/buildrules/build.conf"
-echo QCLEAN="$QCLEAN">>""$SAUCE"/out/buildrules/build.conf"
-echo JBN="$JBN">>""$SAUCE"/out/buildrules/build.conf"
-echo JB="$JB">>""$SAUCE"/out     declare -i i=${#USECH[*]}/buildrules/build.conf"
-echo OTA="$OTA">>""$SAUCE"/out/buildrules/build.conf"
-echo FTP="$FTP">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPUSER="$FTPUSER">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPPASS="$FTPPASS">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPUSERPASS="$FTPUSERPASS">>""$SAUCE"/out/buildrules/build.conf"
-
 # Skip the advanced stuff and just build
 else
   echo ""
@@ -484,16 +458,39 @@ fi
 
   else
     err "Ok loading previous build configuration"
+    USECONF=y
     source ""$SAUCE"/out/buildrules/build.conf"
     echo ""
   fi
 fi
+
+# Save variables for next build
+echo SAUCE="$SAUCE">>""$SAUCE"/out/buildrules/build.conf"
+echo CLEAN="$CLEAN">>""$SAUCE"/out/buildrules/build.conf"
+echo MOVE="$MOVE">>""$SAUCE"/out/buildrules/build.conf"
+echo STORAGE="$STORAGE">>""$SAUCE"/out/buildrules/build.conf"
+echo SYNC="$SYNC">>""$SAUCE"/out/buildrules/build.conf"
+echo J="$J">>""$SAUCE"/out/buildrules/build.conf"
+echo PRCHR="$PRCHR">>""$SAUCE"/out/buildrules/build.conf"
+echo BP="$BP">>""$SAUCE"/out/buildrules/build.conf"
+echo CCACHE="$CCACHE">>""$SAUCE"/out/buildrules/build.conf"
+echo CCDIR="$CCDIR">>""$SAUCE"/out/buildrules/build.conf"
+echo NEW_CCACHE_DIR="$NEW_CCACHE_DIR">>""$SAUCE"/out/buildrules/build.conf"
+echo QCLEAN="$QCLEAN">>""$SAUCE"/out/buildrules/build.conf"
+echo JBN="$JBN">>""$SAUCE"/out/buildrules/build.conf"
+echo JB="$JB">>""$SAUCE"/out/buildrules/build.conf"
+echo OTA="$OTA">>""$SAUCE"/out/buildrules/build.conf"
+echo FTP="$FTP">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPUSER="$FTPUSER">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPPASS="$FTPPASS">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPUSERPASS="$FTPUSERPASS">>""$SAUCE"/out/buildrules/build.conf"
 
 # Final build settings
 echo ""
 info "Final build settings..."
 echo ""
   cat <<!EOD
+USE PREVIOUS BUILD CONFIGURATION: $USECONF
 DEVICES TO BUILD: ${DEVICES[@]}
 !EOD
 if [ "$OTA" = y ]; then
@@ -582,6 +579,15 @@ if [ "$USECONF" = y ]; then
     err "Canceling build process..."
     exit
   fi
+  if [ "$CLEAN" = y ]; then
+    err "You had make clean enabled on your last build..."
+    if askyn "Are you sure you want to continue?"; then
+      echo "continuing make clean..."
+    else
+      echo "Canceling build process"
+      exit
+    fi
+  fi
 fi
 fi
 
@@ -596,6 +602,19 @@ cd "$SAUCE"
 if [ "$SYNC" = y ]; then
   info "Running repo sync..."
   repo sync -j"$J"
+fi
+
+if [ "$CLEAN" = y ]; then
+  err "Preparing to make clean..."
+  echo "Backing up your build.conf..."
+  mkdir -p ""$SAUCE"/tmp"
+  mv ""$SAUCE"/out/buildrules/build.conf" ""$SAUCE"/tmp"
+  err "Running make clean..."
+  make clean
+  echo "Restoring build.conf"
+  mkdir -p ""$SAUCE"/out/buildrules"
+  mv ""$SAUCE"/tmp/build.conf" ""$SAUCE"/out/buildrules"
+  rm -rf ""$SAUCE"/tmp"
 fi
 
 for DEVICE in ${DEVICES[@]}; do
