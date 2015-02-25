@@ -216,10 +216,23 @@ fi
 
 if [[ $GO != y ]]; then
 
+# Make sure a conf dir exists
+mkdir -p ""$SAUCE"/out/buildrules"
+
+# Find previous build.conf, if it exists
+if [ -f ""$SAUCE"/out/buildrules/build.conf" ]; then
+  err "Previous Build Configuration Found..."
+  USECONF=$(askyn "Would You Like to use your previous build configuration?" $USECONF)
+  if [ "$USECONF" = n ]; then
+    err "OK, Not using previous configuration..."
+    rm "$SAUCE"/out/buildrules/*
+    echo '#!/bin/bash' >> ""$SAUCE"/out/buildrules/build.conf"
+
   declare -i i=${#DEVICES[*]}
   if ((i == 0)); then
     DEVICES[$((i++))]=$(demand "What device would you like to build?")
   fi
+  echo DEVICES[1]=${DEVICES[*]}>>""$SAUCE"/out/buildrules/build.conf"
   echo "Device list: ${DEVICES[*]}"
 
   while response=$(ask "What other device would you like to build [return if done]?"); do
@@ -227,6 +240,7 @@ if [[ $GO != y ]]; then
       err "You already said $response"
     else
       DEVICES[$((i++))]="$response"
+      echo "DEVICES[$((i++))]"="$response">>""$SAUCE"/out/buildrules/build.conf"
     fi
     echo "Device list: ${DEVICES[*]}"
   done
@@ -249,19 +263,21 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
     echo ""
     err "WARNING!!! MAKE CLEAN WILL DELETE THE ENTIRE CONTENTS OF YOUR OUT FOLDER!!!"
       if SURE=$(askyn "Are you sure you would like to continue?" $SURE); then
+        echo "Backing up your build.conf..."
+        mkdir -p ""$SAUCE"/tmp"
+        mv ""$SAUCE"/out/buildrules/build.conf" ""$SAUCE"/tmp"
         err "Running make clean..."
         make clean
+        echo "Restoring build.conf"
+        mkdir -p ""$SAUCE"/out/buildrules"
+        mv ""$SAUCE"/tmp/build.conf" ""$SAUCE"/out/buildrules"
+        rm -rf ""$SAUCE"/tmp"
+        BP=n
       else
         err "Canceling make clean..."
       fi
   fi
 
-# Make sure any previous build rules are removed before proceding
-  if [ -d "$SAUCE"/out/buildrules ]; then
-    rm -rf "$SAUCE"/out/buildrules/*
-  else
-    mkdir -p ""$SAUCE"/out/buildrules"
-  fi
 
 # Should we move to a storage folder?
   while :; do
@@ -293,12 +309,12 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
 # Use ccache?
   if CCACHE=$(askyn "Do you want to use ccache" $CCACHE); then
     if CCDIR=$(askyn "Would you like to specify the .ccache dir" $CCDIR); then
-      NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR) 
+      NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR)
     fi
   fi
 
 # Use a prebuilt chromium?
-  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then 
+  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then
     for DEVICE in ${DEVICES[@]}; do
       if USECH=$(askyn "Would you like to use a prebuilt Chromium for "$DEVICE"?" $USECH); then
         if [[ ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_chromium.txt" && ! -f ""$SAUCE"/prebuilts/chromium/"$DEVICE"/hash_webview.txt" ]]; then
@@ -341,7 +357,7 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
       done
     fi
   fi
-
+  
 # Set build thread count
   if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
     DEF_CORE=$(ask "How many cores (including HT) does your processor have?" $DEF_CORE)
@@ -369,11 +385,13 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
                 cp "$OLDIE" "$OTABDIR"
                 OTABO[$((i++))]=$DEVICE
                 echo "Added to OTA build list: "${OTABO[@]}""
+                echo OTABO[$((i++))]="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
                 break
               done
           elif [ -f "$OTABDIR"/*".zip" ];then
             OTABO[$((i++))]=$DEVICE
             echo "Added to OTA build list: "${OTABO[@]}""
+            echo OTABO[$((i++))]="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
           fi
         else
           err "NOT BUILDING OTA FOR "$DEVICE"..."
@@ -409,6 +427,7 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
     for DEVICE in ${DEVICES[@]}; do
       if FTPUP=$(askyn "Do you want to upload "$DEVICE"?" $FTPUP); then
         FTPUL[$((i++))]=$DEVICE
+        echo FTPUL[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
         echo "Added to FTP upload list: "${FTPUL[@]}""
       else
         err "NOT UPLOADING "$DEVICE"..."
@@ -418,12 +437,41 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
     echo ""
   fi
 
+# Save variables for next build
+echo SAUCE="$SAUCE">>""$SAUCE"/out/buildrules/build.conf"
+echo MOVE="$MOVE">>""$SAUCE"/out/buildrules/build.conf"
+echo STORAGE="$STORAGE">>""$SAUCE"/out/buildrules/build.conf"
+echo SYNC="$SYNC">>""$SAUCE"/out/buildrules/build.conf"
+echo J="$J">>""$SAUCE"/out/buildrules/build.conf"
+echo PRCHR="$PRCHR">>""$SAUCE"/out/buildrules/build.conf"
+echo BP="$BP">>""$SAUCE"/out/buildrules/build.conf"
+echo CCACHE="$CCACHE">>""$SAUCE"/out/buildrules/build.conf"
+echo CCDIR="$CCDIR">>""$SAUCE"/out/buildrules/build.conf"
+echo NEW_CCACHE_DIR="$NEW_CCACHE_DIR">>""$SAUCE"/out/buildrules/build.conf"
+echo QCLEAN="$QCLEAN">>""$SAUCE"/out/buildrules/build.conf"
+echo JBN="$JBN">>""$SAUCE"/out/buildrules/build.conf"
+echo JB="$JB">>""$SAUCE"/out/buildrules/build.conf"
+echo OTA="$OTA">>""$SAUCE"/out/buildrules/build.conf"
+echo FTP="$FTP">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPUSER="$FTPUSER">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPPASS="$FTPPASS">>""$SAUCE"/out/buildrules/build.conf"
+echo FTPUSERPASS="$FTPUSERPASS">>""$SAUCE"/out/buildrules/build.conf"
+
 # Skip the advanced stuff and just build
 else
   echo ""
   err "OK, Sticking with the default build settings..."
   echo ""
+  for DEVICE in ${DEVICES[@]}; do
+    echo "$DEVICE">>""$SAUCE"/out/buildrules/bp.devices"
+  done
 fi
+
+  else
+    err "Ok loading previous build configuration"
+    source ""$SAUCE"/out/buildrules/build.conf"
+    echo ""
+  fi
 fi
 
 # Final build settings
@@ -506,6 +554,16 @@ if [ "$ADVNC" = y ]; then
   fi
 fi
 
+if [ "$USECONF" = y ]; then
+  if askyn "Are the settings above correct? Would you like to continue?"; then
+  echo "Continuing with build..."
+  else
+    err "Canceling build process..."
+    exit
+  fi
+fi
+fi
+
 # Pre-build settup
 if [[ "${#DEVICES[@]}" = 0 ]]; then
   err "Nothing to build"
@@ -551,17 +609,12 @@ for DEVICE in ${DEVICES[@]}; do
   croot
   lunch mk_"${DEVICE}"-userdebug
 
-  if [ "$ADVNC" = y ]; then
     if [ -f ""$SAUCE"/out/buildrules/bp.devices" ]; then
       if grep -q "$DEVICE" "$SAUCE"/out/buildrules/bp.devices; then
         info "Removing build.prop"
         rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
       fi
     fi
-  else
-    info "Removing build.prop"
-    rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
-  fi
 
   if [ -f ""$SAUCE"/out/buildrules/qclean.devices" ]; then
     if grep -q "$DEVICE" "$SAUCE"/out/buildrules/qclean.devices; then
@@ -583,6 +636,7 @@ for DEVICE in ${DEVICES[@]}; do
   DET=$(date +%s)
   info "Done building "$DEVICE" in $(((DET-DST)/60)) minutes $(((DET-DST)%60)) seconds"
   echo ""
+
 done
 
 # Build OTA for chosen devices
@@ -678,10 +732,6 @@ if [[ "$FTP" = y && "$OTA" = y ]]; then
       fi
   done
   echo ""
-fi
-
-if [ -d "$SAUCE"/out/buildrules ]; then
-  rm -rf "$SAUCE"/out/buildrules
 fi
 
 # How long did the build take altogether?
