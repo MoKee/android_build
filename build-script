@@ -27,7 +27,7 @@ MOVE=n
 STORAGE=
 SYNC=n
 J=4
-BP=n
+BP=y
 CCACHE=y
 DEFAULT_CCACHE_DIR=~/.ccache
 PRCHR=n
@@ -551,11 +551,16 @@ for DEVICE in ${DEVICES[@]}; do
   croot
   lunch mk_"${DEVICE}"-userdebug
 
-  if [ -f ""$SAUCE"/out/buildrules/bp.devices" ]; then
-    if grep -q "$DEVICE" "$SAUCE"/out/buildrules/bp.devices; then
-      info "Removing build.prop"
-      rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
+  if [ "$ADVNC" = y ]; then
+    if [ -f ""$SAUCE"/out/buildrules/bp.devices" ]; then
+      if grep -q "$DEVICE" "$SAUCE"/out/buildrules/bp.devices; then
+        info "Removing build.prop"
+        rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
+      fi
     fi
+  else
+    info "Removing build.prop"
+    rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
   fi
 
   if [ -f ""$SAUCE"/out/buildrules/qclean.devices" ]; then
