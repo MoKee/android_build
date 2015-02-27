@@ -220,18 +220,27 @@ if [[ $GO != y ]]; then
 mkdir -p ""$SAUCE"/out/buildrules"
 
 # Find previous build.conf, if it exists
-if [ -f ""$SAUCE"/out/buildrules/build.conf" ]; then
+if [ ! -f ""$SAUCE"/out/buildrules/build.conf" ]; then
+  USECONF=n
+else
   err "Previous Build Configuration Found..."
   err "Your saved build settings are:"
   echo ""
   cat ""$SAUCE"/out/buildrules/build.conf" | tail -n+2
   echo""
-USECONF=$(askyn "Would You Like to use your previous build configuration?" $USECONF)
-  if [ "$USECONF" = n ]; then
+  if USECONF=$(askyn "Would You Like to use your previous build configuration?" $USECONF); then
+    err "Ok loading previous build configuration"
+    USECONF=y
+    source ""$SAUCE"/out/buildrules/build.conf"
+    echo ""
+    else
     err "OK, Not using previous configuration..."
     rm "$SAUCE"/out/buildrules/*
-    echo '#!/bin/bash' >> ""$SAUCE"/out/buildrules/build.conf"
-
+    USECONF=n
+  fi
+fi
+if [ "$USECONF" = n ]; then
+  echo '#!/bin/bash' >> ""$SAUCE"/out/buildrules/build.conf"
 # Add devices
   declare -i i=${#DEVICES[*]}
   if ((i == 0)); then
@@ -275,7 +284,6 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
         CLEAN=n
       fi
   fi
-
 
 # Should we move to a storage folder?
   while :; do
@@ -453,13 +461,7 @@ else
     echo ""BPD[$((i++))]"="$DEVICE"   # Remove build.prop before building "$DEVICE"" >>""$SAUCE"/out/buildrules/build.conf"
   done
 fi
-
-  else
-    err "Ok loading previous build configuration"
-    USECONF=y
-    source ""$SAUCE"/out/buildrules/build.conf"
-    echo ""
-  fi
+fi
 fi
 
 # Save variables for next build if not using old build.comf
@@ -576,7 +578,6 @@ if [ "$USECONF" = y ]; then
       exit
     fi
   fi
-fi
 fi
 
 # Pre-build settup
