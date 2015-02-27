@@ -222,7 +222,11 @@ mkdir -p ""$SAUCE"/out/buildrules"
 # Find previous build.conf, if it exists
 if [ -f ""$SAUCE"/out/buildrules/build.conf" ]; then
   err "Previous Build Configuration Found..."
-  USECONF=$(askyn "Would You Like to use your previous build configuration?" $USECONF)
+  err "The build curent settings are:"
+  echo ""
+  cat ""$SAUCE"/out/buildrules/build.conf" | tail -n+2
+  echo""
+USECONF=$(askyn "Would You Like to use your previous build configuration?" $USECONF)
   if [ "$USECONF" = n ]; then
     err "OK, Not using previous configuration..."
     rm "$SAUCE"/out/buildrules/*
@@ -231,17 +235,17 @@ if [ -f ""$SAUCE"/out/buildrules/build.conf" ]; then
 # Add devices
   declare -i i=${#DEVICES[*]}
   if ((i == 0)); then
-    DEVICES[$((i++))]=$(demand "What device would you like to build?")
+    DEVICES[$((i++))]=$(demand "Which device would you like to build?")
   fi
-  echo DEVICES[1]=${DEVICES[*]}>>""$SAUCE"/out/buildrules/build.conf"
+  echo "DEVICES[1]="${DEVICES[*]}"   # Build "${DEVICES[*]}"">>""$SAUCE"/out/buildrules/build.conf"
   echo "Device list: ${DEVICES[*]}"
 
-  while response=$(ask "What other device would you like to build [return if done]?"); do
+  while response=$(ask "Which other device would you like to build [return if done]?"); do
     if isIn "$response" "${DEVICES[@]}"; then
       err "You already said $response"
     else
       DEVICES[$((i++))]="$response"
-      echo "DEVICES[$((i++))]"="$response">>""$SAUCE"/out/buildrules/build.conf"
+      echo ""DEVICES[$((i++))]"="$response"   # Build "$response"">>""$SAUCE"/out/buildrules/build.conf"
     fi
     echo "Device list: ${DEVICES[*]}"
   done
@@ -301,14 +305,14 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
   fi
 
 # Use ccache?
-  if CCACHE=$(askyn "Do you want to use ccache" $CCACHE); then
+  if CCACHE=$(askyn "Would you like to use ccache" $CCACHE); then
     if CCDIR=$(askyn "Would you like to specify the .ccache dir" $CCDIR); then
       NEW_CCACHE_DIR=$(ask "What directory would you like to use?" $NEW_CCACHE_DIR)
     fi
   fi
 
 # Use a prebuilt chromium?
-  if PRCHR=$(askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)" $PRCHR); then
+  if askyn "Would you like to to use a prebuilt Chromium for chosen devices? (speeds up build time)"; then
     for DEVICE in ${DEVICES[@]}; do
       declare -i i=${#USECH[*]}
       if askyn "Would you like to use a prebuilt Chromium for "$DEVICE"?"; then
@@ -316,13 +320,11 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
           err "You have not built with a prebuilt Chromium before..."
           err "Chromium will be built from source this time, but will be set up for future prebuilt builds..."
           USECH[$((i++))]=$DEVICE
-          echo USECH[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
-          echo USECH=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
+          echo ""USECH[$((i++))]"="$DEVICE"   # Use prebuilt chromium for "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
         else
           echo "Using prebuilt Chromium for "$DEVICE", as long as it is up to date..."
           USECH[$((i++))]=$DEVICE
-          echo USECH[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
-          echo USECHR=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
+          echo ""USECH[$((i++))]"="$DEVICE"   # Use prebuilt chromium for "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
         fi
       else echo "Not using prebuilt Chronium for "$DEVICE"..."
       fi
@@ -331,14 +333,13 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
 
 # Remove the build.prop before the build? (We only do this if "make clean" was not selected)
   if [[ "$CLEAN" =~ ^([nN]) ]]; then
-    if BP=$(askyn "Do you want to remove build.prop for chosen devices before the build? (recomended)" $BP); then
+    if askyn "Would you like to remove build.prop for chosen devices before the build? (recomended)"; then
       declare -i i=${#BPD[*]}
       for DEVICE in ${DEVICES[@]}; do
         if askyn "Would you like to remove the build.prop for "$DEVICE"?"; then
           echo "Removing build.prop for "$DEVICE"..."
           BPD[$((i++))]=$DEVICE
-          echo BPD[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
-          echo RBPD=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
+          echo ""BPD[$((i++))]"="$DEVICE"   # Remove build.prop before building "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
         else
           echo "Not removing build.prop for "$DEVICE"..."
         fi
@@ -348,14 +349,13 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
 
 # Do a "mka installclean" before the build? (We only do this if "make clean" if not selected)
   if [[ "$CLEAN" =~ ^([nN]) ]]; then
-    if QCLEAN=$(askyn "Do you want to run mka installclean for chosen devices before the build? (quick clean build)" $QCLEAN); then
+    if askyn "Would you like to run mka installclean for chosen devices before the build? (quick clean build)"; then
       declare -i i=${#QCD[*]}
       for DEVICE in ${DEVICES[@]}; do
         if askyn "Would you like to mka installclean for "$DEVICE"?"; then
           echo "Running mka installclean for "$DEVICE"..."
           QCD[$((i++))]=$DEVICE
-          echo QCD[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
-          echo QUCD=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
+          echo ""QCD[$((i++))]"="$DEVICE"   # Run mka install clean before building "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
         else
           echo "Not not running mka installclean for "$DEVICE"..."
         fi
@@ -364,7 +364,7 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
   fi
 
 # Set build thread count
-  if JB=$(askyn "would you like to set the number of threads to build with?" $JB); then
+  if JB=$(askyn "Would you like to set the number of threads to build with?" $JB); then
     DEF_CORE=$(ask "How many cores (including HT) does your processor have?" $DEF_CORE)
     JBN=$(($DEF_CORE + 1))
   fi
@@ -390,13 +390,13 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
                 cp "$OLDIE" "$OTABDIR"
                 OTABO[$((i++))]=$DEVICE
                 echo "Added to OTA build list: "${OTABO[@]}""
-                echo OTABO[$((i++))]="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
+                echo ""OTABO[$((i++))]"="$DEVICE"   # Build OTA for "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
                 break
               done
           elif [ -f "$OTABDIR"/*".zip" ];then
             OTABO[$((i++))]=$DEVICE
             echo "Added to OTA build list: "${OTABO[@]}""
-            echo OTABO[$((i++))]="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
+            echo ""OTABO[$((i++))]"="$DEVICE"   # Build OTA for "$DEVICE"">>""$SAUCE"/out/buildrules/build.conf"
           fi
         else
           err "NOT BUILDING OTA FOR "$DEVICE"..."
@@ -408,7 +408,7 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
 
 # Upload to mokeedev.com?
   while :; do
-    if FTP=$(askyn "Do you want to enable FTP uploading" "$FTP"); then
+    if FTP=$(askyn "Would you like to enable FTP uploading" "$FTP"); then
       FTPUSER=$(ask "What is your mokeedev.com username:" "$FTPUSER")
       FTPPASS=$(ask -s "What is your mokeedev.com password:" "$FTPPASS")
       info "Checking access to "$FTPHOST""
@@ -430,9 +430,9 @@ if ADVNC=$(askyn "Would You Like to Enable Advanced Building?" $ADVNC); then
   if [ "$FTP" = y ]; then
     declare -i i=${#FTPUL[*]}
     for DEVICE in ${DEVICES[@]}; do
-      if FTPUP=$(askyn "Do you want to upload "$DEVICE"?" $FTPUP); then
+      if FTPUP=$(askyn "Would you like to upload "$DEVICE"?" $FTPUP); then
         FTPUL[$((i++))]=$DEVICE
-        echo FTPUL[$((i++))]=$DEVICE>>""$SAUCE"/out/buildrules/build.conf"
+        echo ""FTPUL[$((i++))]"="$DEVICE"   # Upload "$DEVICE" to mokeedev">>""$SAUCE"/out/buildrules/build.conf"
         echo "Added to FTP upload list: "${FTPUL[@]}""
       else
         err "NOT UPLOADING "$DEVICE"..."
@@ -450,9 +450,7 @@ else
   for DEVICE in ${DEVICES[@]}; do
     declare -i i=${#BPD[*]}
     BPD[$((i++))]=$DEVICE
-    echo BPD[$((i++))]="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
-    echo RBPD="$DEVICE">>""$SAUCE"/out/buildrules/build.conf"
-
+    echo ""BPD[$((i++))]"="$DEVICE"   # Remove build.prop before building "$DEVICE"" >>""$SAUCE"/out/buildrules/build.conf"
   done
 fi
 
@@ -464,26 +462,25 @@ fi
   fi
 fi
 
-# Save variables for next build
-echo SAUCE="$SAUCE">>""$SAUCE"/out/buildrules/build.conf"
-echo CLEAN="$CLEAN">>""$SAUCE"/out/buildrules/build.conf"
-echo MOVE="$MOVE">>""$SAUCE"/out/buildrules/build.conf"
-echo STORAGE="$STORAGE">>""$SAUCE"/out/buildrules/build.conf"
-echo SYNC="$SYNC">>""$SAUCE"/out/buildrules/build.conf"
-echo J="$J">>""$SAUCE"/out/buildrules/build.conf"
-echo PRCHR="$PRCHR">>""$SAUCE"/out/buildrules/build.conf"
-echo BP="$BP">>""$SAUCE"/out/buildrules/build.conf"
-echo CCACHE="$CCACHE">>""$SAUCE"/out/buildrules/build.conf"
-echo CCDIR="$CCDIR">>""$SAUCE"/out/buildrules/build.conf"
-echo NEW_CCACHE_DIR="$NEW_CCACHE_DIR">>""$SAUCE"/out/buildrules/build.conf"
-echo QCLEAN="$QCLEAN">>""$SAUCE"/out/buildrules/build.conf"
-echo JBN="$JBN">>""$SAUCE"/out/buildrules/build.conf"
-echo JB="$JB">>""$SAUCE"/out/buildrules/build.conf"
-echo OTA="$OTA">>""$SAUCE"/out/buildrules/build.conf"
-echo FTP="$FTP">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPUSER="$FTPUSER">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPPASS="$FTPPASS">>""$SAUCE"/out/buildrules/build.conf"
-echo FTPUSERPASS="$FTPUSERPASS">>""$SAUCE"/out/buildrules/build.conf"
+# Save variables for next build if not using old build.comf
+if [ "$USECONF" = n ]; then
+  echo "SAUCE="$SAUCE"   # Your build directory">>""$SAUCE"/out/buildrules/build.conf"
+  echo "CLEAN="$CLEAN"   # Run make clean before build?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "MOVE="$MOVE"   # Move finished product to storage?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "STORAGE="$STORAGE"   # Storage directory">>""$SAUCE"/out/buildrules/build.conf"
+  echo "SYNC="$SYNC"   # Repo sync?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "J="$J"   # J level for repo sync">>""$SAUCE"/out/buildrules/build.conf"
+  echo "CCACHE="$CCACHE"   # Use ccache?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "CCDIR="$CCDIR"   # Choose a ccache directory?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "NEW_CCACHE_DIR="$NEW_CCACHE_DIR"   # Chosen ccache dir if changed">>""$SAUCE"/out/buildrules/build.conf"
+  echo "JB="$JB"    # Choose number of build threads?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "JBN="$JBN"   # Number of threads to build with">>""$SAUCE"/out/buildrules/build.conf"
+  echo "OTA="$OTA"   # Build OTA updates after build?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "FTP="$FTP"   # Upload finished pruduckt to mokeedev?">>""$SAUCE"/out/buildrules/build.conf"
+  echo "FTPUSER="$FTPUSER"   # Mokeedev username">>""$SAUCE"/out/buildrules/build.conf"
+  echo "FTPPASS="$FTPPASS"   # Mokeedev password">>""$SAUCE"/out/buildrules/build.conf"
+  echo "FTPUSERPASS="$FTPUSERPASS"   # Combination of username and password for the build script">>""$SAUCE"/out/buildrules/build.conf"
+fi
 
 # Final build settings
 echo ""
@@ -519,26 +516,17 @@ cat <<!EOD
 CUSTOM CCACHE DIRECTORY: $NEW_CCACHE_DIR
 !EOD
 fi
-cat <<!EOD
-BUILD WITH PREBUILT CHROMIUM: $PRCHR
-!EOD
-if [ "$PRCHR" = y ]; then
+if grep -q "USECH...=*" "$SAUCE"/out/buildrules/build.conf; then
 cat <<!EOD
 DEVICES USING PREBUILT CHRONIUM: ${USECH[@]}
 !EOD
 fi
-cat <<!EOD
-REMOVE BUILD.PROP BEFORE EACH BUILD: $BP
-!EOD
-if [ "$BP" = y ]; then
+if grep -q "BPD...=*" "$SAUCE"/out/buildrules/build.conf; then
 cat <<!EOD
 REMOVING BUILD.PROP FOR: ${BPD[@]}
 !EOD
 fi
-cat <<!EOD
-QUICK CLEAN BUILD: $QCLEAN
-!EOD
-if [ "$QCLEAN" = y ]; then
+if grep -q "QCD...=*" "$SAUCE"/out/buildrules/build.conf; then
 cat <<!EOD
 RUN MKA INSTALLCLEAN BEFORE BUILDING: ${QCD[@]}
 !EOD
@@ -635,7 +623,7 @@ for DEVICE in ${DEVICES[@]}; do
   fi
 
   unset USE_PREBUILT_CHROMIUM
-  if grep -q -w USECHR="$DEVICE" "$SAUCE"/out/buildrules/build.conf; then
+  if grep -q "USECH...="$DEVICE"" "$SAUCE"/out/buildrules/build.conf; then
     export USE_PREBUILT_CHROMIUM=1
   fi
 
@@ -646,12 +634,12 @@ for DEVICE in ${DEVICES[@]}; do
   croot
   lunch mk_"${DEVICE}"-userdebug
 
-  if grep -q -w RBPD="$DEVICE" "$SAUCE"/out/buildrules/build.conf; then
+  if grep -q "BPD...="$DEVICE"" "$SAUCE"/out/buildrules/build.conf; then
     info "Removing build.prop"
     rm -f $(get_build_var OUT_DIR)/target/product/"$DEVICE"/system/build.prop
   fi
 
-  if grep -q -w QUCD="$DEVICE" "$SAUCE"/out/buildrules/build.conf; then
+  if grep -q -w "QCD...="$DEVICE"" "$SAUCE"/out/buildrules/build.conf; then
       info "Running mka installclean..."
       mka installclean
   fi
