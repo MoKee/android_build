@@ -480,8 +480,6 @@ if [ "$USECONF" = n ]; then
   echo "OTA="$OTA"   # Build OTA updates after build?">>""$SAUCE"/out/buildrules/build.conf"
   echo "FTP="$FTP"   # Upload finished pruduckt to mokeedev?">>""$SAUCE"/out/buildrules/build.conf"
   echo "FTPUSER="$FTPUSER"   # Mokeedev username">>""$SAUCE"/out/buildrules/build.conf"
-  echo "FTPPASS="$FTPPASS"   # Mokeedev password">>""$SAUCE"/out/buildrules/build.conf"
-  echo "FTPUSERPASS="$FTPUSERPASS"   # Combination of username and password for the build script">>""$SAUCE"/out/buildrules/build.conf"
 fi
 
 # Final build settings
@@ -578,6 +576,25 @@ if [ "$USECONF" = y ]; then
       exit
     fi
   fi
+fi
+
+# It's not safe to store your your mokee.dev password in build.conf.
+# if you chose to use your previous configuration, you have to re enter your password.
+if [[ "$USECONF" = y && "$FTP" = y ]]; then
+  err "Please enter your mokee.dev password for ftp uploading."
+  while :; do
+    FTPPASS=$(ask -s "What is your mokeedev.com password:" "$FTPPASS")
+    info "Checking access to "$FTPHOST""
+    until curl -# ftp://"$FTPUSER":"$FTPPASS"@"$FTPHOST"/ >/dev/null; do
+      err "User Name and or Password not correct..."
+      FTPUSER=$(ask "What is your mokeedev.com username:" "$FTPUSER")
+      FTPPASS=$(ask -s "What is your mokeedev.com password:")
+      info "Checking access to "$FTPHOST""
+    done
+    info "Success!"
+    FTPUSERPASS=""$FTPUSER":"$FTPPASS"@"
+    break
+  done
 fi
 
 # Pre-build settup
