@@ -551,30 +551,24 @@ fi
 
 echo ""
 
-if [ "$ADVNC" = y ]; then
+if [[ "$ADVNC" = y  || "$USECONF" = y ]]; then
   if askyn "Are the settings above correct? Would you like to continue?"; then
     echo "Continuing with build..."
+    echo ""
   else
     err "Canceling build process..."
     exit
   fi
 fi
 
-if [ "$USECONF" = y ]; then
-  if askyn "Are the settings above correct? Would you like to continue?"; then
-  echo "Continuing with build..."
+if [ "$CLEAN" = y ]; then
+  err "You had make clean enabled on your last build..."
+  if askyn "Are you sure you want to continue?"; then
+    echo "continuing make clean..."
+    echo ""
   else
-    err "Canceling build process..."
+    err "Canceling build process"
     exit
-  fi
-  if [ "$CLEAN" = y ]; then
-    err "You had make clean enabled on your last build..."
-    if askyn "Are you sure you want to continue?"; then
-      echo "continuing make clean..."
-    else
-      echo "Canceling build process"
-      exit
-    fi
   fi
 fi
 
@@ -636,7 +630,7 @@ for DEVICE in ${DEVICES[@]}; do
       elif [[ "$CCDIR" = n ]]; then
         export CCACHE_DIR=$DEFAULT_CCACHE_DIR
       fi
-  elif [[ "$CCACHE" = n ]]; then
+  else
     unset USE_CCACHE
   fi
 
