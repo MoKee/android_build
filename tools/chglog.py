@@ -124,6 +124,9 @@ def genURL(project):
     elif remote == 'cyanogen':
         name = name[-1]
         repo = 'CyanogenMod/'
+    elif remote == 'third':
+        name = name[-1]
+        repo = 'ThirdProject/'
     else:
         name = name[-1]
         repo = 'MoKee/'
