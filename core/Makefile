@@ -1013,10 +1013,10 @@ systemimage-crusher: $(INTERNAL_SYSTEMIMAGE_FILES)
 
 .PHONY: systemimage-crusher
 
-ifneq ($(MK_BUILDTYPE),RELEASE)
-FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEPS) systemimage-crusher
-else
+ifneq ($(filter RELEASE HISTORY,$(MK_BUILDTYPE)),)
 FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEPS)
+else
+FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEPS) systemimage-crusher
 endif
 # -----------------------------------------------------------------
 # installed file list
