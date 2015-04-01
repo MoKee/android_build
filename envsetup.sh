@@ -645,6 +645,27 @@ function lunch()
         return 1
     fi
 
+    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" == 1 ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+    if [ "$CCACHE_DIR" ]
+    then
+        if [ ! -d "$CCACHE_DIR" ]; then
+          mkdir "$CCACHE_DIR"
+        fi
+        TMP_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
+        export CCACHE_DIR=$TMP_CCACHE_DIR/$product
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
+        if [ -z "$CCACHE_SIZE" ]; then
+            CCACHE_SIZE=16G
+        fi
+        if [ "$(uname)" = "Darwin" ] ; then
+            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+        else
+            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+        fi
+    fi
+
     if [ "$(which pngquant)" == "" ]; then
         echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
     fi
