@@ -1708,6 +1708,13 @@ bacon: otapackage
 	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) | cut -f1 -d' ' > $(MK_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(MK_TARGET_PACKAGE)"${CL_RST}
 
+ifeq ($(USE_PREBUILT_CHROMIUM),1)
+ifneq ($(PRODUCT_PREBUILT_WEBVIEWCHROMIUM),yes)
+	@echo "Running Chromium prebuilt setup script..."
+	$(hide) . $(TOPDIR)build/tools/chromium_prebuilt.sh $(TOP)
+endif
+endif
+
 	$(hide) # Create Release, History, Nightly and Experimental folder Start
 ifdef MK_BUILD_PATH
 	$(hide) mkdir -p $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)/md5
