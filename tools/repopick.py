@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2013-14 The CyanogenMod Project
+# Copyright (C) 2013-2015 The MoKee OpenSource Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ except ImportError:
 # Parse the command line
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=textwrap.dedent('''\
     repopick.py is a utility to simplify the process of cherry picking
-    patches from CyanogenMod's Gerrit instance.
+    patches from MoKee OpenSource's Gerrit instance.
 
     Given a list of change numbers, repopick will cd into the project path
     and cherry pick the latest patch available.
@@ -194,7 +194,7 @@ while(True):
 
 # Get all commits for a specified query
 def fetch_query(query):
-    url = 'http://review.cyanogenmod.org/changes/?q=%s' % query
+    url = 'http://review.mfunz.com/changes/?q=%s' % query
     if args.verbose:
         print('Fetching all commits using query: %s\n' % query)
     f = urllib.request.urlopen(url)
@@ -265,7 +265,7 @@ for changeps in args.change_number:
     # gerrit returns two lines, a magic string and then valid JSON:
     #   )]}'
     #   [ ... valid JSON ... ]
-    url = 'http://review.cyanogenmod.org/changes/?q={change}&o={query_revision}&o=CURRENT_COMMIT&pp=0'.format(change=change, query_revision=query_revision)
+    url = 'http://review.mfunz.com/changes/?q={change}&o={query_revision}&o=CURRENT_COMMIT&pp=0'.format(change=change, query_revision=query_revision)
     if args.verbose:
         print('Fetching from: %s\n' % url)
     try:
@@ -361,7 +361,7 @@ for changeps in args.change_number:
                 else:
                     project_path = '/'.join(split_path[:-1])
 
-                if len(split_branch) == 4 and split_branch[0] == 'cm' and split_branch[2] == 'caf':
+                if len(split_branch) == 4 and split_branch[0] == 'mkl' and split_branch[2] == 'caf':
                     project_path += '-caf/msm' + split_branch[3]
                 # audio and media are different from display
                 elif split_path[2] == 'audio' or split_path[2] == 'media':

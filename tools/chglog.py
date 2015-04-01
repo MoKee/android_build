@@ -121,9 +121,6 @@ def genURL(project):
     if remote == 'aosp':
         name = '_'.join(name)
         repo = 'android/'
-    elif remote == 'cyanogen':
-        name = name[-1]
-        repo = 'CyanogenMod/'
     elif remote == 'third':
         name = name[-1]
         repo = 'ThirdProject/'
