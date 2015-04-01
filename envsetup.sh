@@ -32,6 +32,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+- ota_all:  Generate OTA packages using the MoKee OTA system.
 - chglog:   Alternative tool to generate changelog.
 - clearstr: Helper script to remove unneeded strings from xml
 - clearout: Cleans out directory
@@ -2710,6 +2711,11 @@ function chglog() {
 # Cleans out directory
 function clearout() {
     rm -rf $ANDROID_BUILD_TOP/out/target/product
+}
+
+# OTA Script
+function ota_all() {
+    $ANDROID_BUILD_TOP/build/tools/mk_ota_script/gen_ota $1 $2
 }
 
 # Changelog Tool
