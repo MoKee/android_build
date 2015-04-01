@@ -33,6 +33,8 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
 - chglog:   Alternative tool to generate changelog.
+- clearstr: Helper script to remove unneeded strings from xml
+- clearout: Cleans out directory
 - clog:     Tool to generate changelog.
 
 Look at the source to view more functions. The complete list is:
@@ -2675,15 +2677,26 @@ do
 done
 unset f
 
+# Alternative Changelog Tool
+function chglog() {
+    $ANDROID_BUILD_TOP/build/tools/chglog.py $ANDROID_BUILD_TOP $1 $2
+}
+
+# Cleans out directory
+function clearout() {
+    rm -rf $ANDROID_BUILD_TOP/out/target/product
+}
+
 # Changelog Tool
 function clog() {
     $ANDROID_BUILD_TOP/build/tools/clog $1
 }
 
-# Alternative Changelog Tool
-function chglog() {
-    $ANDROID_BUILD_TOP/build/tools/chglog.py $ANDROID_BUILD_TOP $1 $2
+# Helper script to remove unneeded strings from xml
+function clearstr() {
+    $ANDROID_BUILD_TOP/build/tools/clearstr.py $1 $2 $3
 }
+
 # Add completions
 check_bash_version && {
     dirs="sdk/bash_completion vendor/mk/bash_completion"
