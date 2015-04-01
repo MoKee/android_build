@@ -31,6 +31,8 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+- chglog:   Alternative tool to generate changelog.
+- clog:     Tool to generate changelog.
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -2639,6 +2641,15 @@ do
 done
 unset f
 
+# Changelog Tool
+function clog() {
+    $ANDROID_BUILD_TOP/build/clog $1
+}
+
+# Alternative Changelog Tool
+function chglog() {
+    $ANDROID_BUILD_TOP/build/tools/chglog.py $ANDROID_BUILD_TOP $1 $2
+}
 # Add completions
 check_bash_version && {
     dirs="sdk/bash_completion vendor/cm/bash_completion"
