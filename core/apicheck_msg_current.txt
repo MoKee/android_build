@@ -11,7 +11,7 @@ To make these errors go away, you have two choices:
 
       ^^^^^^^^^^^^^^^^^^
       NO. NO. STOP BEING LAZY. SERIOUSLY.
-      DO NOT DO THIS in CM. THIS IS A LIE. IT WILL BREAK THINGS.
+      DO NOT DO THIS in MK. THIS IS A LIE. IT WILL BREAK THINGS.
 
       To submit the revised current.txt to the main Android repository,
       you will need approval.
