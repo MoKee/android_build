@@ -500,9 +500,6 @@ function print_lunch_menu()
     local uname=$(uname)
     echo
     echo "You're building on" $uname
-    if [ "$(uname)" = "Darwin" ] ; then
-       echo "  (ohai, koush!)"
-    fi
     echo
     if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "Breakfast menu... pick a combo:"
