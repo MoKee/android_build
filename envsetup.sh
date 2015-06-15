@@ -648,12 +648,6 @@ function lunch()
         echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
     fi
 
-    if [ "$(uname)" = "Darwin" ] ; then
-        if [ "$(which gfind)" == "" ]; then
-            echo -e "\033[1;33;41mfindutils is not installed! You must execute 'sudo port install findutils' in Terminal!\033[0m"
-        fi
-    fi
-
     if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" == 1 ]; then
         export CCACHE_DIR=~/.ccache
     fi
