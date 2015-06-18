@@ -181,7 +181,7 @@ include $(BUILD_SYSTEM)/device.mk
 
 # A MK build needs only the MK product makefiles.
 ifneq ($(MK_BUILD),)
-  all_product_configs := $(shell ls device/*/$(MK_BUILD)/mokee.mk)
+  all_product_configs := $(shell find device -path "*/$(MK_BUILD)/mokee.mk")
 else
   ifneq ($(strip $(TARGET_BUILD_APPS)),)
   # An unbundled app build needs only the core product makefiles.
