@@ -34,14 +34,21 @@ if [ -d $PREBUILT_DIR ]; then
     rm -rf $PREBUILT_DIR
 fi
 
+if [ $MK_CPU_ABI -eq "arm64-v8a" ]; then
+    LIB_FILENAME=lib64
+else
+    LIB_FILENAME=lib
+fi
+
 mkdir -p $PREBUILT_DIR
-mkdir -p $PREBUILT_DIR/lib
+mkdir -p $PREBUILT_DIR/$LIB_FILENAME
+
 
 if [ -d $TARGET_DIR ]; then
     echo "Copying files..."
     cp -r $TARGET_DIR/system/app/webview $PREBUILT_DIR
-    rm -r $PREBUILT_DIR/webview/lib
-    cp $TARGET_DIR/system/lib/libwebviewchromium*.so $PREBUILT_DIR/lib
+    rm -r $PREBUILT_DIR/webview/$LIB_FILENAME
+    cp $TARGET_DIR/system/$LIB_FILENAME/libwebviewchromium*.so $PREBUILT_DIR/$LIB_FILENAME
 else
     echo "Please ensure that you have ran a full build prior to running this script!"
     exit 1;
@@ -71,11 +78,11 @@ cat > $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
 
 LOCAL_PATH := prebuilts/chromium/$DEVICE
 
-STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm;ln -sf /system/lib/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm/libwebviewchromium.so)
+STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/$LIB_FILENAME/arm;ln -sf /system/$LIB_FILENAME/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/$LIB_FILENAME/arm/libwebviewchromium.so)
 
 PRODUCT_COPY_FILES += \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/webview,system/app/webview) \\
-    \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/lib,system/lib)
+    \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/$LIB_FILENAME,system/$LIB_FILENAME)
 
 EOF
 
