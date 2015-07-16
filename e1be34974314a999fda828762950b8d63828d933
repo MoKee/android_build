@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fce034c_8fc8d974",
+        "filename": "tools/chromium_prebuilt.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2015-07-16T16:19:37Z",
+      "side": 0,
+      "message": "path is not exists. Can we delete it?",
+      "range": {
+        "startLine": 43,
+        "startChar": 32,
+        "endLine": 43,
+        "endChar": 35
+      },
+      "revId": "e1be34974314a999fda828762950b8d63828d933",
+      "serverId": "83d63960-fecf-4fd1-a7f6-e01518638a62",
+      "unresolved": false
+    }
+  ]
+}
