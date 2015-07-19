@@ -29,4 +29,5 @@ libmsc-v8.so
 libsmartaiwrite-jni-v11.so
 libsmartaiwrite-jni-v12.so
 libvadLib-v5.so
-otasigcheck.sh"
+otasigcheck.sh
+com.google.widevine.software.drm.jar"
