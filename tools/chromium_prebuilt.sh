@@ -29,12 +29,13 @@ fi
 
 TARGET_DIR=$OUT
 PREBUILT_DIR=$TOP/prebuilts/chromium/$DEVICE
+YEAR=$(date +%Y)
 
 if [ -d $PREBUILT_DIR ]; then
     rm -rf $PREBUILT_DIR
 fi
 
-if [ "$MK_CPU_ABI" = "arm64-v8a" ]; then
+if [ "$MK_CPU_ABI" == "arm64-v8a" ]; then
     mkdir -p $PREBUILT_DIR/lib
     mkdir -p $PREBUILT_DIR/lib64
 else
@@ -64,7 +65,7 @@ echo $HASH1 > $PREBUILT_DIR/hash_chromium.txt
 echo $HASH2 > $PREBUILT_DIR/hash_webview.txt
 
 cat > $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
-# Copyright (C) 2015 The MoKee OpenSource Project
+# Copyright (C) $YEAR The MoKee OpenSource Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,20 +81,29 @@ cat > $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
 
 LOCAL_PATH := prebuilts/chromium/$DEVICE
 
-ifeq (\$(MK_CPU_ABI),arm64-v8a)
-STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm;mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm64;ln -sf /system/lib/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm/libwebviewchromium.so;ln -sf /system/lib64/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm64/libwebviewchromium.so)
+EOF
+
+if [ "$MK_CPU_ABI" == "arm64-v8a" ]; then
+cat >> $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
+STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm; \\
+    mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm64; \\
+    ln -sf /system/lib/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm/libwebviewchromium.so; \\
+    ln -sf /system/lib64/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm64/libwebviewchromium.so)
 
 PRODUCT_COPY_FILES += \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/webview,system/app/webview) \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/lib,system/lib) \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/lib64,system/lib64)
+EOF
 else
-STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm;ln -sf /system/lib/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm/libwebviewchromium.so)
+cat >> $PREBUILT_DIR/chromium_prebuilt.mk <<EOF
+STUB := \$(shell mkdir -p out/target/product/$DEVICE/system/app/webview/lib/arm; \\
+    ln -sf /system/lib/libwebviewchromium.so out/target/product/$DEVICE/system/app/webview/lib/arm/libwebviewchromium.so)
 
 PRODUCT_COPY_FILES += \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/webview,system/app/webview) \\
     \$(call find-copy-subdir-files,*,\$(LOCAL_PATH)/lib,system/lib)
-endif
 EOF
+fi
 
 echo "Done!"
