@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-export EXCLUDE_CHECK_MAIN="zip
+export EXCLUDE_CHECK_MAIN="hosts
 otasigcheck.sh
 OneTimeInitializer.apk
 Provision.apk
