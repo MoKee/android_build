@@ -16,8 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-export EXCLUDE_CHECK_MAIN="hosts
-otasigcheck.sh
+export EXCLUDE_CHECK_MAIN="otasigcheck.sh
 OneTimeInitializer.apk
 Provision.apk
 com.google.widevine.software.drm.jar
