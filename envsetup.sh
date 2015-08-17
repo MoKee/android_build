@@ -687,6 +687,12 @@ function lunch()
         export PRODUCT_PREBUILT_WEBVIEWCHROMIUM=""
     fi
 
+    # Use SaberMod Toolchains
+    SABERMOD_TOOLCHAIN_ENABLED=$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)
+    if [ "$(uname)" = "Linux" ] && [ "$SABERMOD_TOOLCHAIN_ENABLED"  == "true" ]; then
+        export LD_LIBRARY_PATH=$(gettop)/prebuilts/gcc/$(uname)-x86/arm/sabermod/usr/lib/
+    fi
+
     fixup_common_out_dir
 
     set_stuff_for_environment
