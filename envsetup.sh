@@ -148,12 +148,6 @@ function setpaths()
     gccprebuiltdir=$(get_abs_build_var ANDROID_GCC_PREBUILTS)
 
     # defined in core/config.mk
-
-    # Use SaberMod Toolchains
-    if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
-        export LD_LIBRARY_PATH=$gccprebuiltdir/arm/sabermod/usr/lib/
-    fi
-
     targetgccversion=$(get_build_var TARGET_GCC_VERSION)
     targetgccversion2=$(get_build_var 2ND_TARGET_GCC_VERSION)
     export TARGET_GCC_VERSION=$targetgccversion
@@ -190,6 +184,11 @@ function setpaths()
     unset ANDROID_KERNEL_TOOLCHAIN_PATH
     case $ARCH in
         arm)
+            # Use SaberMod Toolchains
+            if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
+                targetgccversion=4.9
+                export LD_LIBRARY_PATH=$gccprebuiltdir/arm/sabermod/usr/lib/
+            fi
             # Legacy toolchain configuration used for ARM kernel compilation
             toolchaindir=arm/arm-eabi-$targetgccversion/bin
             if [ -d "$gccprebuiltdir/$toolchaindir" ]; then
