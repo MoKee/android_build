@@ -198,7 +198,7 @@ function setpaths()
             if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
                 targetgccversion=4.9
                 toolchaindir=arm/sabermod-arm-eabi-$targetgccversion/bin
-                export LD_LIBRARY_PATH=$gccprebuiltdir/arm/sabermod/usr/lib/
+                export LD_LIBRARY_PATH=$prebuiltdir/sabermod/usr/lib/
             else
                 toolchaindir=arm/arm-eabi-$targetgccversion/bin
             fi
