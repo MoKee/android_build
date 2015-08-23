@@ -164,6 +164,7 @@ function setpaths()
         arm)
             if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
                 toolchaindir=arm/sabermod-arm-linux-androideabi-$targetgccversion/bin
+                export LD_LIBRARY_PATH=$T/prebuilts/sabermod/usr/lib/
             else
                 toolchaindir=arm/arm-linux-androideabi-$targetgccversion/bin
             fi
@@ -171,6 +172,7 @@ function setpaths()
         arm64)
             if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
                 toolchaindir=aarch64/sabermod-aarch64-linux-android-$targetgccversion/bin;
+                export LD_LIBRARY_PATH=$T/prebuilts/sabermod/usr/lib/
             else
                 toolchaindir=aarch64/aarch64-linux-android-$targetgccversion/bin;
             fi
@@ -198,7 +200,6 @@ function setpaths()
             if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
                 targetgccversion=4.9
                 toolchaindir=arm/sabermod-arm-eabi-$targetgccversion/bin
-                export LD_LIBRARY_PATH=$T/prebuilts/sabermod/usr/lib/
             else
                 toolchaindir=arm/arm-eabi-$targetgccversion/bin
             fi
