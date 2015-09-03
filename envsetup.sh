@@ -161,7 +161,12 @@ function setpaths()
             ;;
         x86_64) toolchaindir=x86/x86_64-linux-android-$targetgccversion/bin
             ;;
-        arm) toolchaindir=arm/arm-linux-androideabi-$targetgccversion/bin
+        arm)
+            if [ "$(uname)" = "Linux" ] && [ -n "$(get_build_var MK_TOOLCHAIN_VARIANT)" ]; then
+                toolchaindir=arm/$(get_build_var MK_TOOLCHAIN_VARIANT)-arm-linux-androideabi-$targetgccversion/bin
+            else
+                toolchaindir=arm/arm-linux-androideabi-$targetgccversion/bin
+            fi
             ;;
         arm64) toolchaindir=aarch64/aarch64-linux-android-$targetgccversion/bin;
                toolchaindir2=arm/arm-linux-androideabi-$targetgccversion2/bin
@@ -185,10 +190,8 @@ function setpaths()
     case $ARCH in
         arm)
             # Legacy toolchain configuration used for ARM kernel compilation
-            if [ "$(uname)" = "Linux" ] && [ "$(get_build_var SABERMOD_TOOLCHAIN_ENABLED)"  == "true" ]; then
-                targetgccversion=4.9
-                toolchaindir=arm/sabermod-arm-eabi-$targetgccversion/bin
-                export LD_LIBRARY_PATH=$T/prebuilts/sabermod/usr/lib/
+            if [ "$(uname)" = "Linux" ] && [ -n "$(get_build_var MK_TOOLCHAIN_VARIANT)" ]; then
+                toolchaindir=arm/$(get_build_var MK_TOOLCHAIN_VARIANT)-arm-eabi-$targetgccversion/bin
             else
                 toolchaindir=arm/arm-eabi-$targetgccversion/bin
             fi
