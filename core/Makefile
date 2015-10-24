@@ -218,7 +218,7 @@ endif
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 			TARGET_BUILD_FLAVOR="$(TARGET_PRODUCT)-$(TARGET_BUILD_VARIANT)" \
 			TARGET_DEVICE="$(TARGET_VENDOR_DEVICE_NAME)" \
-			CM_DEVICE="$(TARGET_DEVICE)" \
+			MK_DEVICE="$(TARGET_DEVICE)" \
 			PRODUCT_NAME="$(TARGET_VENDOR_PRODUCT_NAME)" \
 			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
 			PRODUCT_DEFAULT_LOCALE="$(call get-default-product-locale,$(PRODUCT_LOCALES))" \
@@ -914,9 +914,8 @@ ifneq ($(OTA_PACKAGE_SIGNING_KEY),)
     PRODUCT_EXTRA_RECOVERY_KEYS := $(DEFAULT_SYSTEM_DEV_CERTIFICATE)
 else
     PRODUCT_EXTRA_RECOVERY_KEYS += \
-        build/target/product/security/cm \
-        build/target/product/security/cm-devkey \
-        build/target/product/security/bacon
+        build/target/product/security/mk \
+        build/target/product/security/mk-devkey
 endif
 
 # Generate a file containing the keys that will be read by the
@@ -1807,7 +1806,7 @@ endif
 ifeq ($(WITH_GMS),true)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
 else
-ifneq ($(CM_BUILD),)
+ifneq ($(MK_BUILD),)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := true
 else
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
@@ -1841,14 +1840,22 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-CM_TARGET_PACKAGE := $(PRODUCT_OUT)/cm-$(CM_VERSION).zip
+MK_TARGET_PACKAGE := $(PRODUCT_OUT)/$(MK_VERSION).zip
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CM_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(CM_TARGET_PACKAGE) > $(CM_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_CYN}"Package Complete: $(CM_TARGET_PACKAGE)"${CL_RST}
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(MK_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) > $(MK_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_CYN}"Package Complete: $(MK_TARGET_PACKAGE)"${CL_RST}
+
+	$(hide) # Create Release, History, Nightly and Experimental folder Start
+ifdef MK_BUILD_PATH
+	$(hide) mkdir -p $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)/md5
+	$(hide) cp $(MK_TARGET_PACKAGE) $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)
+	$(hide) cp $(MK_TARGET_PACKAGE).md5sum $(MK_BUILD_PATH)/$(MK_BUILDTYPE)/$(MK_BUILD)/md5
+endif
+	$(hide) # Create Release, History, Nightly and Experimental folder End
 
 # -----------------------------------------------------------------
 # The factory package

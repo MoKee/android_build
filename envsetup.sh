@@ -21,14 +21,14 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
-- cmremote: Add git remote for CM Gerrit Review
-- cmgerrit: A Git wrapper that fetches/pushes patch from/to CM Gerrit Review
-- cmrebase: Rebase a Gerrit change and push it again
+- mkremote: Add git remote for MK Gerrit Review
+- mkgerrit: A Git wrapper that fetches/pushes patch from/to MK Gerrit Review
+- mkrebase: Rebase a Gerrit change and push it again
 - aospremote: Add git remote for matching AOSP repository
 - cafremote: Add git remote for matching CodeAurora repository.
 - mka:      Builds using SCHED_BATCH on all processors
 - mkap:     Builds the module(s) using mka and pushes them to the device.
-- cmka:     Cleans and builds using mka.
+- mkka:     Cleans and builds using mka.
 - repolastsync: Prints date and time of last repo sync.
 - reposync: Parallel repo sync using ionice and SCHED_BATCH
 - repopick: Utility to fetch changes from Gerrit.
@@ -81,13 +81,13 @@ function check_product()
         return
     fi
 
-    if (echo -n $1 | grep -q -e "^cm_") ; then
-       CM_BUILD=$(echo -n $1 | sed -e 's/^cm_//g')
-       export BUILD_NUMBER=$((date +%s%N ; echo $CM_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
+    if (echo -n $1 | grep -q -e "^mk_") ; then
+       MK_BUILD=$(echo -n $1 | sed -e 's/^mk_//g')
+       export BUILD_NUMBER=$((date +%s%N ; echo $MK_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
     else
-       CM_BUILD=
+       MK_BUILD=
     fi
-    export CM_BUILD
+    export MK_BUILD
 
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
@@ -243,6 +243,9 @@ function setpaths()
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
+
+    export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
+
 }
 
 function printconfig()
@@ -493,23 +496,20 @@ function add_lunch_combo()
 }
 
 # add the default one here
-add_lunch_combo aosp_arm-eng
-add_lunch_combo aosp_arm64-eng
-add_lunch_combo aosp_mips-eng
-add_lunch_combo aosp_mips64-eng
-add_lunch_combo aosp_x86-eng
-add_lunch_combo aosp_x86_64-eng
+# add_lunch_combo aosp_arm-eng
+# add_lunch_combo aosp_arm64-eng
+# add_lunch_combo aosp_mips-eng
+# add_lunch_combo aosp_mips64-eng
+# add_lunch_combo aosp_x86-eng
+# add_lunch_combo aosp_x86_64-eng
 
 function print_lunch_menu()
 {
     local uname=$(uname)
     echo
     echo "You're building on" $uname
-    if [ "$(uname)" = "Darwin" ] ; then
-       echo "  (ohai, koush!)"
-    fi
     echo
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "Breakfast menu... pick a combo:"
     else
        echo "Lunch menu... pick a combo:"
@@ -523,7 +523,7 @@ function print_lunch_menu()
         i=$(($i+1))
     done | column
 
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "... and don't forget the bacon!"
     fi
 
@@ -546,10 +546,10 @@ function breakfast()
 {
     target=$1
     local variant=$2
-    CM_DEVICES_ONLY="true"
+    MK_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
-    for f in `/bin/ls vendor/cm/vendorsetup.sh 2> /dev/null`
+    for f in `/bin/ls vendor/mk/vendorsetup.sh 2> /dev/null`
         do
             echo "including $f"
             . $f
@@ -565,11 +565,11 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the CM model name
+            # This is probably just the MK model name
             if [ -z "$variant" ]; then
                 variant="userdebug"
             fi
-            lunch cm_$target-$variant
+            lunch mk_$target-$variant
         fi
     fi
     return $?
@@ -619,7 +619,7 @@ function lunch()
     check_product $product
     if [ $? -ne 0 ]
     then
-        # if we can't find a product, try to grab it off the CM github
+        # if we can't find a product, try to grab it off the MK github
         T=$(gettop)
         pushd $T > /dev/null
         build/tools/roomservice.py $product
@@ -731,8 +731,8 @@ function tapas()
 function eat()
 {
     if [ "$OUT" ] ; then
-        MODVERSION=$(get_build_var CM_VERSION)
-        ZIPFILE=cm-$MODVERSION.zip
+        MODVERSION=$(get_build_var MK_VERSION)
+        ZIPFILE=$MODVERSION.zip
         ZIPPATH=$OUT/$ZIPFILE
         if [ ! -f $ZIPPATH ] ; then
             echo "Nothing to eat"
@@ -747,7 +747,7 @@ function eat()
             done
             echo "Device Found.."
         fi
-    if (adb shell getprop ro.cm.device | grep -q "$CM_BUILD");
+    if (adb shell getprop ro.mk.device | grep -q "$MK_BUILD");
     then
         # if adbd isn't root we can't write to /cache/recovery/
         adb root
@@ -769,7 +769,7 @@ EOF
     fi
     return $?
     else
-        echo "The connected device does not appear to be $CM_BUILD, run away!"
+        echo "The connected device does not appear to be $MK_BUILD, run away!"
     fi
 }
 
@@ -1663,23 +1663,23 @@ function godir () {
     \cd $T/$pathname
 }
 
-function cmremote()
+function mkremote()
 {
-    git remote rm cmremote 2> /dev/null
+    git remote rm mkremote 2> /dev/null
     GERRIT_REMOTE=$(git config --get remote.github.projectname)
     if [ -z "$GERRIT_REMOTE" ]
     then
         echo Unable to set up the git remote, are you under a git repo?
         return 0
     fi
-    CMUSER=$(git config --get review.review.cyanogenmod.org.username)
-    if [ -z "$CMUSER" ]
+    MKUSER=$(git config --get review.review.mfunz.com.username)
+    if [ -z "$MKUSER" ]
     then
-        git remote add cmremote ssh://review.cyanogenmod.org:29418/$GERRIT_REMOTE
+        git remote add mkremote ssh://review.mfunz.com:29418/$GERRIT_REMOTE
     else
-        git remote add cmremote ssh://$CMUSER@review.cyanogenmod.org:29418/$GERRIT_REMOTE
+        git remote add mkremote ssh://$MKUSER@review.mfunz.com:29418/$GERRIT_REMOTE
     fi
-    echo You can now push to "cmremote".
+    echo You can now push to "mkremote".
 }
 
 function aospremote()
@@ -1744,7 +1744,7 @@ function installboot()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 > /dev/null
     adb wait-for-online remount
-    if (adb shell getprop ro.cm.device | grep -q "$CM_BUILD");
+    if (adb shell getprop ro.mk.device | grep -q "$MK_BUILD");
     then
         adb push $OUT/boot.img /cache/
         for i in $OUT/system/lib/modules/*;
@@ -1755,7 +1755,7 @@ function installboot()
         adb shell chmod 644 /system/lib/modules/*
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $CM_BUILD, run away!"
+        echo "The connected device does not appear to be $MK_BUILD, run away!"
     fi
 }
 
@@ -1789,13 +1789,13 @@ function installrecovery()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 >> /dev/null
     adb wait-for-online remount
-    if (adb shell getprop ro.cm.device | grep -q "$CM_BUILD");
+    if (adb shell getprop ro.mk.device | grep -q "$MK_BUILD");
     then
         adb push $OUT/recovery.img /cache/
         adb shell dd if=/cache/recovery.img of=$PARTITION
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $CM_BUILD, run away!"
+        echo "The connected device does not appear to be $MK_BUILD, run away!"
     fi
 }
 
@@ -1812,21 +1812,21 @@ function makerecipe() {
 
   repo forall -c '
 
-  if [ "$REPO_REMOTE" == "github" ]
+  if [ "$REPO_REMOTE" == "mokee" ]
   then
     pwd
-    cmremote
-    git push cmremote HEAD:refs/heads/'$1'
+    mkremote
+    git push mkremote HEAD:refs/heads/'$1'
   fi
   '
 }
 
-function cmgerrit() {
+function mkgerrit() {
     if [ $# -eq 0 ]; then
         $FUNCNAME help
         return 1
     fi
-    local user=`git config --get review.review.cyanogenmod.org.username`
+    local user=`git config --get review.review.mfunz.com.username`
     local review=`git config --get remote.github.review`
     local project=`git config --get remote.github.projectname`
     local command=$1
@@ -1862,7 +1862,7 @@ EOF
             case $1 in
                 __cmg_*) echo "For internal use only." ;;
                 changes|for)
-                    if [ "$FUNCNAME" = "cmgerrit" ]; then
+                    if [ "$FUNCNAME" = "mkgerrit" ]; then
                         echo "'$FUNCNAME $1' is deprecated."
                     fi
                     ;;
@@ -1955,7 +1955,7 @@ EOF
                 $local_branch:refs/for/$remote_branch || return 1
             ;;
         changes|for)
-            if [ "$FUNCNAME" = "cmgerrit" ]; then
+            if [ "$FUNCNAME" = "mkgerrit" ]; then
                 echo >&2 "'$FUNCNAME $command' is deprecated."
             fi
             ;;
@@ -2054,15 +2054,15 @@ EOF
     esac
 }
 
-function cmrebase() {
+function mkrebase() {
     local repo=$1
     local refs=$2
     local pwd="$(pwd)"
     local dir="$(gettop)/$repo"
 
     if [ -z $repo ] || [ -z $refs ]; then
-        echo "CyanogenMod Gerrit Rebase Usage: "
-        echo "      cmrebase <path to project> <patch IDs on Gerrit>"
+        echo "MoKee OpenSource Gerrit Rebase Usage: "
+        echo "      mkrebase <path to project> <patch IDs on Gerrit>"
         echo "      The patch IDs appear on the Gerrit commands that are offered."
         echo "      They consist on a series of numbers and slashes, after the text"
         echo "      refs/changes. For example, the ID in the following command is 26/8126/2"
@@ -2083,7 +2083,7 @@ function cmrebase() {
     echo "Bringing it up to date..."
     repo sync .
     echo "Fetching change..."
-    git fetch "http://review.cyanogenmod.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
+    git fetch "http://review.mfunz.com/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
     if [ "$?" != "0" ]; then
         echo "Error cherry-picking. Not uploading!"
         return
@@ -2106,7 +2106,7 @@ function mka() {
     esac
 }
 
-function cmka() {
+function mkka() {
     if [ ! -z "$1" ]; then
         for i in "$@"; do
             case $i in
@@ -2169,7 +2169,7 @@ function dopush()
         echo "Device Found."
     fi
 
-    if (adb shell getprop ro.cm.device | grep -q "$CM_BUILD") || [ "$FORCE_PUSH" == "true" ];
+    if (adb shell getprop ro.mk.device | grep -q "$MK_BUILD") || [ "$FORCE_PUSH" == "true" ];
     then
     # retrieve IP and PORT info if we're using a TCP connection
     TCPIPPORT=$(adb devices | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+[^0-9]+' \
@@ -2232,14 +2232,14 @@ function dopush()
     rm -f $OUT/.log
     return 0
     else
-        echo "The connected device does not appear to be $CM_BUILD, run away!"
+        echo "The connected device does not appear to be $MK_BUILD, run away!"
     fi
 }
 
 alias mmp='dopush mm'
 alias mmmp='dopush mmm'
 alias mkap='dopush mka'
-alias cmkap='dopush cmka'
+alias mkkap='dopush mkka'
 
 function repopick() {
     T=$(gettop)
@@ -2249,7 +2249,7 @@ function repopick() {
 function fixup_common_out_dir() {
     common_out_dir=$(get_build_var OUT_DIR)/target/common
     target_device=$(get_build_var TARGET_DEVICE)
-    if [ ! -z $CM_FIXUP_COMMON_OUT ]; then
+    if [ ! -z $MK_FIXUP_COMMON_OUT ]; then
         if [ -d ${common_out_dir} ] && [ ! -L ${common_out_dir} ]; then
             mv ${common_out_dir} ${common_out_dir}-${target_device}
             ln -s ${common_out_dir}-${target_device} ${common_out_dir}
@@ -2380,7 +2380,7 @@ unset f
 
 # Add completions
 check_bash_version && {
-    dirs="sdk/bash_completion vendor/cm/bash_completion"
+    dirs="sdk/bash_completion vendor/mk/bash_completion"
     for dir in $dirs; do
     if [ -d ${dir} ]; then
         for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
@@ -2392,3 +2392,4 @@ check_bash_version && {
 }
 
 export ANDROID_BUILD_TOP=$(gettop)
+export MK_BUILDER=True

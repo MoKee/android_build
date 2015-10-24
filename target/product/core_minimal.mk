@@ -99,8 +99,8 @@ PRODUCT_BOOT_JARS := \
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
 PRODUCT_SYSTEM_SERVER_JARS := \
-    org.cyanogenmod.platform \
-    org.cyanogenmod.hardware \
+    org.mokee.platform \
+    org.mokee.hardware \
     services \
     ethernet-service \
     wifi-service
