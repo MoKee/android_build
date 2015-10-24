@@ -34,7 +34,9 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+- chglog:   Alternative tool to generate changelog.
 - clearout: Cleans out directory
+- clog:     Tool to generate changelog.
 
 Environemnt options:
 - SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
@@ -2392,9 +2394,19 @@ check_bash_version && {
     done
 }
 
+# Alternative Changelog Tool
+function chglog() {
+    $ANDROID_BUILD_TOP/build/tools/chglog.py $ANDROID_BUILD_TOP $1 $2
+}
+
 # Cleans out directory
 function clearout() {
     rm -rf $ANDROID_BUILD_TOP/out/target/product
+}
+
+# Changelog Tool
+function clog() {
+    $ANDROID_BUILD_TOP/build/tools/clog $1
 }
 
 export ANDROID_BUILD_TOP=$(gettop)
