@@ -21,10 +21,10 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
-- mkremote: Add git remote for MK Gerrit Review
-- mkgerrit: A Git wrapper that fetches/pushes patch from/to MK Gerrit Review
-- mkrebase: Rebase a Gerrit change and push it again
-- aospremote: Add git remote for matching AOSP repository
+- mkremote: Add git remote for MK Gerrit Review.
+- mkgerrit: A Git wrapper that fetches/pushes patch from/to MK Gerrit Review.
+- mkrebase: Rebase a Gerrit change and push it again.
+- aospremote: Add git remote for matching AOSP repository.
 - cafremote: Add git remote for matching CodeAurora repository.
 - mka:      Builds using SCHED_BATCH on all processors
 - mkap:     Builds the module(s) using mka and pushes them to the device.
@@ -34,6 +34,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+- clearout: Cleans out directory
 
 Environemnt options:
 - SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
@@ -2389,6 +2390,11 @@ check_bash_version && {
         done
     fi
     done
+}
+
+# Cleans out directory
+function clearout() {
+    rm -rf $ANDROID_BUILD_TOP/out/target/product
 }
 
 export ANDROID_BUILD_TOP=$(gettop)
