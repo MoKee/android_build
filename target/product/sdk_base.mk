@@ -36,7 +36,6 @@ PRODUCT_PACKAGES := \
 	LiveWallpapersPicker \
 	Mms \
 	Music \
-	OpenWnn \
 	Protips \
 	rild \
 	SdkSetup \
