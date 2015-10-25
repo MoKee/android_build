@@ -583,7 +583,7 @@ bootimage-nodeps: $(MKBOOTIMG)
 	$(hide) $(call assert-max-image-size,$(INSTALLED_BOOTIMAGE_TARGET),$(BOARD_BOOTIMAGE_PARTITION_SIZE))
 	@echo -e ${CL_INS}"Made boot image: $@"${CL_RST}
 
-  endif # PRODUCT_SUPPORTS_VERITY
+  endif # PRODUCT_SUPPORTS_VBOOT
 endif # PRODUCT_SUPPORTS_BOOT_SIGNER / BOARD_CUSTOM_BOOTIMG_MK
 
 else	# TARGET_NO_KERNEL
@@ -960,7 +960,7 @@ define build-recoveryimage-target
           > $(TARGET_RECOVERY_ROOT_OUT)/default.prop
   $(hide) $(MKBOOTFS) -d $(TARGET_OUT) $(TARGET_RECOVERY_ROOT_OUT) | $(MINIGZIP) > $(recovery_ramdisk)
 
-  $(if !$(BOARD_CUSTOM_BOOTIMG_MK),
+  $(if $(BOARD_CUSTOM_BOOTIMG_MK),,
     $(if $(filter true,$(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_SUPPORTS_VBOOT)), \
       $(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(BOARD_MKBOOTIMG_ARGS) --output $(1).unsigned, \
       $(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(BOARD_MKBOOTIMG_ARGS) --output $(1) --id > $(RECOVERYIMAGE_ID_FILE))
@@ -968,8 +968,8 @@ define build-recoveryimage-target
       $(BOOT_SIGNER) /recovery $(1) $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_VERITY_SIGNING_KEY).pk8 $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_VERITY_SIGNING_KEY).x509.pem $(1))
     $(if $(filter true,$(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_SUPPORTS_VBOOT)), \
       $(VBOOT_SIGNER) $(FUTILITY) $(1).unsigned $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_VBOOT_SIGNING_KEY).vbpubk $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_VBOOT_SIGNING_KEY).vbprivk $(1).keyblock $(1))
-    $(hide) $(call assert-max-image-size,$(1),$(BOARD_RECOVERYIMAGE_PARTITION_SIZE)))
-  @echo -e ${CL_CYN}"Made recovery image: $@"${CL_RST}
+    $(hide) $(call assert-max-image-size,$(1),$(BOARD_RECOVERYIMAGE_PARTITION_SIZE))
+    @echo -e ${CL_CYN}"Made recovery image: $@"${CL_RST})
 endef
 
 $(recovery_uncompressed_ramdisk): $(MINIGZIP) $(recovery_ramdisk)
