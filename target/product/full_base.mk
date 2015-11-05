@@ -26,9 +26,6 @@ PRODUCT_PACKAGES := \
 # Put zh_CN first in the list, so make it default.
 PRODUCT_LOCALES := zh_CN
 
-# Include drawables for all densities
-PRODUCT_AAPT_CONFIG := normal
-
 # Get some sounds
 # $(call inherit-product-if-exists, frameworks/base/data/sounds/AllAudio.mk)
 
