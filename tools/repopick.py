@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2013-2015 The MoKee OpenSource Project
+# Copyright (C) 2013-2016 The MoKee Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -120,12 +120,12 @@ def fetch_query(remote_url, query):
         raise Exception('Gerrit URL should be in the form http[s]://hostname/ or ssh://[user@]host[:port]')
 
 if __name__ == '__main__':
-    # Default to MoKee OpenSource Gerrit
+    # Default to MoKee Open Source Gerrit
     default_gerrit = 'http://review.mfunz.com'
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=textwrap.dedent('''\
         repopick.py is a utility to simplify the process of cherry picking
-        patches from MoKee OpenSource's Gerrit instance (or any gerrit instance of your choosing)
+        patches from MoKee Open Source's Gerrit instance (or any gerrit instance of your choosing)
 
         Given a list of change numbers, repopick will cd into the project path
         and cherry pick the latest patch available.

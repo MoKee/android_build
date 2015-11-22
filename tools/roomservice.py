@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2012-2015, The MoKee OpenSource Project
+# Copyright (C) 2012-2016, The MoKee Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ except:
     device = product
 
 if not depsonly:
-    print("Device %s not found. Attempting to retrieve device repository from MoKee OpenSource Github (https://github.com/MoKee)." % device)
+    print("Device %s not found. Attempting to retrieve device repository from MoKee Open Source Github (https://github.com/MoKee)." % device)
 
 repositories = []
 
@@ -292,4 +292,4 @@ else:
             print("Done")
             sys.exit()
 
-print("Repository for %s not found in the MoKee OpenSource Github repository list. If this is in error, you may need to manually add it to your local_manifests/roomservice.xml." % device)
+print("Repository for %s not found in the MoKee Open Source Github repository list. If this is in error, you may need to manually add it to your local_manifests/roomservice.xml." % device)
