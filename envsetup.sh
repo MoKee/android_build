@@ -2110,7 +2110,7 @@ function makerecipe() {
 
   repo forall -c '
 
-  if [ "$REPO_REMOTE" == "github" ]
+  if [ "$REPO_REMOTE" == "mokee" ]
   then
     pwd
     mkremote
