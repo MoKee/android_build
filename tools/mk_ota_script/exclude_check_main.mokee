@@ -18,6 +18,7 @@
 
 export EXCLUDE_CHECK_MAIN="otasigcheck.sh
 OneTimeInitializer.apk
+PackageInstaller.apk
 Provision.apk
 com.google.widevine.software.drm.jar
 "
