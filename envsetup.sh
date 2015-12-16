@@ -244,6 +244,27 @@ function setpaths()
         export CCACHE_DIR=$ANDROID_CCACHE_DIR
     fi
 
+    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" == 1 ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+    if [ "$CCACHE_DIR" ]
+    then
+        if [ ! -d "$CCACHE_DIR" ]; then
+          mkdir -p "$CCACHE_DIR"
+        fi
+        BASE_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
+        export CCACHE_DIR=$BASE_CCACHE_DIR/$product
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
+        if [ -z "$CCACHE_SIZE" ]; then
+            CCACHE_SIZE=16G
+        fi
+        if [ "$(uname)" = "Darwin" ] ; then
+            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+        else
+            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+        fi
+    fi
+
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
@@ -658,27 +679,6 @@ function lunch()
 
     if [ "$(which pngquant)" == "" ]; then
         echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
-    fi
-
-    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" == 1 ]; then
-        export CCACHE_DIR=~/.ccache
-    fi
-    if [ "$CCACHE_DIR" ]
-    then
-        if [ ! -d "$CCACHE_DIR" ]; then
-          mkdir -p "$CCACHE_DIR"
-        fi
-        BASE_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
-        export CCACHE_DIR=$BASE_CCACHE_DIR/$product
-        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
-        if [ -z "$CCACHE_SIZE" ]; then
-            CCACHE_SIZE=16G
-        fi
-        if [ "$(uname)" = "Darwin" ] ; then
-            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
-        else
-            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
-        fi
     fi
 
     export TARGET_PRODUCT=$product
