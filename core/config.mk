@@ -184,8 +184,11 @@ FIND_LEAVES_EXCLUDES := $(addprefix --prune=, $(OUT_DIR) $(SCAN_EXCLUDE_DIRS) .r
 
 # General entries for project pathmap.  Any entries listed here should
 # be device and hardware independent.
+ifneq ($(BUILD_TWRP),)
+$(call project-set-path-variant,recovery,RECOVERY_VARIANT,bootable/recovery-twrp)
+else
 $(call project-set-path-variant,recovery,RECOVERY_VARIANT,bootable/recovery)
-
+endif
 -include vendor/extra/BoardConfigExtra.mk
 # The build system exposes several variables for where to find the kernel
 # headers:
