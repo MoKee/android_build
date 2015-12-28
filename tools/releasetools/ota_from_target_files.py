@@ -618,6 +618,16 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
+  script.Print(" ___  ___      _   __           ")
+  script.Print(" |  \/  |     | | / /           ")
+  script.Print(" | .  . | ___ | |/ /  ___  ___  ")
+  script.Print(" | |\/| |/ _ \|    \ / _ \/ _ \ ")
+  script.Print(" | |  | | (_) | |\  \  __/  __/ ")
+  script.Print(" \_|  |_/\___/\_| \_/\___|\___| ")
+  script.Print(" ")
+  script.Print("      || Android 6.0.1 ||       ")
+  script.Print(" ")
+
   CopyInstallTools(output_zip)
   script.UnpackPackageDir("install", "/tmp/install")
   script.SetPermissionsRecursive("/tmp/install", 0, 0, 0755, 0644, None, None)
