@@ -270,6 +270,7 @@ function setpaths()
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
 
     export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
+    export ART_USE_OPTIMIZING_COMPILER=true
 
 }
 
