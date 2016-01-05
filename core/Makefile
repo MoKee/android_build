@@ -1923,6 +1923,7 @@ bacon: otapackage
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(MK_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(MK_TARGET_PACKAGE) | cut -f1 -d' ' > $(MK_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(MK_TARGET_PACKAGE)"${CL_RST}
+	@echo -e ${CL_CYN}"ROM Size : `ls -lh $(MK_TARGET_PACKAGE) | cut -d ' ' -f 5`"
 
 	$(hide) # Create Release, History, Nightly and Experimental folder Start
 ifdef MK_BUILD_PATH
