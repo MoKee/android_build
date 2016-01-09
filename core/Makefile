@@ -844,6 +844,10 @@ recovery_build_prop := $(intermediate_system_build_prop)
 recovery_uncompressed_ramdisk := $(PRODUCT_OUT)/ramdisk-recovery.cpio
 recovery_resources_common := $(call project-path-for,recovery)/res
 
+ifeq ($(RECOVERY_VARIANT),twrp)
+TW_USE_TOOLBOX ?= true
+endif
+
 # Set recovery_density to the density bucket of the device.
 recovery_density := unknown
 ifneq (,$(TARGET_RECOVERY_DENSITY))
