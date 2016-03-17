@@ -27,7 +27,7 @@ PRODUCT_PACKAGES += \
     DownloadProvider \
     HTMLViewer \
     MediaProvider \
-    PackageInstaller \
+    MoKeePackageInstaller \
     SettingsProvider \
     Shell \
     StatementService \
