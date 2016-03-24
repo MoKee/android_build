@@ -1040,7 +1040,7 @@ INTERNAL_SYSTEMIMAGE_FILES := $(filter $(TARGET_OUT)/%, \
 
 v4a-hook: $(INTERNAL_SYSTEMIMAGE_FILES)
 	@echo -e "V4a audio effects hook!"
-	$(hide) ./build/tools/releasetools/v4a_hook.pyz
+	$(hide) java -jar ./build/tools/releasetools/v4a_hook.jar
 
 .PHONY: v4a-hook
 
