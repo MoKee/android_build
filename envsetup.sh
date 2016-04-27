@@ -2473,7 +2473,7 @@ function mk_timer()
     local mins=$((($tdiff % 3600) / 60))
     local secs=$(($tdiff % 60))
     local ncolors=$(tput colors 2>/dev/null)
-    if [ -n "$ncolors" ] && [ $ncolors -ge 8 ]; then
+    if [[ -n "$ncolors" && $ncolors -ge 8 ]]; then
         color_failed="\e[0;31m"
         color_success="\e[0;32m"
         color_reset="\e[0m"
