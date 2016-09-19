@@ -592,7 +592,8 @@ def WriteFullOTAPackage(input_zip, output_zip):
       metadata=metadata,
       info_dict=OPTIONS.info_dict)
 
-  has_recovery_patch = HasRecoveryPatch(input_zip)
+  #  has_recovery_patch = HasRecoveryPatch(input_zip)
+  has_recovery_patch = True
   block_based = OPTIONS.block_based and has_recovery_patch
 
   metadata["ota-type"] = "BLOCK" if block_based else "FILE"
@@ -652,6 +653,13 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
+  script.Print("  __  __    ___    _  __  _____   _____  ")
+  script.Print(" |  \/  |  / _ \  | |/ / | ____| | ____| ")
+  script.Print(" | |\/| | | | | | | ' /  |  _|   |  _|   ")
+  script.Print(" | |  | | | |_| | | . \  | |___  | |___  ")
+  script.Print(" |_|  |_|  \___/  |_|\_\ |_____| |_____| ")
+  script.Print(" ")
+
   CopyInstallTools(output_zip)
   script.UnpackPackageDir("install", "/tmp/install")
   script.SetPermissionsRecursive("/tmp/install", 0, 0, 0o755, 0o644, None, None)
@@ -677,6 +685,19 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     script.ValidateSignatures("data")
     script.Unmount("/data")
     script.AppendExtra("endif;")
+
+  builddate = GetBuildProp("ro.build.date", OPTIONS.info_dict);
+  releasetype = GetBuildProp("ro.mk.releasetype", OPTIONS.info_dict);
+
+  device = GetBuildProp("ro.mk.device", OPTIONS.info_dict);
+  if not OPTIONS.override_prop:
+    product = "%s"%(device);
+  else:
+    product = "%s (unified)"%(device);
+
+  script.Print("# Release: %s"%(releasetype));
+  script.Print("# Build date: %s"%(builddate));
+  script.Print("# Device: %s"%(product));
 
   # Place a copy of file_contexts.bin into the OTA package which will be used
   # by the recovery program.
@@ -715,8 +736,8 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
       common.ZipWriteStr(output_zip, "recovery/" + fn, data)
       system_items.Get("system/" + fn)
 
-    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink,
-                             recovery_img, boot_img)
+#    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink,
+#                             recovery_img, boot_img)
 
     system_items.GetMetadata(input_zip)
     system_items.Get("system").SetPermissions(script)
@@ -790,7 +811,7 @@ endif;
   common.ZipWriteStr(output_zip, "system/build.prop",
                      ""+input_zip.read("SYSTEM/build.prop"))
 
-  common.ZipWriteStr(output_zip, "META-INF/org/cyanogenmod/releasekey",
+  common.ZipWriteStr(output_zip, "META-INF/org/mokee/releasekey",
                      ""+input_zip.read("META/releasekey.txt"))
 
 def WritePolicyConfig(file_name, output_zip):

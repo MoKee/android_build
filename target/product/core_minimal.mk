@@ -31,7 +31,7 @@ PRODUCT_PACKAGES += \
     ExtServices \
     HTMLViewer \
     MediaProvider \
-    PackageInstaller \
+    MoKeePackageInstaller \
     SettingsProvider \
     Shell \
     StatementService \
@@ -102,10 +102,10 @@ PRODUCT_BOOT_JARS := \
     org.apache.http.legacy.boot
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
-ifneq ($(TARGET_DISABLE_CMSDK), true)
+ifneq ($(TARGET_DISABLE_MKSDK), true)
 PRODUCT_SYSTEM_SERVER_JARS := \
-    org.cyanogenmod.platform \
-    org.cyanogenmod.hardware
+    org.mokee.platform \
+    org.mokee.hardware
 endif
 PRODUCT_SYSTEM_SERVER_JARS += \
     services \

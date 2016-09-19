@@ -437,11 +437,11 @@ else # LOCAL_SDK_RES_VERSION
 framework_res_package_export := \
     $(call intermediates-dir-for,APPS,framework-res,,COMMON)/package-export.apk
 
-ifneq ($(TARGET_DISABLE_CMSDK), true)
+ifneq ($(TARGET_DISABLE_MKSDK), true)
 # Avoid possible circular dependency with our platform-res
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
-cm_plat_res_package_export := \
-    $(call intermediates-dir-for,APPS,org.cyanogenmod.platform-res,,COMMON)/package-export.apk
+mk_plat_res_package_export := \
+    $(call intermediates-dir-for,APPS,org.mokee.platform-res,,COMMON)/package-export.apk
 endif # LOCAL_IGNORE_SUBDIR
 endif
 
@@ -451,10 +451,10 @@ endif
 framework_res_package_export_deps := \
     $(dir $(framework_res_package_export))src/R.stamp
 
-ifneq ($(TARGET_DISABLE_CMSDK), true)
+ifneq ($(TARGET_DISABLE_MKSDK), true)
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
-cm_plat_res_package_export_deps := \
-    $(dir $(cm_plat_res_package_export))src/R.stamp
+mk_plat_res_package_export_deps := \
+    $(dir $(mk_plat_res_package_export))src/R.stamp
 endif # LOCAL_IGNORE_SUBDIR
 endif
 
@@ -469,12 +469,12 @@ all_library_res_package_export_deps := \
     $(foreach lib,$(LOCAL_RES_LIBRARIES),\
         $(call intermediates-dir-for,APPS,$(lib),,COMMON)/src/R.stamp)
 
-ifneq ($(TARGET_DISABLE_CMSDK), true)
+ifneq ($(TARGET_DISABLE_MKSDK), true)
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
 all_library_res_package_exports += \
-    $(cm_plat_res_package_export)
+    $(mk_plat_res_package_export)
 all_library_res_package_export_deps += \
-    $(cm_plat_res_package_export_deps)
+    $(mk_plat_res_package_export_deps)
 endif # LOCAL_IGNORE_SUBDIR
 endif
 
