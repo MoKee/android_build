@@ -294,6 +294,29 @@ function setpaths()
         export CCACHE_DIR=$ANDROID_CCACHE_DIR
     fi
 
+    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" = 1 ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+    if [ "$CCACHE_DIR" ]
+    then
+        if [ ! -d "$CCACHE_DIR" ]; then
+          mkdir -p "$CCACHE_DIR"
+        fi
+        BASE_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
+        export CCACHE_DIR=$BASE_CCACHE_DIR/$product
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
+        if [ -z "$CCACHE_SIZE" ]; then
+            CCACHE_SIZE=16G
+        fi
+        if [ "$(uname)" = "Darwin" ] ; then
+            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+        else
+            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+        fi
+    fi
+
+    export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
+
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
