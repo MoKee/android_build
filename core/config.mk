@@ -189,7 +189,7 @@ FIND_LEAVES_EXCLUDES := $(addprefix --prune=, $(OUT_DIR) $(SCAN_EXCLUDE_DIRS) .r
 $(call project-set-path-variant,recovery,RECOVERY_VARIANT,bootable/recovery)
 
 -include vendor/extra/BoardConfigExtra.mk
--include vendor/cm/config/BoardConfigCM.mk
+-include vendor/mk/config/BoardConfigMK.mk
 
 # The build system exposes several variables for where to find the kernel
 # headers:
@@ -915,10 +915,10 @@ ifneq ($(TARGET_COPY_FILES_OVERRIDES),)
     PRODUCT_COPY_FILES := $(filter-out $(TARGET_COPY_FILES_OVERRIDES), $(PRODUCT_COPY_FILES))
 endif
 
-ifneq ($(CM_BUILD),)
+ifneq ($(MK_BUILD),)
 ## We need to be sure the global selinux policies are included
 ## last, to avoid accidental resetting by device configs
-$(eval include vendor/cm/sepolicy/sepolicy.mk)
+$(eval include vendor/mk/sepolicy/sepolicy.mk)
 
 # Include any vendor specific config.mk file
 -include $(TOPDIR)vendor/*/build/core/config.mk
