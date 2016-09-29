@@ -1015,10 +1015,6 @@ OTA_PUBLIC_KEYS := $(DEFAULT_SYSTEM_DEV_CERTIFICATE).x509.pem
 ifneq ($(OTA_PACKAGE_SIGNING_KEY),)
     OTA_PUBLIC_KEYS := $(OTA_PACKAGE_SIGNING_KEY).x509.pem
     PRODUCT_EXTRA_RECOVERY_KEYS := $(DEFAULT_SYSTEM_DEV_CERTIFICATE)
-else
-    PRODUCT_EXTRA_RECOVERY_KEYS += \
-        build/target/product/security/mk \
-        build/target/product/security/mk-devkey
 endif
 
 # Generate a file containing the keys that will be read by the
