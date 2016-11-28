@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2015-2016 The MoKee Open Source Project
+# Copyright (C) 2016 The MoKee OpenSource Project
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,11 +60,9 @@ if [ -e "$1" ];then
     aapt p -0 .dat -0 .dict -0 .arsc -F $NAME .
 
     [ $QUIET ] || echo -e $CL_YLW"Resigning with cert: $(echo $CERT)"$CL_RST
+    java -Djava.library.path=$ANDROID_HOST_OUT/lib64 -jar $ANDROID_HOST_OUT/framework/signapk.jar $ANDROID_BUILD_TOP/$CERT $ANDROID_BUILD_TOP/$KEY $NAME signed_$NAME
 
-    [ $QUIET ] || echo java -jar $ANDROID_HOST_OUT/framework/signapk.jar $ANDROID_BUILD_TOP/$CERT $ANDROID_BUILD_TOP/$KEY $NAME signed_$NAME
-    java -jar $ANDROID_HOST_OUT/framework/signapk.jar $ANDROID_BUILD_TOP/$CERT $ANDROID_BUILD_TOP/$KEY $NAME signed_$NAME
     [ $QUIET ] || echo -e $CL_YLW"Zipaligning.."$CL_RST
-
     zipalign -f 4 signed_$NAME $BASE/$1
     if [ ! $QUIET ];then
         ls -l $BASE/$1.old
