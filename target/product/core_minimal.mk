@@ -94,8 +94,7 @@ PRODUCT_BOOT_JARS := \
     voip-common \
     ims-common \
     apache-xml \
-    org.apache.http.legacy.boot \
-    smartisanos
+    org.apache.http.legacy.boot
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
 PRODUCT_SYSTEM_SERVER_JARS := \
