@@ -17,6 +17,8 @@
 #
 
 export EXCLUDE_CHECK_MAIN="otasigcheck.sh
+Browser.apk
+Browser.odex
 ExtServices.apk
 ExtServices.odex
 Nox.apk
