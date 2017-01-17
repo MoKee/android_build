@@ -29,6 +29,8 @@ PackageInstaller.apk
 PackageInstaller.odex
 Provision.apk
 Provision.odex
+YuBrowser.apk
+YuBrowser.odex
 com.google.widevine.software.drm.jar
 bootanimation.zip
 recovery-resource.dat
