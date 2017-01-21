@@ -24,4 +24,6 @@ PackageInstaller.odex
 Provision.apk
 Provision.odex
 com.google.widevine.software.drm.jar
+bootanimation.zip
+recovery-resource.dat
 "
