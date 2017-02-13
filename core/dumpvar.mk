@@ -84,5 +84,11 @@ $(info   HOST_OS_EXTRA=$(HOST_OS_EXTRA))
 $(info   HOST_BUILD_TYPE=$(HOST_BUILD_TYPE))
 $(info   BUILD_ID=$(BUILD_ID))
 $(info   OUT_DIR=$(OUT_DIR))
+ifneq ($(RECOVERY_VARIANT),)
+$(info   RECOVERY_VARIANT=$(RECOVERY_VARIANT))
+endif
+ifeq ($(WITH_GMS),true)
+$(info   WITH_GMS=$(WITH_GMS))
+endif
 $(info ============================================)
 endif
