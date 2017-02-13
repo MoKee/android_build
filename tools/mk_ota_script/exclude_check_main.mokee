@@ -17,6 +17,8 @@
 #
 
 export EXCLUDE_CHECK_MAIN="otasigcheck.sh
+AudioFX.apk
+AudioFX.odex
 Browser.apk
 Browser.odex
 ExtServices.apk
