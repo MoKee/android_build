@@ -658,10 +658,10 @@ else
 endif
 
 # Rules for QCOM targets
-include vendor/cm/build/core/qcom_target.mk
+include vendor/mk/build/core/qcom_target.mk
 
 # Rules for MTK targets
-include vendor/cm/build/core/mtk_target.mk
+include vendor/mk/build/core/mtk_target.mk
 
 # ###############################################################
 # Set up final options.
