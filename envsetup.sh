@@ -23,7 +23,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 
 EOF
 
-    __print_cm_functions_help
+    __print_mk_functions_help
 
 cat <<EOF
 
@@ -35,7 +35,7 @@ Environment options:
 Look at the source to view more functions. The complete list is:
 EOF
     T=$(gettop)
-    for i in `cat $T/build/envsetup.sh $T/vendor/cm/build/envsetup.sh | sed -n "/^[[:blank:]]*function /s/function \([a-z_]*\).*/\1/p" | sort | uniq`; do
+    for i in `cat $T/build/envsetup.sh $T/vendor/mk/build/envsetup.sh | sed -n "/^[[:blank:]]*function /s/function \([a-z_]*\).*/\1/p" | sort | uniq`; do
       echo "$i"
     done | column
 }
@@ -45,8 +45,8 @@ function build_build_var_cache()
 {
     T=$(gettop)
     # Grep out the variable names from the script.
-    cached_vars=`cat $T/build/envsetup.sh $T/vendor/cm/build/envsetup.sh | tr '()' '  ' | awk '{for(i=1;i<=NF;i++) if($i~/get_build_var/) print $(i+1)}' | sort -u | tr '\n' ' '`
-    cached_abs_vars=`cat $T/build/envsetup.sh $T/vendor/cm/build/envsetup.sh | tr '()' '  ' | awk '{for(i=1;i<=NF;i++) if($i~/get_abs_build_var/) print $(i+1)}' | sort -u | tr '\n' ' '`
+    cached_vars=`cat $T/build/envsetup.sh $T/vendor/mk/build/envsetup.sh | tr '()' '  ' | awk '{for(i=1;i<=NF;i++) if($i~/get_build_var/) print $(i+1)}' | sort -u | tr '\n' ' '`
+    cached_abs_vars=`cat $T/build/envsetup.sh $T/vendor/mk/build/envsetup.sh | tr '()' '  ' | awk '{for(i=1;i<=NF;i++) if($i~/get_abs_build_var/) print $(i+1)}' | sort -u | tr '\n' ' '`
     # Call the build system to dump the "<val>=<value>" pairs as a shell script.
     build_dicts_script=`\cd $T; export CALLED_FROM_SETUP=true; export BUILD_SYSTEM=build/core; \
                         command make --no-print-directory -f build/core/config.mk \
@@ -132,17 +132,13 @@ function check_product()
         return
     fi
 
-    if (echo -n $1 | grep -q -e "^lineage_") ; then
-        CM_BUILD=$(echo -n $1 | sed -e 's/^lineage_//g')
-        export BUILD_NUMBER=$( (date +%s%N ; echo $CM_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
-    elif (echo -n $1 | grep -q -e "^cm_") ; then
-        # Fall back to cm_<product>
-        CM_BUILD=$(echo -n $1 | sed -e 's/^cm_//g')
-        export BUILD_NUMBER=$( (date +%s%N ; echo $CM_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
+    if (echo -n $1 | grep -q -e "^mk_") ; then
+       MK_BUILD=$(echo -n $1 | sed -e 's/^mk_//g')
+       export BUILD_NUMBER=$((date +%s%N ; echo $MK_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
     else
-        CM_BUILD=
+       MK_BUILD=
     fi
-    export CM_BUILD
+    export MK_BUILD
 
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
@@ -275,6 +271,29 @@ function setpaths()
 
     unset ANDROID_HOST_OUT
     export ANDROID_HOST_OUT=$(get_abs_build_var HOST_OUT)
+
+    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" = 1 ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+    if [ "$CCACHE_DIR" ]
+    then
+        if [ ! -d "$CCACHE_DIR" ]; then
+          mkdir -p "$CCACHE_DIR"
+        fi
+        BASE_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
+        export CCACHE_DIR=$BASE_CCACHE_DIR/$product
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
+        if [ -z "$CCACHE_SIZE" ]; then
+            CCACHE_SIZE=16G
+        fi
+        if [ "$(uname)" = "Darwin" ] ; then
+            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+        else
+            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+        fi
+    fi
+
+    export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
 
     # needed for building linux on MacOS
     # TODO: fix the path
@@ -536,12 +555,12 @@ function add_lunch_combo()
 }
 
 # add the default one here
-add_lunch_combo aosp_arm-eng
-add_lunch_combo aosp_arm64-eng
-add_lunch_combo aosp_mips-eng
-add_lunch_combo aosp_mips64-eng
-add_lunch_combo aosp_x86-eng
-add_lunch_combo aosp_x86_64-eng
+# add_lunch_combo aosp_arm-eng
+# add_lunch_combo aosp_arm64-eng
+# add_lunch_combo aosp_mips-eng
+# add_lunch_combo aosp_mips64-eng
+# add_lunch_combo aosp_x86-eng
+# add_lunch_combo aosp_x86_64-eng
 
 function print_lunch_menu()
 {
@@ -549,7 +568,7 @@ function print_lunch_menu()
     echo
     echo "You're building on" $uname
     echo
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "Breakfast menu... pick a combo:"
     else
        echo "Lunch menu... pick a combo:"
@@ -563,7 +582,7 @@ function print_lunch_menu()
         i=$(($i+1))
     done | column
 
-    if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${MK_DEVICES_ONLY}" != "z" ]; then
        echo "... and don't forget the bacon!"
     fi
 
@@ -622,16 +641,16 @@ function lunch()
     check_product $product
     if [ $? -ne 0 ]
     then
-        # if we can't find a product, try to grab it off the CM github
+        # if we can't find a product, try to grab it off the MK github
         T=$(gettop)
         cd $T > /dev/null
-        vendor/cm/build/tools/roomservice.py $product
+        vendor/mk/build/tools/roomservice.py $product
         cd - > /dev/null
         check_product $product
     else
         T=$(gettop)
         cd $T > /dev/null
-        vendor/cm/build/tools/roomservice.py $product true
+        vendor/mk/build/tools/roomservice.py $product true
         cd - > /dev/null
     fi
     TARGET_PRODUCT=$product \
@@ -650,6 +669,10 @@ function lunch()
     then
         echo
         return 1
+    fi
+
+    if [ "$(which pngquant)" = "" ]; then
+        echo -e "\033[1;33;41mpngquant is not installed! Builds will be larger!\033[0m"
     fi
 
     export TARGET_PRODUCT=$product
@@ -1707,7 +1730,7 @@ unset f
 
 # Add completions
 check_bash_version && {
-    dirs="sdk/bash_completion vendor/cm/bash_completion"
+    dirs="sdk/bash_completion vendor/mk/bash_completion"
     for dir in $dirs; do
     if [ -d ${dir} ]; then
         for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
@@ -1720,4 +1743,4 @@ check_bash_version && {
 
 export ANDROID_BUILD_TOP=$(gettop)
 
-. $ANDROID_BUILD_TOP/vendor/cm/build/envsetup.sh
+. $ANDROID_BUILD_TOP/vendor/mk/build/envsetup.sh
