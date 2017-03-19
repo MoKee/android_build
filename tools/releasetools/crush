@@ -49,6 +49,7 @@ if [ -e "$1" ];then
     trap "rm -rf $TMPDIR; exit" INT TERM EXIT
     cd $TMPDIR/$NAME
     unzip -q $BASE/$1
+    rm classes*.dex
     PNG_FILES=$(find . -name "*.png" | grep -v "\.9.png$" | tr "\n" " ")
     for x in $PNG_FILES;do
         [ $QUIET ] || echo -e $CL_YLW"Crushing $x"$CL_RST
@@ -57,7 +58,11 @@ if [ -e "$1" ];then
     cp $BASE/$1 $BASE/$1.old
 
     [ $QUIET ] || echo -e $CL_YLW"Repacking apk.."$CL_RST
-    aapt p -0 .dat -0 .dict -0 .arsc -F $NAME .
+    aapt p --compress 1 -0 .dat -0 .dict -0 .arsc -F $NAME .
+
+    [ $QUIET ] || echo -e $CL_YLW"Adding classes.dex to apk.."$CL_RST
+    unzip -q $BASE/$1 classes*.dex
+    zip -qjX $NAME classes*.dex
 
     [ $QUIET ] || echo -e $CL_YLW"Resigning with cert: $(echo $CERT)"$CL_RST
     java -Djava.library.path=$ANDROID_HOST_OUT/lib64 -jar $ANDROID_HOST_OUT/framework/signapk.jar $ANDROID_BUILD_TOP/$CERT $ANDROID_BUILD_TOP/$KEY $NAME signed_$NAME
