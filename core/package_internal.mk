@@ -559,10 +559,25 @@ $(LOCAL_BUILT_MODULE): PRIVATE_RES_PACKAGE := $(my_res_package)
 $(LOCAL_BUILT_MODULE) : $(my_res_package) $(AAPT2) | $(ACP)
 else
 $(LOCAL_BUILT_MODULE) : $(all_res_assets) $(full_android_manifest) $(AAPT)
+	@echo "all_res_assets: $(all_res_assets)"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "full_android_manifest: $(full_android_manifest)"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "-"
+	@echo "AAPT: $(AAPT)"
 endif
 	@echo "target Package: $(PRIVATE_MODULE) ($@)"
 ifdef LOCAL_USE_AAPT2
+	@echo "LOCAL_USE_AAPT2"
 ifdef LOCAL_JACK_ENABLED
+	@echo "LOCAL_JACK_ENABLED"
 	$(call copy-file-to-new-target)
 else
 	@# TODO: implement merge-two-packages.
@@ -578,6 +593,9 @@ else
 	  $(call initialize-package-file,$(PRIVATE_SOURCE_ARCHIVE),$@),\
 	  $(create-empty-package))
 endif
+
+	@echo "add-assets-to-package"
+	@echo "$(add-assets-to-package)"
 	$(add-assets-to-package)
 endif  # LOCAL_USE_AAPT2
 ifneq ($(jni_shared_libraries),)
@@ -587,6 +605,8 @@ ifeq ($(full_classes_jar),)
 # We don't build jar, need to add the Java resources here.
 	$(if $(PRIVATE_EXTRA_JAR_ARGS),$(call add-java-resources-to,$@))
 else  # full_classes_jar
+	@echo "add-dex-to-package"
+	@echo "$(add-dex-to-package)"
 	$(add-dex-to-package)
 endif  # full_classes_jar
 ifdef LOCAL_JACK_ENABLED
@@ -601,6 +621,8 @@ ifneq (nostripping,$(LOCAL_DEX_PREOPT))
 	$(call dexpreopt-remove-classes.dex,$@)
 endif
 endif
+	@echo "sign-package"
+	@echo "$(sign-package)"
 	$(sign-package)
 
 ###############################
