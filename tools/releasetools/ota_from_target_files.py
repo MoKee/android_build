@@ -611,6 +611,7 @@ def WriteFullOTAPackage(input_zip, output_zip):
   AppendAssertions(script, OPTIONS.info_dict, oem_dict)
   device_specific.FullOTA_Assertions()
   TrustZoneAssertion_Hack(script)
+  BaseBandAssertion_Hack(script)
 
   # Two-step package strategy (in chronological order, which is *not*
   # the order in which the generated script has things):
@@ -2005,8 +2006,7 @@ def TrustZoneAssertion_Hack(script):
     tmp = script.script.pop(index)
     result = re.search(r"\(([^;]+)\)", tmp)
     cmd = result.group(1)
-    script.script.insert(index,
-            'ifelse({}, ui_print("Base firmware match..."),'.format(cmd))
+    script.script.insert(index, 'ifelse(!({}),'.format(cmd))
     script.script.insert(index + 1,
             'ui_print("***************************************");')
     script.script.insert(index + 2,
@@ -2017,6 +2017,35 @@ def TrustZoneAssertion_Hack(script):
             'ui_print("*                                     *");')
     script.script.insert(index + 5,
             'ui_print("*   !!!!! Wrong base firmware !!!!!   *");')
+    script.script.insert(index + 6,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 7,
+            'ui_print("***************************************");')
+    script.script.insert(index + 8, 'abort());')
+
+def BaseBandAssertion_Hack(script):
+  # Kids, do not try this at home
+  index = -1
+  for i, s in enumerate(script.script):
+    if 'verify_baseband' in s:
+      index = i
+      break
+
+  if index != -1:
+    tmp = script.script.pop(index)
+    result = re.search(r"\(([^;]+)\)", tmp)
+    cmd = result.group(1)
+    script.script.insert(index, 'ifelse(!({}),'.format(cmd))
+    script.script.insert(index + 1,
+            'ui_print("***************************************");')
+    script.script.insert(index + 2,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 3,
+            'ui_print("*       !!!!! FBI WARNING !!!!!       *");')
+    script.script.insert(index + 4,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 5,
+            'ui_print("*      !!!!! Wrong baseband !!!!!     *");')
     script.script.insert(index + 6,
             'ui_print("*                                     *");')
     script.script.insert(index + 7,
