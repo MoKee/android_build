@@ -158,7 +158,14 @@ class EdifyGenerator(object):
     cmd = ("assert(" +
            " ||\0".join(['getprop("ro.bootloader") == "%s"' % (b,)
                          for b in bootloaders]) +
-           ' || abort("This package supports bootloader(s): ' +
+           ' || abort(ui_print("***************************************"' +
+           'ui_print("*                                     *");' +
+           'ui_print("*       !!!!! FBI WARNING !!!!!       *");' +
+           'ui_print("*                                     *");' +
+           'ui_print("*    !!!!! Wrong bootloader !!!!!     *");' +
+           'ui_print("*                                     *");' +
+           'ui_print("***************************************");' +
+           '"This package supports bootloader(s): ' +
            ", ".join(["%s" % (b,) for b in bootloaders]) +
            '; this device has bootloader " + getprop("ro.bootloader") + ".");' +
            ");")
