@@ -145,7 +145,7 @@ class EdifyGenerator(object):
     cmd = ("assert(" +
            " || ".join(['getprop("ro.bootloader") == "%s"' % (b,)
                          for b in bootloaders]) +
-           ' || abort(ui_print("***************************************";\n' +
+           ' || abort(ui_print("***************************************");\n' +
            'ui_print("*                                     *");\n' +
            'ui_print("*       !!!!! FBI WARNING !!!!!       *");\n' +
            'ui_print("*                                     *");\n' +
