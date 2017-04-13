@@ -21,6 +21,16 @@ AudioFX.apk
 AudioFX.odex
 Browser.apk
 Browser.odex
+Calculator.apk
+Calculator.odex
+Calendar.apk
+Calendar.odex
+DeskClock.apk
+DeskClock.odex
+ExactCalculator.apk
+ExactCalculator.odex
+Exchange2.apk
+Exchange2.odex
 ExtServices.apk
 ExtServices.odex
 Nox.apk
@@ -31,6 +41,8 @@ PackageInstaller.apk
 PackageInstaller.odex
 Provision.apk
 Provision.odex
+Tag.apk
+Tag.odex
 YuBrowser.apk
 YuBrowser.odex
 com.google.widevine.software.drm.jar
