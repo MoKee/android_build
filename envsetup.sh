@@ -272,19 +272,18 @@ function setpaths()
     unset ANDROID_HOST_OUT
     export ANDROID_HOST_OUT=$(get_abs_build_var HOST_OUT)
 
-    if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" = 1 ]; then
-        export CCACHE_DIR=~/.ccache/mk_default
+    if [ "$USE_CCACHE" = 1 ]; then
         export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
-    fi
-    if [ "$CCACHE_DIR" ]
-    then
-        if [ ! "$USE_CCACHE_DIR_LEGACY" ]
-        then
+        if [ ! "$CCACHE_DIR" ]; then
+            export CCACHE_DIR=~/.ccache
+        fi
+        if [ ! "$USE_CCACHE_DIR_LEGACY" ]; then
             export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/$product
             if [ -z "$CCACHE_SIZE" ]; then
                 CCACHE_SIZE=16G
             fi
         else
+            export CCACHE_DIR=${CCACHE_DIR}/mk_default
             if [ -z "$CCACHE_SIZE" ]; then
                 CCACHE_SIZE=100G
             fi
