@@ -274,17 +274,23 @@ function setpaths()
 
     if [ ! "$CCACHE_DIR" ] && [ "$USE_CCACHE" = 1 ]; then
         export CCACHE_DIR=~/.ccache
+        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
     fi
     if [ "$CCACHE_DIR" ]
     then
+        if [ ! "$USE_CCACHE_DIR_LEGACY" ]
+        then
+            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/$product
+            if [ -z "$CCACHE_SIZE" ]; then
+                CCACHE_SIZE=16G
+            fi
+        else
+            if [ -z "$CCACHE_SIZE" ]; then
+                CCACHE_SIZE=100G
+            fi
+        fi
         if [ ! -d "$CCACHE_DIR" ]; then
           mkdir -p "$CCACHE_DIR"
-        fi
-        BASE_CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})
-        export CCACHE_DIR=$BASE_CCACHE_DIR/$product
-        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
-        if [ -z "$CCACHE_SIZE" ]; then
-            CCACHE_SIZE=16G
         fi
         if [ "$(uname)" = "Darwin" ] ; then
             prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
