@@ -277,7 +277,7 @@ function setpaths()
         if [ ! "$CCACHE_DIR" ]; then
             export CCACHE_DIR=~/.ccache
         fi
-        if [ ! "$USE_CCACHE_DIR_LEGACY" ]; then
+        if [ ! "$USE_LEGACY_CCACHE_DIR" ]; then
             export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/$product
             if [ -z "$CCACHE_SIZE" ]; then
                 CCACHE_SIZE=16G
