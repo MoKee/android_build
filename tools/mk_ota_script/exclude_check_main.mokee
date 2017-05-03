@@ -53,6 +53,8 @@ libttscompat.so
 libttspico.so
 Provision.apk
 Provision.odex
+Snap.apk
+Snap.odex
 StorageManager.apk
 StorageManager.odex
 Tag.apk
