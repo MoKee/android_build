@@ -49,6 +49,8 @@ PackageInstaller.apk
 PackageInstaller.odex
 PicoTts.apk
 PicoTts.odex
+PrintRecommendationService.apk
+PrintRecommendationService.odex
 libttscompat.so
 libttspico.so
 Provision.apk
