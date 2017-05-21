@@ -17,6 +17,8 @@
 #
 
 export EXCLUDE_CHECK_MAIN="otasigcheck.sh
+AmazeFileManager.apk
+AmazeFileManager.odex
 AudioFX.apk
 AudioFX.odex
 Browser.apk
@@ -31,6 +33,8 @@ DeskClock.apk
 DeskClock.odex
 Dialer.apk
 Dialer.odex
+Eleven.apk
+Eleven.odex
 Email.apk
 Email.odex
 ExactCalculator.apk
@@ -39,6 +43,8 @@ Exchange2.apk
 Exchange2.odex
 ExtServices.apk
 ExtServices.odex
+LockClock.apk
+LockClock.odex
 messaging.apk
 messaging.odex
 Nox.apk
@@ -51,10 +57,10 @@ PicoTts.apk
 PicoTts.odex
 PrintRecommendationService.apk
 PrintRecommendationService.odex
-libttscompat.so
-libttspico.so
 Provision.apk
 Provision.odex
+Recorder.apk
+Recorder.odex
 Snap.apk
 Snap.odex
 StorageManager.apk
@@ -65,9 +71,11 @@ Venus.apk
 Venus.odex
 webview.apk
 webview.odex
-libwebviewchromium.so
 YuBrowser.apk
 YuBrowser.odex
+libttscompat.so
+libttspico.so
+libwebviewchromium.so
 com.google.widevine.software.drm.jar
 bootanimation.zip
 recovery-resource.dat
