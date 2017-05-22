@@ -17,6 +17,8 @@
 #
 
 export EXCLUDE_CHECK_MAIN="otasigcheck.sh
+Aegis.apk
+Aegis.odex
 AmazeFileManager.apk
 AmazeFileManager.odex
 AudioFX.apk
@@ -65,6 +67,8 @@ Snap.apk
 Snap.odex
 StorageManager.apk
 StorageManager.odex
+Substratum.apk
+Substratum.odex
 Tag.apk
 Tag.odex
 Venus.apk
