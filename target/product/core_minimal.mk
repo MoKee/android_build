@@ -32,7 +32,7 @@ PRODUCT_PACKAGES += \
     ExtServices \
     HTMLViewer \
     MediaProvider \
-    PackageInstaller \
+    MoKeePackageInstaller \
     SettingsProvider \
     Shell \
     StatementService \
