@@ -41,7 +41,6 @@ pathmap_INCL := \
     libhardware_legacy:hardware/libhardware_legacy/include \
     libril:hardware/ril/include \
     opengl-tests-includes:frameworks/native/opengl/tests/include \
-    recovery:bootable/recovery \
     system-core:system/core/include \
     audio:system/media/audio/include \
     audio-effects:system/media/audio_effects/include \
@@ -100,3 +99,7 @@ FRAMEWORKS_BASE_SUBDIRS := \
 #
 FRAMEWORKS_BASE_JAVA_SRC_DIRS := \
 	$(addprefix frameworks/base/,$(FRAMEWORKS_BASE_SUBDIRS))
+
+ifneq ($(MK_BUILD),)
+-include $(TOPDIR)vendor/mk/build/core/pathmap.mk
+endif
