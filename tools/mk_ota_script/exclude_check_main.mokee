@@ -89,6 +89,8 @@ Venus.apk
 Venus.odex
 webview.apk
 webview.odex
+XposedInstaller.apk
+XposedInstaller.odex
 YuBrowser.apk
 YuBrowser.odex
 libttscompat.so
