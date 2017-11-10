@@ -490,8 +490,8 @@ framework_res_package_export := \
 
 # Avoid possible circular dependency with our platform-res
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
-lineage_plat_res_package_export := \
-    $(call intermediates-dir-for,APPS,org.lineageos.platform-res,,COMMON)/package-export.apk
+mokee_plat_res_package_export := \
+    $(call intermediates-dir-for,APPS,org.mokee.platform-res,,COMMON)/package-export.apk
 endif # LOCAL_IGNORE_SUBDIR
 
 # We can't depend directly on the export.apk file; it won't get its
@@ -501,8 +501,8 @@ framework_res_package_export_deps := \
     $(dir $(framework_res_package_export))src/R.stamp
 
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
-lineage_plat_res_package_export_deps := \
-    $(dir $(lineage_plat_res_package_export))src/R.stamp
+mokee_plat_res_package_export_deps := \
+    $(dir $(mokee_plat_res_package_export))src/R.stamp
 endif # LOCAL_IGNORE_SUBDIR
 
 endif # LOCAL_SDK_RES_VERSION
@@ -518,9 +518,9 @@ all_library_res_package_export_deps := \
 
 ifneq ($(LOCAL_IGNORE_SUBDIR), true)
 all_library_res_package_exports += \
-    $(lineage_plat_res_package_export)
+    $(mokee_plat_res_package_export)
 all_library_res_package_export_deps += \
-    $(lineage_plat_res_package_export_deps)
+    $(mokee_plat_res_package_export_deps)
 endif # LOCAL_IGNORE_SUBDIR
 
 $(resource_export_package) $(R_file_stamp) $(LOCAL_BUILT_MODULE): $(all_library_res_package_export_deps)
