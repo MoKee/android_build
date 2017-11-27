@@ -78,13 +78,6 @@ ifeq ($(BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED), true)
 endif
 
 # -----------------------------------------------------------------
-# skip_fingerprint_from_file
-skip_fingerprint_from_file :=
-ifeq ($(PRODUCT_SKIP_FINGERPRINT_FROM_FILE), true)
-  skip_fingerprint_from_file := true
-endif
-
-# -----------------------------------------------------------------
 # prop.default
 ifdef property_overrides_split_enabled
 INSTALLED_DEFAULT_PROP_TARGET := $(TARGET_OUT)/etc/prop.default
@@ -118,9 +111,7 @@ $(INSTALLED_DEFAULT_PROP_TARGET): $(intermediate_system_build_prop)
 	        echo "#" >> $@;
 	$(hide) echo ro.bootimage.build.date=`$(DATE_FROM_FILE)`>>$@
 	$(hide) echo ro.bootimage.build.date.utc=`$(DATE_FROM_FILE) +%s`>>$@
-ifndef skip_fingerprint_from_file
 	$(hide) echo ro.bootimage.build.fingerprint="$(BUILD_FINGERPRINT_FROM_FILE)">>$@
-endif
 	$(hide) build/tools/post_process_props.py $@
 ifdef property_overrides_split_enabled
 	$(hide) ln -sf system/etc/prop.default $(TARGET_ROOT_OUT)/default.prop
@@ -359,9 +350,7 @@ $(INSTALLED_VENDOR_BUILD_PROP_TARGET): $(VENDOR_BUILDINFO_SH)
 	$(hide) echo > $@
 	$(hide) echo ro.vendor.build.date=`$(DATE_FROM_FILE)`>>$@
 	$(hide) echo ro.vendor.build.date.utc=`$(DATE_FROM_FILE) +%s`>>$@
-ifndef skip_fingerprint_from_file
 	$(hide) echo ro.vendor.build.fingerprint="$(BUILD_FINGERPRINT_FROM_FILE)">>$@
-endif
 ifdef property_overrides_split_enabled
 	$(hide) TARGET_BOOTLOADER_BOARD_NAME="$(TARGET_BOOTLOADER_BOARD_NAME)" \
 			TARGET_BOARD_PLATFORM="$(TARGET_BOARD_PLATFORM)" \
@@ -1083,12 +1072,16 @@ recovery_resources_common := $(call project-path-for,recovery)/res
 
 # Set recovery_density to the density bucket of the device.
 recovery_density := unknown
+ifneq (,$(TARGET_RECOVERY_DENSITY))
+recovery_density := $(filter %dpi,$(TARGET_RECOVERY_DENSITY))
+else
 ifneq (,$(PRODUCT_AAPT_PREF_CONFIG))
 # If PRODUCT_AAPT_PREF_CONFIG includes a dpi bucket, then use that value.
 recovery_density := $(filter %dpi,$(PRODUCT_AAPT_PREF_CONFIG))
 else
 # Otherwise, use the default medium density.
 recovery_densities := mdpi
+endif
 endif
 
 ifneq (,$(wildcard $(recovery_resources_common)-$(recovery_density)))
