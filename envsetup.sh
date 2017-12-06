@@ -316,10 +316,12 @@ function setpaths()
         if [ ! -d "$CCACHE_DIR" ]; then
             mkdir -p "$CCACHE_DIR"
         fi
-        if [ "$(uname)" = "Darwin" ] ; then
-            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+
+        CCACHE_PATH=$(which ccache)
+        if [ ! -n "$CCACHE_PATH" ] ; then
+            prebuilts/misc/$(get_build_var HOST_PREBUILT_TAG)/ccache/ccache -M $CCACHE_SIZE
         else
-            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+            $CCACHE_PATH -M $CCACHE_SIZE
         fi
     fi
 
