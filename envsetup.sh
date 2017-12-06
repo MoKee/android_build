@@ -273,7 +273,6 @@ function setpaths()
     export ANDROID_HOST_OUT=$(get_abs_build_var HOST_OUT)
 
     if [ "$USE_CCACHE" = 1 ]; then
-        export CCACHE_BASEDIR=$ANDROID_BUILD_TOP
         if [ ! "$CCACHE_DIR" ]; then
             export CCACHE_DIR=~/.ccache
         fi
@@ -291,10 +290,12 @@ function setpaths()
         if [ ! -d "$CCACHE_DIR" ]; then
           mkdir -p "$CCACHE_DIR"
         fi
-        if [ "$(uname)" = "Darwin" ] ; then
-            prebuilts/misc/darwin-x86/ccache/ccache -M $CCACHE_SIZE
+
+        CCACHE_PATH=$(which ccache)
+        if [ ! -n "$CCACHE_PATH" ] ; then
+            prebuilts/misc/$(get_build_var HOST_PREBUILT_TAG)/ccache/ccache -M $CCACHE_SIZE
         else
-            prebuilts/misc/linux-x86/ccache/ccache -M $CCACHE_SIZE
+            $CCACHE_PATH -M $CCACHE_SIZE
         fi
     fi
 
