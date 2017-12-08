@@ -310,7 +310,7 @@ function setpaths()
         else
             export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/mk_default
             if [ -z "$CCACHE_SIZE" ]; then
-                CCACHE_SIZE=100G
+                CCACHE_SIZE=50G
             fi
         fi
         if [ ! -d "$CCACHE_DIR" ]; then
