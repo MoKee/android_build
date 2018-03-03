@@ -516,11 +516,9 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     system_progress -= 0.1
 
   builddate = GetBuildProp("ro.build.date", OPTIONS.info_dict);
-  releasetype = GetBuildProp("ro.mk.releasetype", OPTIONS.info_dict);
 
   device = GetBuildProp("ro.mk.device", OPTIONS.info_dict);
 
-  script.Print("# Release: %s"%(releasetype));
   script.Print("# Build date: %s"%(builddate));
   script.Print("# Device: %s"%(device));
 
