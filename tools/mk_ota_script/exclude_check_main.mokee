@@ -23,6 +23,8 @@ AmazeFileManager.apk
 AmazeFileManager.odex
 AudioFX.apk
 AudioFX.odex
+BookmarkProvider.apk
+BookmarkProvider.odex
 Browser.apk
 Browser.odex
 Calculator.apk
@@ -45,6 +47,8 @@ Exchange2.apk
 Exchange2.odex
 ExtServices.apk
 ExtServices.odex
+ExtShared.apk
+ExtShared.odex
 FMRadio.apk
 FMRadio.odex
 GoogleIntl.apk
