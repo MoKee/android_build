@@ -573,8 +573,8 @@ ZIPTIME := $(prebuilt_build_tools_bin)/ziptime
 # Generic tools.
 JACK := $(HOST_OUT_EXECUTABLES)/jack
 
-ifeq ($(USE_HOST_FLEX),yes)
-LEX := flex
+ifneq ($(FLEX_EXEC),)
+LEX := $(FLEX_EXEC)
 else
 LEX := prebuilts/misc/$(BUILD_OS)-$(HOST_PREBUILT_ARCH)/flex/flex-2.5.39
 endif
@@ -583,7 +583,11 @@ endif
 # To run bison from elsewhere you need to set up enviromental variable
 # BISON_PKGDATADIR.
 BISON_PKGDATADIR := $(PWD)/external/bison/data
+ifneq ($(BISON_EXEC),)
+BISON := $(BISON_EXEC)
+else
 BISON := $(HOST_OUT_EXECUTABLES)/bison
+endif
 YACC := $(BISON) -d
 BISON_DATA := $(wildcard external/bison/data/* external/bison/data/*/*)
 
