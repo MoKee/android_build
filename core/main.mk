@@ -283,6 +283,7 @@ ifneq (,$(user_variant))
   else
     # Set device insecure for other builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
+    ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
   endif
   ADDITIONAL_DEFAULT_PROPERTIES += security.perf_harden=1
 
