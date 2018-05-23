@@ -45,7 +45,7 @@ need_compile_res := true
 LOCAL_RESOURCE_DIR := $(foreach d,$(LOCAL_RESOURCE_DIR),$(call clean-path,$(d)))
 endif
 ifdef LOCAL_USE_AAPT2
-ifneq ($(LOCAL_STATIC_ANDROID_LIBRARIES),)
+ifneq ($(strip $(LOCAL_STATIC_ANDROID_LIBRARIES) $(LOCAL_STATIC_JAVA_AAR_LIBRARIES)),)
 need_compile_res := true
 endif
 endif
@@ -118,7 +118,7 @@ endif
 endif
 
 ifdef LOCAL_USE_AAPT2
-import_proguard_flag_files := $(strip $(foreach l,$(LOCAL_STATIC_ANDROID_LIBRARIES),\
+import_proguard_flag_files := $(strip $(foreach l,$(LOCAL_STATIC_ANDROID_LIBRARIES) $(LOCAL_STATIC_JAVA_AAR_LIBRARIES),\
     $(call intermediates-dir-for,JAVA_LIBRARIES,$(l),,COMMON)/export_proguard_flags))
 $(intermediates.COMMON)/export_proguard_flags: $(import_proguard_flag_files) $(addprefix $(LOCAL_PATH)/,$(LOCAL_EXPORT_PROGUARD_FLAG_FILES))
 	@echo "Export proguard flags: $@"
