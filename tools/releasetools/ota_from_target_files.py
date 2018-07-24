@@ -596,6 +596,10 @@ endif;
 
   script.SetProgress(1)
   script.AddToZip(input_zip, output_zip, input_path=OPTIONS.updater_binary)
+  input_zip = zipfile.ZipFile(input_zip.filename, "a")
+  common.ZipWriteStr(input_zip, "updater-script",
+                     "\n".join(script.script) + "\n")
+  common.ZipClose(input_zip)
   metadata["ota-required-cache"] = str(script.required_cache)
   WriteMetadata(metadata, output_zip)
 
