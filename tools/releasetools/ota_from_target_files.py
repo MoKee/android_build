@@ -907,8 +907,14 @@ endif;
 
   script.SetProgress(1)
   script.AddToZip(input_zip, output_zip, input_path=OPTIONS.updater_binary)
+  input_zip_path = input_zip.filename
+  common.ZipClose(input_zip)
+  input_zip = zipfile.ZipFile(input_zip_path, "a")
+  common.ZipWriteStr(input_zip, "updater-script",
+                     "\n".join(script.script) + "\n")
   metadata["ota-required-cache"] = str(script.required_cache)
 
+  common.ZipClose(input_zip)
   # We haven't written the metadata entry, which will be done in
   # FinalizeMetadata.
   common.ZipClose(output_zip)
