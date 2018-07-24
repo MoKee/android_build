@@ -596,6 +596,9 @@ endif;
 
   script.SetProgress(1)
   script.AddToZip(input_zip, output_zip, input_path=OPTIONS.updater_binary)
+  input_zip = zipfile.ZipFile(input_zip.filename, "a")
+  common.ZipWriteStr(input_zip, "updater-script",
+                     "\n".join(script.script) + "\n")
   metadata["ota-required-cache"] = str(script.required_cache)
   WriteMetadata(metadata, output_zip)
 
@@ -603,6 +606,7 @@ endif;
                      ""+input_zip.read("SYSTEM/build.prop"))
   common.ZipWriteStr(output_zip, "META-INF/org/mokee/releasekey",
                      ""+input_zip.read("META/releasekey.txt"))
+  common.ZipClose(input_zip)
 
 def WritePolicyConfig(file_name, output_zip):
   common.ZipWrite(output_zip, file_name, os.path.basename(file_name))
