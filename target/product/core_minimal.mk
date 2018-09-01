@@ -133,6 +133,8 @@ endif
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
 PRODUCT_SYSTEM_SERVER_JARS := \
+    org.mokee.platform \
+    org.mokee.hardware \
     services \
     ethernet-service \
     wifi-service \
