@@ -853,9 +853,9 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   if HasVendorPartition(input_zip):
     system_progress -= 0.1
 
-  builddate = GetBuildProp("ro.build.date", OPTIONS.info_dict);
+  builddate = target_info.GetBuildProp("ro.build.date");
 
-  device = GetBuildProp("ro.mk.device", OPTIONS.info_dict);
+  device = target_info.GetBuildProp("ro.mk.device");
 
   script.Print("# Build date: %s"%(builddate));
   script.Print("# Device: %s"%(device));
