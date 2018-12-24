@@ -803,22 +803,6 @@ def BuildImage(in_dir, prop_dict, out_file, target_out=None):
                         algorithm, salt, avb_signing_args):
       return False
 
-  if run_e2fsck and prop_dict.get("skip_fsck") != "true":
-    success, unsparse_image = UnsparseImage(out_file, replace=False)
-    if not success:
-      return False
-
-    # Run e2fsck on the inflated image file
-    e2fsck_command = ["e2fsck", "-f", "-n", unsparse_image]
-    (e2fsck_output, exit_code) = RunCommand(e2fsck_command)
-
-    os.remove(unsparse_image)
-
-    if exit_code != 0:
-      print("Error: '%s' failed with exit code %d:\n%s" % (
-          e2fsck_command, exit_code, e2fsck_output))
-      return False
-
   return True
 
 
