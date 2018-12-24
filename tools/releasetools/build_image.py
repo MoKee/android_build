@@ -611,16 +611,6 @@ def BuildImage(in_dir, prop_dict, out_file, target_out=None):
                         partition_name, key_path, algorithm, salt, additional_args):
       return False
 
-  if run_fsck and prop_dict.get("skip_fsck") != "true":
-    success, unsparse_image = UnsparseImage(out_file, replace=False)
-    if not success:
-      return False
-
-    # Run e2fsck on the inflated image file
-    e2fsck_command = ["e2fsck", "-f", "-n", unsparse_image]
-    (_, exit_code) = RunCommand(e2fsck_command)
-
-    os.remove(unsparse_image)
 
   return exit_code == 0
 
