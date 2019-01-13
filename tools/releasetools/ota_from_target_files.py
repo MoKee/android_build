@@ -1338,7 +1338,7 @@ def Assertion_Hack(script, assert_name, msg):
   # Kids, do not try this at home
   index = -1
   for i, s in enumerate(script.script):
-    if 'verify_' + assert_name in s:
+    if 'verify_' + assert_name in s and 'abort(' not in s:
       index = i
       break
 
