@@ -139,7 +139,6 @@ function check_product()
     fi
     if (echo -n $1 | grep -q -e "^mk_") ; then
         MK_BUILD=$(echo -n $1 | sed -e 's/^mk_//g')
-        export BUILD_NUMBER=$( (date +%s%N ; echo $MK_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
     else
         MK_BUILD=
     fi
