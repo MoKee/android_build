@@ -276,17 +276,11 @@ user_variant := $(filter user userdebug,$(TARGET_BUILD_VARIANT))
 enable_target_debugging := true
 tags_to_install :=
 ifneq (,$(user_variant))
-  ifdef MK_RELEASE
-    # Target is secure in release builds.
-    ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
-  else ifdef MK_HISTORY
-    # Target is secure in history builds.
-    ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
-  else ifdef MK_NIGHTLY
-    # Target is secure in nightly builds.
+  ifneq ($(filter true,$(MK_RELEASE) $(MK_HISTORY) $(MK_NIGHTLY) $(MK_PREMIUM)),)
+    # Target is secure in this builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
   else
-    # Set device insecure for other builds.
+    # Target is insecure in this builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
     ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
   endif
