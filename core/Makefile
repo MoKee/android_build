@@ -415,7 +415,7 @@ endif
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 	        TARGET_BUILD_FLAVOR="$(TARGET_BUILD_FLAVOR)" \
 	        TARGET_DEVICE="$(TARGET_DEVICE)" \
-	        LINEAGE_DEVICE="$(TARGET_DEVICE)" \
+	        MK_DEVICE="$(TARGET_DEVICE)" \
 	        PRODUCT_DEFAULT_LOCALE="$(call get-default-product-locale,$(PRODUCT_LOCALES))" \
 	        PRODUCT_DEFAULT_WIFI_CHANNELS="$(PRODUCT_DEFAULT_WIFI_CHANNELS)" \
 	        PRIVATE_BUILD_DESC="$(PRIVATE_BUILD_DESC)" \
@@ -859,7 +859,7 @@ endif
 ifdef BUILDING_RAMDISK_IMAGE
 BOOT_RAMDISK_COMPRESSOR := $(MINIGZIP)
 RECOVERY_RAMDISK_COMPRESSOR := $(MINIGZIP)
-LZMA := prebuilts/tools-lineage/${HOST_OS}-x86/bin/lzma
+LZMA := prebuilts/tools-mokee/${HOST_OS}-x86/bin/lzma
 ifneq ($(LZMA_RAMDISK_TARGETS),)
   ifneq (,$(findstring boot,$(LZMA_RAMDISK_TARGETS)))
     BOOT_RAMDISK_COMPRESSOR := $(LZMA) -f -c

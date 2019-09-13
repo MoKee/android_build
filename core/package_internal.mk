@@ -482,11 +482,11 @@ framework_res_package_export := \
     $(call intermediates-dir-for,APPS,framework-res,,COMMON)/package-export.apk
 
 # Avoid possible circular dependency with our platform-res
-lineage_plat_res_package_export := \
-    $(call intermediates-dir-for,APPS,org.lineageos.platform-res,,COMMON)/package-export.apk
+mokee_plat_res_package_export := \
+    $(call intermediates-dir-for,APPS,org.mokee.platform-res,,COMMON)/package-export.apk
 
-lineage_plat_res_package_export_deps := \
-    $(dir $(lineage_plat_res_package_export))src/R.stamp
+mokee_plat_res_package_export_deps := \
+    $(dir $(mokee_plat_res_package_export))src/R.stamp
 
 endif # LOCAL_SDK_RES_VERSION
 endif # LOCAL_NO_STANDARD_LIBRARIES
@@ -502,9 +502,9 @@ all_library_res_package_export_deps := \
         $(call intermediates-dir-for,APPS,$(lib),,COMMON)/src/R.stamp)
 
 all_library_res_package_exports += \
-    $(lineage_plat_res_package_export)
+    $(mokee_plat_res_package_export)
 all_library_res_package_export_deps += \
-    $(lineage_plat_res_package_export_deps)
+    $(mokee_plat_res_package_export_deps)
 
 $(resource_export_package) $(R_file_stamp) $(LOCAL_BUILT_MODULE): $(all_library_res_package_export_deps)
 $(LOCAL_INTERMEDIATE_TARGETS): \
