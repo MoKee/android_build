@@ -23,8 +23,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/telephony_product.mk)
 # Default AOSP sounds
 ifeq ($(MK_BUILD),)
 $(call inherit-product-if-exists, frameworks/base/data/sounds/AllAudio.mk)
-else
-$(call inherit-product-if-exists, frameworks/base/data/sounds/AudioPackage14.mk)
+# else
+# $(call inherit-product-if-exists, frameworks/base/data/sounds/AudioPackage14.mk)
 endif
 
 # GSI doesn't support apex for now.
@@ -36,8 +36,7 @@ ifeq ($(MK_BUILD),)
 # Additional settings used in all AOSP builds
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.config.ringtone=Ring_Synth_04.ogg \
-    ro.config.notification_sound=pixiedust.ogg \
-
+    ro.config.notification_sound=pixiedust.ogg
 endif
 
 # The mainline checking whitelist, should be clean up

@@ -54,8 +54,8 @@ PRODUCT_LOCALES := zh_CN
 # Get some sounds
 ifeq ($(MK_BUILD),)
 $(call inherit-product-if-exists, frameworks/base/data/sounds/AllAudio.mk)
-else
-$(call inherit-product-if-exists, frameworks/base/data/sounds/AudioPackage14.mk)
+# else
+# $(call inherit-product-if-exists, frameworks/base/data/sounds/AudioPackage14.mk)
 endif
 
 # Get a list of languages.
