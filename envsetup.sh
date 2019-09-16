@@ -327,9 +327,51 @@ function setpaths()
     unset ANDROID_TARGET_OUT_TESTCASES
     export ANDROID_TARGET_OUT_TESTCASES=$(get_abs_build_var TARGET_OUT_TESTCASES)
 
+    if [ "$USE_CCACHE" = 1 ]; then
+        if [ ! "$USE_LEGACY_CCACHE_DIR" ]; then
+            set_ccache "$product"
+        else
+            set_ccache "mokee_default"
+        fi
+    fi
+
+    export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
+
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
+}
+
+function set_ccache()
+{
+    if [ -z "$CCACHE_DIR" ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+
+    if [ -z "$LAST_CCACHE_DIR" ]; then
+        export CCACHE_DIR=$CCACHE_DIR/$1
+    else
+        export CCACHE_DIR="$(dirname $LAST_CCACHE_DIR)"/$1
+    fi
+
+    export LAST_CCACHE_DIR=$CCACHE_DIR
+
+    if [ ! -d "$CCACHE_DIR" ]; then
+        mkdir -p "$CCACHE_DIR"
+    fi
+
+    if [ -z "$CCACHE_SIZE" ]; then
+        if [[ "$1" == "mokee_default" ]]; then
+            CCACHE_SIZE=60G
+        else
+            CCACHE_SIZE=25G
+        fi
+    fi
+
+    local CCACHE_HOST="$(uname | tr '[:upper:]' '[:lower:]')"
+    export CCACHE_EXEC=$ANDROID_BUILD_TOP/prebuilts/tools-mokee/${CCACHE_HOST}-x86/bin/ccache
+
+    $CCACHE_EXEC -M $CCACHE_SIZE
 }
 
 function printconfig()
