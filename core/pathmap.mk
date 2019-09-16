@@ -74,6 +74,7 @@ FRAMEWORKS_BASE_SUBDIRS := \
 	    media/mca/effect \
 	    media/mca/filterfw \
 	    media/mca/filterpacks \
+	    mokee \
 	    drm \
 	    opengl \
 	    sax \
