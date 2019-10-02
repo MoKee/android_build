@@ -335,12 +335,10 @@ function setpaths()
             mkdir -p "$CCACHE_DIR"
         fi
 
-        CCACHE_PATH=$(which ccache)
-        if [ ! -n "$CCACHE_PATH" ] ; then
-            prebuilts/misc/$(get_build_var HOST_PREBUILT_TAG)/ccache/ccache -M $CCACHE_SIZE
-        else
-            $CCACHE_PATH -M $CCACHE_SIZE
-        fi
+        local CCACHE_HOST="$(uname)"
+        export CCACHE_EXEC=$ANDROID_BUILD_TOP/prebuilts/tools-mokee/"${CCACHE_HOST,,}"-x86/bin/ccache
+
+        $CCACHE_EXEC -M $CCACHE_SIZE
     fi
 
     export MK_CPU_ABI=$(get_build_var TARGET_CPU_ABI)
