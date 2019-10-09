@@ -321,12 +321,12 @@ function setpaths()
             export CCACHE_DIR=~/.ccache
         fi
         if [ ! "$USE_LEGACY_CCACHE_DIR" ]; then
-            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/$product
+            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mokee_*})/$product
             if [ -z "$CCACHE_SIZE" ]; then
                 CCACHE_SIZE=16G
             fi
         else
-            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/mk_default
+            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mokee_*})/mokee_default
             if [ -z "$CCACHE_SIZE" ]; then
                 CCACHE_SIZE=50G
             fi
