@@ -298,29 +298,10 @@ function setpaths()
     export ANDROID_TARGET_OUT_TESTCASES=$(get_abs_build_var TARGET_OUT_TESTCASES)
 
     if [ "$USE_CCACHE" = 1 ]; then
-        if [ ! "$CCACHE_DIR" ]; then
-            export CCACHE_DIR=~/.ccache
-        fi
         if [ ! "$USE_LEGACY_CCACHE_DIR" ]; then
-            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/$product
-            if [ -z "$CCACHE_SIZE" ]; then
-                CCACHE_SIZE=16G
-            fi
+            set_ccache "$product"
         else
-            export CCACHE_DIR=$(echo ${CCACHE_DIR%%/mk_*})/mk_default
-            if [ -z "$CCACHE_SIZE" ]; then
-                CCACHE_SIZE=50G
-            fi
-        fi
-        if [ ! -d "$CCACHE_DIR" ]; then
-            mkdir -p "$CCACHE_DIR"
-        fi
-
-        CCACHE_PATH=$(which ccache)
-        if [ ! -n "$CCACHE_PATH" ] ; then
-            prebuilts/misc/$(get_build_var HOST_PREBUILT_TAG)/ccache/ccache -M $CCACHE_SIZE
-        else
-            $CCACHE_PATH -M $CCACHE_SIZE
+            set_ccache "mokee_default"
         fi
     fi
 
@@ -329,6 +310,43 @@ function setpaths()
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
+}
+
+function set_ccache()
+{
+    if [ -z "$CCACHE_DIR" ]; then
+        export CCACHE_DIR=~/.ccache
+    fi
+
+    if [ -z "$LAST_CCACHE_DIR" ]; then
+        if [ -d "$CCACHE_DIR/mk_default" ]; then
+            mv $CCACHE_DIR/mk_default $CCACHE_DIR/mokee_default
+        fi
+        export CCACHE_DIR=$CCACHE_DIR/$1
+    else
+        export CCACHE_DIR="$(dirname $LAST_CCACHE_DIR)"/$1
+    fi
+
+    export LAST_CCACHE_DIR=$CCACHE_DIR
+
+    if [ ! -d "$CCACHE_DIR" ]; then
+        mkdir -p "$CCACHE_DIR"
+    fi
+
+    if [ -z "$CCACHE_SIZE" ]; then
+        if [ "$1" -eq "mokee_default" ]; then
+            CCACHE_SIZE=50G
+        else
+            CCACHE_SIZE=16G
+        fi
+    fi
+
+    local CCACHE_PATH=$(which ccache)
+    if [ ! -n "$CCACHE_PATH" ]; then
+        prebuilts/misc/$(get_build_var HOST_PREBUILT_TAG)/ccache/ccache -M $CCACHE_SIZE
+    else
+        $CCACHE_PATH -M $CCACHE_SIZE
+    fi
 }
 
 function printconfig()
