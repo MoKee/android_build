@@ -357,8 +357,8 @@ function set_ccache()
         fi
     fi
 
-    local CCACHE_HOST="$(uname)"
-    export CCACHE_EXEC=$ANDROID_BUILD_TOP/prebuilts/tools-mokee/"${CCACHE_HOST,,}"-x86/bin/ccache
+    local CCACHE_HOST="$(uname | tr '[:upper:]' '[:lower:]')"
+    export CCACHE_EXEC=$ANDROID_BUILD_TOP/prebuilts/tools-mokee/${CCACHE_HOST}-x86/bin/ccache
 
     $CCACHE_EXEC -M $CCACHE_SIZE
 }
