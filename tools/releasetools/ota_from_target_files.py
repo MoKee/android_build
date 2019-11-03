@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (C) 2008 The Android Open Source Project
+# Copyright (C) 2017-2019 The MoKee Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -216,6 +217,7 @@ import itertools
 import logging
 import multiprocessing
 import os.path
+import re
 import shlex
 import shutil
 import struct
@@ -772,6 +774,12 @@ def WriteFullOTAPackage(input_zip, output_file):
                                         target_info=target_info,
                                         source_info=None,
                                         device_specific=device_specific)
+
+  FBI = {"trustzone": "*   !!!!! Wrong base firmware !!!!!   *",
+         "baseband" : "*      !!!!! Wrong baseband !!!!!     *",
+         "modem"    : "*       !!!!! Wrong modem !!!!!       *"}
+  for i in FBI:
+    Assertion_Hack(script, i, FBI[i])
 
   # Two-step package strategy (in chronological order, which is *not*
   # the order in which the generated script has things):
@@ -2074,6 +2082,34 @@ def CalculateRuntimeDevicesAndFingerprints(build_info, boot_variable_values):
     fingerprints.add(new_build_info.fingerprint)
   return device_names, fingerprints
 
+def Assertion_Hack(script, assert_name, msg):
+  # Kids, do not try this at home
+  index = -1
+  for i, s in enumerate(script.script):
+    if 'verify_' + assert_name in s and 'abort(' not in s:
+      index = i
+      break
+
+  if index != -1:
+    tmp = script.script.pop(index)
+    result = re.search(r"\(([^;]+)\)", tmp)
+    cmd = result.group(1)
+    script.script.insert(index, 'ifelse(!({}),'.format(cmd))
+    script.script.insert(index + 1,
+            'ui_print("***************************************");')
+    script.script.insert(index + 2,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 3,
+            'ui_print("*       !!!!! FBI WARNING !!!!!       *");')
+    script.script.insert(index + 4,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 5,
+            'ui_print("' + msg + '");')
+    script.script.insert(index + 6,
+            'ui_print("*                                     *");')
+    script.script.insert(index + 7,
+            'ui_print("***************************************");')
+    script.script.insert(index + 8, 'abort());')
 
 def main(argv):
 
