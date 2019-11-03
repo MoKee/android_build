@@ -971,6 +971,13 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
+  script.Print("  __  __    ___    _  __  _____   _____  ")
+  script.Print(" |  \/  |  / _ \  | |/ / | ____| | ____| ")
+  script.Print(" | |\/| | | | | | | ' /  |  _|   |  _|   ")
+  script.Print(" | |  | | | |_| | | . \  | |___  | |___  ")
+  script.Print(" |_|  |_|  \___/  |_|\_\ |_____| |_____| ")
+  script.Print(" ")
+
   CopyInstallTools(output_zip)
   script.UnpackPackageDir("install", "/tmp/install")
   script.SetPermissionsRecursive("/tmp/install", 0, 0, 0755, 0644, None, None)
@@ -982,6 +989,13 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     system_progress -= 0.1
   if HasVendorPartition(input_zip):
     system_progress -= 0.1
+
+  builddate = target_info.GetBuildProp("ro.build.date");
+
+  device = target_info.GetBuildProp("ro.mk.device");
+
+  script.Print("# Build date: %s"%(builddate));
+  script.Print("# Device: %s"%(device));
 
   script.ShowProgress(system_progress, 0)
 
