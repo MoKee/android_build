@@ -832,6 +832,15 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
 
   device_specific.FullOTA_InstallBegin()
 
+  script.Print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+  script.Print("~$$~~~~$$~~$$$$$~~$$~~~$$~$$$$$$~$$$$$$~")
+  script.Print("~$$$~~$$$~$$~~~$$~$$~$$~~~$$~~~~~$$~~~~~")
+  script.Print("~$$~$$~$$~$$~~~$$~$$$~~~~~$$$$$$~$$$$$$~")
+  script.Print("~$$~~~~$$~$$~~~$$~$$~$$~~~$$~~~~~$$~~~~~")
+  script.Print("~$$~~~~$$~~$$$$$~~$$~~~$$~$$$$$$~$$$$$$~")
+  script.Print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+  script.Print(" ")
+
   CopyInstallTools(output_zip)
   script.UnpackPackageDir("install", "/tmp/install")
   script.SetPermissionsRecursive("/tmp/install", 0, 0, 0o755, 0o644, None, None)
@@ -850,6 +859,14 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   system_progress = 0.9 - (len(block_diff_dict) - 1) * 0.1
   if OPTIONS.wipe_user_data:
     system_progress -= 0.1
+
+  builddate = target_info.GetBuildProp("ro.build.date");
+
+  device = target_info.GetBuildProp("ro.mk.device");
+
+  script.Print("# Build date: %s"%(builddate));
+  script.Print("# Device: %s"%(device));
+
   progress_dict = {partition: 0.1 for partition in block_diff_dict}
   progress_dict["system"] = system_progress
 
