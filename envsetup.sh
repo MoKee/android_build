@@ -350,7 +350,7 @@ function set_ccache()
     fi
 
     if [ -z "$CCACHE_SIZE" ]; then
-        if [ "$1" -eq "mokee_default" ]; then
+        if [ "$1" == "mokee_default" ]; then
             CCACHE_SIZE=50G
         else
             CCACHE_SIZE=16G
