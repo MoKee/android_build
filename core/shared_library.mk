@@ -49,6 +49,12 @@ LOCAL_2ND_ARCH_VAR_PREFIX :=
 
 endif # TARGET_2ND_ARCH
 
+ifeq ($(SDCLANG), true)
+ifeq ($(LOCAL_SDCLANG_LTO), true)
+include $(SDCLANG_LTO_DEFS)
+endif
+endif
+
 my_module_arch_supported :=
 
 ###########################################################
