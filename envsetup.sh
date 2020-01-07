@@ -351,9 +351,9 @@ function set_ccache()
 
     if [ -z "$CCACHE_SIZE" ]; then
         if [[ "$1" == "mokee_default" ]]; then
-            CCACHE_SIZE=50G
+            CCACHE_SIZE=60G
         else
-            CCACHE_SIZE=16G
+            CCACHE_SIZE=25G
         fi
     fi
 
