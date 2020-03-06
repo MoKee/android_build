@@ -47,7 +47,10 @@ void usage(void)
 static int getAlignment(bool pageAlignSharedLibs, int defaultAlignment,
     ZipEntry* pEntry) {
 
-    static const int kPageAlignment = 4096;
+    static const int kPageAlignment = 16384;
+    if (defaultAlignment == 4096) {
+        defaultAlignment = 16384; /* FREE UPGRADE! */
+    }
 
     if (!pageAlignSharedLibs) {
         return defaultAlignment;
