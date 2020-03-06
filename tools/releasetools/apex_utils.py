@@ -201,7 +201,7 @@ def SignApex(apex_data, payload_key, container_key, container_pw,
 
   # 2. Align the files at page boundary (same as in apexer).
   aligned_apex = common.MakeTempFile(prefix='apex-container-', suffix='.apex')
-  common.RunAndCheckOutput(['zipalign', '-f', '4096', apex_file, aligned_apex])
+  common.RunAndCheckOutput(['zipalign', '-f', '16384', apex_file, aligned_apex])
 
   # 3. Sign the APEX container with container_key.
   signed_apex = common.MakeTempFile(prefix='apex-container-', suffix='.apex')
