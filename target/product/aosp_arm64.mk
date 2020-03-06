@@ -45,6 +45,7 @@ endif
 PRODUCT_ARTIFACT_PATH_REQUIREMENT_WHITELIST += \
     root/init.zygote32_64.rc \
     root/init.zygote64_32.rc \
+    root/init.zygote64.rc \
 
 # Copy different zygote settings for vendor.img to select by setting property
 # ro.zygote=zygote64_32 or ro.zygote=zygote32_64:

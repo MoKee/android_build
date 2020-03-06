@@ -19,9 +19,11 @@ TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_VARIANT := generic
 TARGET_CPU_ABI := arm64-v8a
 
-TARGET_2ND_ARCH := arm
-TARGET_2ND_CPU_ABI := armeabi-v7a
-TARGET_2ND_CPU_ABI2 := armeabi
+AUDIOSERVER_MULTILIB := 64
+
+#TARGET_2ND_ARCH := arm
+#TARGET_2ND_CPU_ABI := armeabi-v7a
+#TARGET_2ND_CPU_ABI2 := armeabi
 
 ifneq ($(TARGET_BUILD_APPS)$(filter cts sdk vts,$(MAKECMDGOALS)),)
 # DO NOT USE
@@ -41,15 +43,15 @@ ifneq ($(TARGET_BUILD_APPS)$(filter cts sdk vts,$(MAKECMDGOALS)),)
 #
 # DO NOT USE
 # DO NOT USE
-TARGET_2ND_ARCH_VARIANT := armv7-a-neon
+#TARGET_2ND_ARCH_VARIANT := armv7-a-neon
 # DO NOT USE
 # DO NOT USE
-TARGET_2ND_CPU_VARIANT := generic
+#TARGET_2ND_CPU_VARIANT := generic
 # DO NOT USE
 # DO NOT USE
 else
-TARGET_2ND_ARCH_VARIANT := armv8-a
-TARGET_2ND_CPU_VARIANT := generic
+#TARGET_2ND_ARCH_VARIANT := armv8-a
+#TARGET_2ND_CPU_VARIANT := generic
 endif
 
 include build/make/target/board/BoardConfigGsiCommon.mk
@@ -70,11 +72,9 @@ BOARD_ROOT_EXTRA_SYMLINKS += /vendor/firmware_mnt:/firmware
 BOARD_SEPOLICY_DIRS += build/make/target/board/generic_arm64_ab/sepolicy
 
 # Wifi.
-BOARD_WLAN_DEVICE           := emulator
+BOARD_WLAN_DEVICE           := brcmfmac
 BOARD_HOSTAPD_DRIVER        := NL80211
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_simulated
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_simulated
 WPA_SUPPLICANT_VERSION      := VER_0_8_X
 WIFI_DRIVER_FW_PATH_PARAM   := "/dev/null"
 WIFI_DRIVER_FW_PATH_STA     := "/dev/null"
