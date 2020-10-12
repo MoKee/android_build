@@ -249,6 +249,14 @@ org\.chromium\.arc\..*
 
 ###################################################
 # MoKee
+com\.google\.location.*
+com\.mokee\.center.*
+com\.mokee\.cloud.*
+com\.mokee\.mms.*
+com\.mokee\.os.*
+com\.mokee\.security.*
+com\.mokee\.utils.*
+com\.mokee\.warpshare.*
 mokee\.platform
 org\.mokee\.platform\.internal
 
