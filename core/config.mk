@@ -295,8 +295,8 @@ include $(BUILD_SYSTEM)/envsetup.mk
 FIND_LEAVES_EXCLUDES := $(addprefix --prune=, $(SCAN_EXCLUDE_DIRS) .repo .git)
 
 -include vendor/extra/BoardConfigExtra.mk
-ifneq ($(LINEAGE_BUILD),)
-include vendor/lineage/config/BoardConfigLineage.mk
+ifneq ($(MK_BUILD),)
+include vendor/mokee/config/BoardConfigMoKee.mk
 endif
 
 # The build system exposes several variables for where to find the kernel
@@ -1233,11 +1233,11 @@ dont_bother_goals := out \
     vbmetaimage-nodeps \
     product-graph dump-products
 
-ifneq ($(LINEAGE_BUILD),)
-ifneq ($(wildcard device/lineage/sepolicy/common/sepolicy.mk),)
+ifneq ($(MK_BUILD),)
+ifneq ($(wildcard device/mokee/sepolicy/common/sepolicy.mk),)
 ## We need to be sure the global selinux policies are included
 ## last, to avoid accidental resetting by device configs
-$(eval include device/lineage/sepolicy/common/sepolicy.mk)
+$(eval include device/mokee/sepolicy/common/sepolicy.mk)
 endif
 endif
 
