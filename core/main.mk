@@ -263,10 +263,10 @@ enable_target_debugging := true
 tags_to_install :=
 ifneq (,$(user_variant))
   ifneq ($(filter true,$(MK_RELEASE) $(MK_HISTORY) $(MK_NIGHTLY) $(MK_PREMIUM)),)
-    # Target is secure in this builds.
+    # Target is secure in these builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=1
   else
-    # Target is insecure in this builds.
+    # Target is insecure in these builds.
     ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
     ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
   endif
